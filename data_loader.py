@@ -16,6 +16,97 @@ def get_end_date_string():
     return (pd.Timestamp.utcnow().normalize() + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
 
 
+def _normalize_download_to_close_df(raw, expected_ticker=None):
+    """
+    Convert a yfinance download result into a 2-column dataframe:
+    Date, <Ticker>
+    """
+    if raw is None or raw.empty:
+        return pd.DataFrame(columns=["Date"])
+
+    if isinstance(raw.columns, pd.MultiIndex):
+        if "Close" not in raw.columns.get_level_values(0):
+            return pd.DataFrame(columns=["Date"])
+        close = raw["Close"].copy()
+    else:
+        if "Close" not in raw.columns:
+            return pd.DataFrame(columns=["Date"])
+        ticker_name = expected_ticker or "VALUE"
+        close = raw[["Close"]].copy()
+        close.columns = [ticker_name]
+
+    if isinstance(close, pd.Series):
+        close = close.to_frame(name=expected_ticker or "VALUE")
+
+    close = close.reset_index()
+    date_col = "Date" if "Date" in close.columns else close.columns[0]
+    close = close.rename(columns={date_col: "Date"})
+    close["Date"] = pd.to_datetime(close["Date"], errors="coerce").dt.tz_localize(None)
+    close = close.dropna(subset=["Date"]).sort_values("Date").reset_index(drop=True)
+
+    value_cols = [c for c in close.columns if c != "Date"]
+    for col in value_cols:
+        close[col] = pd.to_numeric(close[col], errors="coerce")
+
+    return close
+
+
+def fetch_single_ticker_history(ticker, start_date, end_date):
+    raw = yf.download(
+        tickers=ticker,
+        start=start_date,
+        end=end_date,
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+        group_by="column",
+    )
+
+    df = _normalize_download_to_close_df(raw, expected_ticker=ticker)
+
+    if "Date" not in df.columns:
+        return pd.DataFrame(columns=["Date", ticker])
+
+    if ticker not in df.columns:
+        value_cols = [c for c in df.columns if c != "Date"]
+        if value_cols:
+            df = df.rename(columns={value_cols[0]: ticker})
+        else:
+            df[ticker] = np.nan
+
+    return df[["Date", ticker]].copy()
+
+
+def backfill_missing_tickers(prices, tickers, start_date, end_date):
+    """
+    For any ticker missing from the bulk pull, or present but entirely null,
+    fetch it individually and merge it back into the main prices table.
+    """
+    out = prices.copy()
+
+    for ticker in tickers:
+        needs_backfill = ticker not in out.columns or out[ticker].isna().all()
+
+        if not needs_backfill:
+            continue
+
+        single = fetch_single_ticker_history(ticker, start_date, end_date)
+
+        if single.empty or ticker not in single.columns:
+            if ticker not in out.columns:
+                out[ticker] = np.nan
+            continue
+
+        if ticker not in out.columns:
+            out = out.merge(single, on="Date", how="left")
+        else:
+            merged = out[["Date"]].merge(single, on="Date", how="left")
+            out[ticker] = out[ticker].where(~out[ticker].isna(), merged[ticker])
+
+    return out
+
+
 @st.cache_data(show_spinner=False, ttl=PRICE_TTL_SECONDS)
 def fetch_price_history(tickers_tuple, start_date, end_date):
     tickers = list(dict.fromkeys([str(t).strip().upper() for t in tickers_tuple if pd.notna(t)]))
@@ -33,84 +124,46 @@ def fetch_price_history(tickers_tuple, start_date, end_date):
         threads=True,
     )
 
-    if raw is None or raw.empty:
+    prices = _normalize_download_to_close_df(raw)
+
+    if prices.empty:
         raise ValueError("yfinance returned no price history.")
 
-    if isinstance(raw.columns, pd.MultiIndex):
-        if "Close" not in raw.columns.get_level_values(0):
-            raise ValueError("Downloaded data does not contain Close prices.")
-        close = raw["Close"].copy()
-    else:
-        if "Close" not in raw.columns:
-            raise ValueError("Downloaded data does not contain a Close column.")
-        single_ticker = tickers[0]
-        close = raw[["Close"]].copy()
-        close.columns = [single_ticker]
+    if "Date" not in prices.columns:
+        raise ValueError("Downloaded price history did not include a Date column.")
 
-    close = close.reset_index()
-    date_col = "Date" if "Date" in close.columns else close.columns[0]
-    close = close.rename(columns={date_col: "Date"})
-    close["Date"] = pd.to_datetime(close["Date"], errors="coerce").dt.tz_localize(None)
-    close = close.dropna(subset=["Date"]).sort_values("Date").reset_index(drop=True)
-
-    expected_cols = ["Date"] + tickers
+    # Ensure every expected ticker exists as a column before backfill
     for ticker in tickers:
-        if ticker not in close.columns:
-            close[ticker] = np.nan
+        if ticker not in prices.columns:
+            prices[ticker] = np.nan
 
-    close = close[expected_cols].copy()
+    prices = prices[["Date"] + tickers].copy()
 
-    for col in tickers:
-        close[col] = pd.to_numeric(close[col], errors="coerce")
+    # Backfill any missing/all-null columns with single-ticker downloads
+    prices = backfill_missing_tickers(prices, tickers, start_date, end_date)
 
-    return close
+    # Final numeric cleanup
+    for ticker in tickers:
+        prices[ticker] = pd.to_numeric(prices[ticker], errors="coerce")
+
+    prices = prices.sort_values("Date").reset_index(drop=True)
+
+    return prices
 
 
 def fetch_single_ticker_inception_close(ticker, start_date, end_date):
-    raw = yf.download(
-        tickers=ticker,
-        start=start_date,
-        end=end_date,
-        interval="1d",
-        auto_adjust=False,
-        progress=False,
-        threads=False,
-    )
+    df = fetch_single_ticker_history(ticker, start_date, end_date)
 
-    if raw is None or raw.empty:
+    if df.empty or ticker not in df.columns:
         return np.nan, pd.NaT
 
-    if isinstance(raw.columns, pd.MultiIndex):
-        if "Close" not in raw.columns.get_level_values(0):
-            return np.nan, pd.NaT
-        close = raw["Close"].copy()
-        if isinstance(close, pd.DataFrame):
-            close = close.iloc[:, 0]
-    else:
-        if "Close" not in raw.columns:
-            return np.nan, pd.NaT
-        close = raw["Close"].copy()
-
-    if isinstance(close, pd.DataFrame):
-        close = close.iloc[:, 0]
-
-    df = close.reset_index()
-    date_col = "Date" if "Date" in df.columns else df.columns[0]
-    value_cols = [col for col in df.columns if col != date_col]
-
-    if not value_cols:
-        return np.nan, pd.NaT
-
-    df = df.rename(columns={date_col: "Date", value_cols[0]: "Close"})
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.tz_localize(None)
-    df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-    df = df.dropna(subset=["Date", "Close"]).sort_values("Date").reset_index(drop=True)
+    df = df.dropna(subset=["Date", ticker]).sort_values("Date").reset_index(drop=True)
 
     if df.empty:
         return np.nan, pd.NaT
 
     first_row = df.iloc[0]
-    return first_row["Close"], first_row["Date"]
+    return first_row[ticker], first_row["Date"]
 
 
 def build_portfolios_from_config(config_rows, prices, start_date):
