@@ -38,7 +38,7 @@ PORTFOLIO_CONFIG = [
     {"Portfolio": "OpenAI 100", "Ticker": "NVDA", "Initial Investment": 373.38},
     {"Portfolio": "OpenAI 100", "Ticker": "QQQ", "Initial Investment": 230.89},
     {"Portfolio": "Random A", "Ticker": "ADM", "Initial Investment": 246.84},
-    {"Portfolio": "Random A", "Ticker": "DOC", "Initial Investment": 492.08},
+    {"Portfolio": "Random A", "Ticker": "PEAK", "Initial Investment": 492.08},
     {"Portfolio": "Random A", "Ticker": "NRG", "Initial Investment": 9.99},
     {"Portfolio": "Random A", "Ticker": "PANW", "Initial Investment": 206.08},
     {"Portfolio": "Random A", "Ticker": "SMCI", "Initial Investment": 45.01},
