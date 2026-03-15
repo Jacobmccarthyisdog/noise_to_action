@@ -77,15 +77,34 @@ def fetch_single_ticker_inception_close(ticker, start_date, end_date):
         threads=False,
     )
 
-    if raw is None or raw.empty or "Close" not in raw.columns:
+    if raw is None or raw.empty:
         return np.nan, pd.NaT
 
-    df = raw[["Close"]].copy().reset_index()
+    if isinstance(raw.columns, pd.MultiIndex):
+        if "Close" not in raw.columns.get_level_values(0):
+            return np.nan, pd.NaT
+        close = raw["Close"].copy()
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
+    else:
+        if "Close" not in raw.columns:
+            return np.nan, pd.NaT
+        close = raw["Close"].copy()
+
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+
+    df = close.reset_index()
     date_col = "Date" if "Date" in df.columns else df.columns[0]
-    df = df.rename(columns={date_col: "Date"})
+    value_cols = [col for col in df.columns if col != date_col]
+
+    if not value_cols:
+        return np.nan, pd.NaT
+
+    df = df.rename(columns={date_col: "Date", value_cols[0]: "Close"})
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.tz_localize(None)
     df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-    df = df.dropna(subset=["Date", "Close"]).sort_values("Date")
+    df = df.dropna(subset=["Date", "Close"]).sort_values("Date").reset_index(drop=True)
 
     if df.empty:
         return np.nan, pd.NaT
