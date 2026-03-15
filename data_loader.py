@@ -66,6 +66,34 @@ def fetch_price_history(tickers_tuple, start_date, end_date):
     return close
 
 
+def fetch_single_ticker_inception_close(ticker, start_date, end_date):
+    raw = yf.download(
+        tickers=ticker,
+        start=start_date,
+        end=end_date,
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+    )
+
+    if raw is None or raw.empty or "Close" not in raw.columns:
+        return np.nan, pd.NaT
+
+    df = raw[["Close"]].copy().reset_index()
+    date_col = "Date" if "Date" in df.columns else df.columns[0]
+    df = df.rename(columns={date_col: "Date"})
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.tz_localize(None)
+    df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
+    df = df.dropna(subset=["Date", "Close"]).sort_values("Date")
+
+    if df.empty:
+        return np.nan, pd.NaT
+
+    first_row = df.iloc[0]
+    return first_row["Close"], first_row["Date"]
+
+
 def build_portfolios_from_config(config_rows, prices, start_date):
     portfolios = pd.DataFrame(config_rows).copy()
     validate_columns(
@@ -102,6 +130,23 @@ def build_portfolios_from_config(config_rows, prices, start_date):
         how="left",
     )
     portfolios = portfolios.rename(columns={"Date": "Inception Date"})
+
+    missing_mask = portfolios["Inception Close"].isna()
+
+    if missing_mask.any():
+        end_date = get_end_date_string()
+        missing_tickers = portfolios.loc[missing_mask, "Ticker"].dropna().unique().tolist()
+
+        for ticker in missing_tickers:
+            fallback_close, fallback_date = fetch_single_ticker_inception_close(
+                ticker=ticker,
+                start_date=start_date,
+                end_date=end_date,
+            )
+
+            ticker_mask = (portfolios["Ticker"] == ticker) & (portfolios["Inception Close"].isna())
+            portfolios.loc[ticker_mask, "Inception Close"] = fallback_close
+            portfolios.loc[ticker_mask, "Inception Date"] = fallback_date
 
     missing = portfolios[portfolios["Inception Close"].isna()]["Ticker"].dropna().unique().tolist()
     if missing:
