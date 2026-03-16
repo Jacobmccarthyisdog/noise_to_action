@@ -1,3 +1,31 @@
+import pandas as pd
+import numpy as np
+
+from config import TICKER_THEME_MAP
+from calculations import pct, exclude_benchmark_portfolios
+
+def join_names(names):
+    names = [str(name).strip() for name in names if pd.notna(name) and str(name).strip()]
+    if not names:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    return f"{names[0]}, {names[1]}, and {names[2]}"
+
+def get_theme_regime_comment(theme):
+    if theme in {"AI / Semis", "Mega-cap Growth", "High-beta Growth", "Software"}:
+        return "That points to a more risk-on tape where growth, innovation, and narrative-heavy leaders are doing more of the work."
+    if theme in {"Energy", "Financials", "Industrials"}:
+        return "That points to a more cyclical backdrop, where macro sensitivity, rate expectations, or commodity linkage may be playing a bigger role."
+    if theme in {"Healthcare", "Defensive / Quality"}:
+        return "That points to a steadier, more defensive market tone where resilience and earnings durability are being rewarded."
+    if theme in {"Rate-sensitive", "Consumer / Housing"}:
+        return "That suggests moves in rates and consumer demand may be having an outsized influence on returns."
+    return "That suggests leadership is coming from a narrower pocket of the market rather than broad beta alone."
+
+
 def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
     if summary_df.empty:
         return "There is not enough filtered portfolio history to generate AI-dvisor insights yet."
@@ -175,7 +203,7 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     return " ".join(
         [
             benchmark_sentence,
-            leadership_sentence,
+            portfolio_sentence,
             winners_losers_sentence,
             repeat_sentence,
             theme_sentence,
@@ -183,4 +211,3 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
             parking_sentence,
         ]
     )
-    
