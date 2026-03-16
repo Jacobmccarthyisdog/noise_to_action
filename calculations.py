@@ -34,8 +34,8 @@ def exclude_benchmark_portfolios(df, portfolio_col="Portfolio"):
         return df.copy()
 
     out = df.copy()
-    portfolio_names = out[portfolio_col].astype(str).str.strip().str.upper()
-    return out[~portfolio_names.isin(benchmark_names)].copy()
+    _names = out[_col].astype(str).str.strip().str.upper()
+    return out[~_names.isin(benchmark_names)].copy()
 
 
 def build_benchmark_history(prices, benchmark_map):
@@ -54,7 +54,7 @@ def build_benchmark_history(prices, benchmark_map):
     return pd.concat(frames, ignore_index=True)
 
 
-def build_cumulative_return_series(df, value_col="Portfolio Value", group_col="Portfolio"):
+def build_cumulative_return_series(df, value_col=" Value", group_col=""):
     parts = []
 
     for _, group in df.groupby(group_col):
@@ -78,7 +78,7 @@ def compute_holdings_snapshot(merged):
     if valid.empty:
         return pd.DataFrame(
             columns=[
-                "Portfolio",
+                "",
                 "Ticker",
                 "Initial Investment",
                 "Shares",
@@ -102,7 +102,7 @@ def compute_holdings_snapshot(merged):
     )
 
     columns = [
-        "Portfolio",
+        "",
         "Ticker",
         "Initial Investment",
         "Shares",
@@ -111,11 +111,11 @@ def compute_holdings_snapshot(merged):
         "Dollar Change",
         "Return",
     ]
-    return latest[columns].sort_values(["Portfolio", "Current Value"], ascending=[True, False])
+    return latest[columns].sort_values(["", "Current Value"], ascending=[True, False])
 
 
 @st.cache_data(show_spinner=False)
-def build_datasets(portfolios, prices):
+def build_datasets(s, prices):
     ticker_cols = [col for col in prices.columns if col != "Date"]
     if not ticker_cols:
         raise ValueError("No ticker columns found in price data.")
@@ -128,31 +128,31 @@ def build_datasets(portfolios, prices):
     )
     price_long["Ticker"] = price_long["Ticker"].astype(str).str.strip().str.upper()
 
-    merged = portfolios.merge(price_long, on="Ticker", how="left")
+    merged = s.merge(price_long, on="Ticker", how="left")
     merged["Position Value"] = merged["Shares"] * merged["Price"]
 
-    portfolio_history = (
-        merged.groupby(["Date", "Portfolio"], as_index=False)["Position Value"]
+    _history = (
+        merged.groupby(["Date", ""], as_index=False)["Position Value"]
         .sum()
-        .rename(columns={"Position Value": "Portfolio Value"})
-        .sort_values(["Portfolio", "Date"])
+        .rename(columns={"Position Value": " Value"})
+        .sort_values(["", "Date"])
         .reset_index(drop=True)
     )
 
     holdings_snapshot = compute_holdings_snapshot(merged)
     benchmark_history = build_benchmark_history(prices, BENCHMARK_MAP)
 
-    portfolio_cumret = build_cumulative_return_series(
-        portfolio_history,
-        value_col="Portfolio Value",
-        group_col="Portfolio",
+    _cumret = build_cumulative_return_series(
+        _history,
+        value_col=" Value",
+        group_col="",
     )
 
     benchmark_cumret = pd.DataFrame()
     if not benchmark_history.empty:
         benchmark_cumret = build_cumulative_return_series(
-            benchmark_history.rename(columns={"Benchmark Value": "Portfolio Value", "Benchmark": "Portfolio"}),
-            value_col="Portfolio Value",
+            benchmark_history.rename(columns={"Benchmark Value": " Value", "Benchmark": ""}),
+            value_col=" Value",
             group_col="Portfolio",
         )
 
@@ -427,7 +427,7 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     return " ".join(
         [
             benchmark_sentence,
-            portfolioS_sentence,
+            portfolio_sentence,
             winners_losers_sentence,
             repeat_sentence,
             theme_sentence,
