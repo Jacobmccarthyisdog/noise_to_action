@@ -13,10 +13,10 @@ from calculations import (
     build_datasets,
     build_summary,
     summarize_benchmark,
+    build_ai_dvisor_insights,
     format_summary_table,
     format_holdings_table,
 )
-from ai_advisor import build_ai_dvisor_insights
 from charts import (
     build_return_bar_colors,
     build_portfolio_heatmap,
@@ -173,7 +173,9 @@ with st.expander("Dashboard Controls", expanded=False):
             key="date_range",
         )
 
-selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
+selected_portfolios = [
+    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
+]
 if not selected_portfolios:
     st.warning("Select at least one portfolio.")
     st.stop()
