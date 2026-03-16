@@ -63,7 +63,11 @@ try:
         benchmark_cumret,
     ) = build_datasets(portfolios, prices)
 except Exception as exc:
-    st.error(f"Could not build dashboard datasets: {exc}")
+    st.error(f"Could not build dashboard datasets: {repr(exc)}")
+    st.write("Portfolio columns:", portfolios.columns.tolist())
+    st.write("Price columns:", prices.columns.tolist())
+    st.write("Portfolio preview:", portfolios.head())
+    st.write("Price preview:", prices.head())
     st.stop()
 
 if portfolio_history.empty:
