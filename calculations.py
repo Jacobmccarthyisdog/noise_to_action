@@ -427,7 +427,7 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     return " ".join(
         [
             benchmark_sentence,
-            leadership_sentence,
+            portfolioS_sentence,
             winners_losers_sentence,
             repeat_sentence,
             theme_sentence,
