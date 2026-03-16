@@ -35,12 +35,53 @@ st.set_page_config(
 
 st.markdown(APP_CSS, unsafe_allow_html=True)
 
-st.title("From Noise to Action")
+st.markdown(
+    """
+    <style>
+    .refresh-top-right {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -0.25rem;
+        margin-bottom: 0.35rem;
+    }
 
-refresh_col1, refresh_col2 = st.columns([0.6, 7])
+    .refresh-top-right .stButton > button {
+        padding: 0.34rem 0.72rem;
+        font-size: 0.80rem;
+        font-weight: 600;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.05);
+        color: white;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border 0.18s ease;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+        min-height: 2.2rem;
+    }
 
-with refresh_col1:
-    st.markdown('<div class="refresh-btn-wrap">', unsafe_allow_html=True)
+    .refresh-top-right .stButton > button:hover {
+        transform: translateY(-1px) scale(1.02);
+        border: 1px solid rgba(255,255,255,0.24);
+        background: rgba(255,255,255,0.10);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+    }
+
+    .refresh-top-right .stButton > button:active {
+        transform: scale(0.98);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+title_col, refresh_col = st.columns([8.5, 1.5])
+
+with title_col:
+    st.title("From Noise to Action")
+
+with refresh_col:
+    st.markdown('<div class="refresh-top-right">', unsafe_allow_html=True)
     if st.button("↻ Refresh", key="refresh_prices_button"):
         fetch_price_history.clear()
         st.rerun()
