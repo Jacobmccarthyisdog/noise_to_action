@@ -173,9 +173,7 @@ with st.expander("Dashboard Controls", expanded=False):
             key="date_range",
         )
 
-selected_portfolios = [
-    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
-]
+selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
 if not selected_portfolios:
     st.warning("Select at least one portfolio.")
     st.stop()
@@ -384,3 +382,4 @@ with st.expander("See portfolio summary table"):
 
 with st.expander("See price table preview"):
     st.dataframe(prices.head(20), use_container_width=True, hide_index=True)
+    
