@@ -16,7 +16,7 @@ from calculations import (
     format_summary_table,
     format_holdings_table,
 )
-from ai_dvisor_insights import  build_ai_dvisor_insights
+from ai_dvisor_insights import build_ai_dvisor_insights
 from charts import (
     build_return_bar_colors,
     build_portfolio_heatmap,
@@ -85,51 +85,6 @@ if "benchmark_choice" not in st.session_state:
 if "date_range" not in st.session_state:
     st.session_state.date_range = default_dates
 
-initial_start_date, initial_end_date = normalize_date_range(
-    st.session_state.date_range,
-    date_min,
-    date_max,
-)
-
-initial_selected = [
-    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
-] or default_portfolios
-
-initial_benchmark = (
-    st.session_state.benchmark_choice
-    if st.session_state.benchmark_choice in BENCHMARK_MAP
-    else default_benchmark
-)
-
-portfolio_history_initial = portfolio_history[
-    (portfolio_history["Portfolio"].isin(initial_selected))
-    & (portfolio_history["Date"] >= initial_start_date)
-    & (portfolio_history["Date"] <= initial_end_date)
-].copy()
-
-summary_initial = build_summary(portfolio_history_initial)
-holdings_snapshot_initial = holdings_snapshot[
-    holdings_snapshot["Portfolio"].isin(initial_selected)
-].copy()
-
-benchmark_summary_initial = summarize_benchmark(
-    benchmark_history=benchmark_history,
-    benchmark_label=initial_benchmark,
-    start_date=initial_start_date,
-    end_date=initial_end_date,
-)
-
-ai_dvisor_text = ai_dvisor_insights(
-    summary_df=summary_initial,
-    holdings_df=holdings_snapshot_initial,
-    benchmark_summary=benchmark_summary_initial,
-    benchmark_choice=initial_benchmark,
-)
-
-st.markdown("### AI-dvisor Insights")
-with st.expander("Read more", expanded=False):
-    st.write(ai_dvisor_text)
-
 with st.expander("Dashboard Controls", expanded=False):
     b1, b2 = st.columns([1, 6])
 
@@ -173,10 +128,15 @@ with st.expander("Dashboard Controls", expanded=False):
             key="date_range",
         )
 
-selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
+selected_portfolios = [
+    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
+]
 if not selected_portfolios:
     st.warning("Select at least one portfolio.")
     st.stop()
+
+benchmark_choice = st.session_state.benchmark_choice
+date_range = st.session_state.date_range
 
 start_date, end_date = normalize_date_range(date_range, date_min, date_max)
 
@@ -213,6 +173,17 @@ benchmark_summary = summarize_benchmark(
     start_date=start_date,
     end_date=end_date,
 )
+
+ai_dvisor_text = build_ai_dvisor_insights(
+    summary_df=summary_f,
+    holdings_df=holdings_snapshot_f,
+    benchmark_summary=benchmark_summary,
+    benchmark_choice=benchmark_choice,
+)
+
+st.markdown("### AI-dvisor Insights")
+with st.expander("Read more", expanded=False):
+    st.write(ai_dvisor_text)
 
 if not summary_f.empty:
     best_row = summary_f.sort_values("Return", ascending=False).iloc[0]
