@@ -266,29 +266,56 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
 
     avg_return = ranked["Return"].mean()
     avg_vol = ranked["Volatility"].mean()
+    return_spread = best["Return"] - worst["Return"]
 
+    # -----------------------------
+    # Market tone / benchmark framing
+    # -----------------------------
     if benchmark_summary is not None and pd.notna(benchmark_summary["Return"]) and pd.notna(avg_return):
         spread = avg_return - benchmark_summary["Return"]
-        benchmark_sentence = (
-            f"Across the selected window, the portfolio set is "
-            f"{'outperforming' if spread >= 0 else 'lagging'} {benchmark_choice} "
-            f"by {pct(abs(spread))} on average, with average daily volatility near {pct(avg_vol)}."
-        )
+
+        if spread >= 0.03:
+            benchmark_sentence = (
+                f"Across the selected window, the portfolio group is clearly outperforming {benchmark_choice}, "
+                f"which points to stock selection and portfolio construction adding real value in this stretch."
+            )
+        elif spread >= 0:
+            benchmark_sentence = (
+                f"Across the selected window, the portfolio group is modestly ahead of {benchmark_choice}, "
+                f"suggesting a slight edge versus simply owning the benchmark."
+            )
+        elif spread > -0.03:
+            benchmark_sentence = (
+                f"Across the selected window, the portfolio group is slightly trailing {benchmark_choice}, "
+                f"so results have been competitive but not strong enough yet to decisively beat the market."
+            )
+        else:
+            benchmark_sentence = (
+                f"Across the selected window, the portfolio group is lagging {benchmark_choice} by a noticeable margin, "
+                f"which suggests the current market environment is rewarding exposures outside the core portfolio mix."
+            )
     else:
         benchmark_sentence = (
-            f"Across the selected window, the portfolio set is averaging performance with "
-            f"average daily volatility near {pct(avg_vol)}."
+            f"Across the selected window, the portfolio group is posting mixed results, "
+            f"with average daily volatility around {pct(avg_vol)}."
         )
 
+    # -----------------------------
+    # Fallback if no holdings
+    # -----------------------------
     if insight_holdings.empty:
         return " ".join(
             [
                 benchmark_sentence,
-                f"{best['Portfolio']} is the current leader at {pct(best['Return'])}, while {worst['Portfolio']} is the weakest at {pct(worst['Return'])}.",
-                "The spread between leaders and laggards suggests portfolio construction is mattering materially in this tape, but there is not enough holding-level data to isolate the stock and macro drivers.",
+                f"At the portfolio level, {best['Portfolio']} is the strongest performer at {pct(best['Return'])}, while {worst['Portfolio']} is the weakest at {pct(worst['Return'])}.",
+                f"The spread between the top and bottom portfolios is {pct(return_spread)}, which suggests positioning is mattering meaningfully right now.",
+                "Without holding-level detail, the clearest takeaway is to lean toward the portfolios already showing stronger momentum and be more cautious with the laggards until leadership improves.",
             ]
         )
 
+    # -----------------------------
+    # Stock-level analysis
+    # -----------------------------
     ticker_stats = (
         insight_holdings.groupby("Ticker", as_index=False)
         .agg(
@@ -323,6 +350,9 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     top_names = repeated_leaders["Ticker"].head(3).tolist()
     weak_names = repeated_laggards["Ticker"].head(2).tolist()
 
+    # -----------------------------
+    # Theme / sector analysis
+    # -----------------------------
     holdings_with_theme = insight_holdings.copy()
     holdings_with_theme["Theme"] = holdings_with_theme["Ticker"].map(TICKER_THEME_MAP).fillna("Other")
 
@@ -344,55 +374,72 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     best_theme = theme_stats.iloc[0]["Theme"] if not theme_stats.empty else None
     worst_theme = theme_stats.iloc[-1]["Theme"] if not theme_stats.empty else None
 
+    # -----------------------------
+    # Narrative sections
+    # -----------------------------
     leadership_sentence = (
-        f"{best['Portfolio']} is currently leading at {pct(best['Return'])}, while {worst['Portfolio']} trails at {pct(worst['Return'])}; "
-        f"at the stock level, {strongest['Ticker']} has been the strongest average contributor and {weakest['Ticker']} has been the softest spot."
+        f"{best['Portfolio']} is setting the pace at {pct(best['Return'])}, while {worst['Portfolio']} is trailing at {pct(worst['Return'])}. "
+        f"That gap of {pct(return_spread)} between first and last place tells us this has not been a flat market where everything is moving together."
+    )
+
+    winners_losers_sentence = (
+        f"At the holding level, {strongest['Ticker']} has been one of the biggest tailwinds across the portfolios, "
+        f"while {weakest['Ticker']} has been the clearest drag."
     )
 
     repeat_sentence = ""
     if top_names:
         repeat_sentence = (
-            f"Repeated leadership across portfolios is showing up in {join_names(top_names)}, which suggests those names are doing a meaningful share of the heavy lifting rather than the outperformance being purely random. "
+            f"The strongest leadership is showing up repeatedly in {join_names(top_names)}, which suggests the winning positions are not isolated one-offs but part of a broader pattern across the portfolio set. "
         )
     else:
         repeat_sentence = (
-            f"Leadership looks narrower right now, with {strongest['Ticker']} standing out as the clearest single winner across the selected portfolios. "
+            f"Leadership looks a bit narrower right now, with {strongest['Ticker']} standing out more than any broader cluster of repeat winners. "
         )
 
     if weak_names:
-        repeat_sentence += f"On the weaker side, repeated drag appears to be coming from {join_names(weak_names)}."
+        repeat_sentence += f"On the weaker side, repeated pressure is coming from {join_names(weak_names)}."
 
     theme_sentence = ""
     if best_theme and worst_theme and best_theme != worst_theme:
         theme_sentence = (
-            f"From a macro and exposure standpoint, the strongest pocket appears to be {best_theme}, while the softest pocket appears to be {worst_theme}. "
+            f"From a sector and exposure standpoint, leadership is strongest in {best_theme}, while the weakest pocket of the market appears to be {worst_theme}. "
             f"{get_theme_regime_comment(best_theme)}"
         )
     elif best_theme:
         theme_sentence = (
-            f"From a macro and exposure standpoint, current leadership appears centered around {best_theme}. "
+            f"From a sector and exposure standpoint, current leadership is centered around {best_theme}. "
             f"{get_theme_regime_comment(best_theme)}"
         )
 
     max_repeat_count = repeated["Portfolio_Count"].max() if not repeated.empty else 1
     if max_repeat_count >= 3:
         concentration_sentence = (
-            "Performance also looks somewhat concentrated, meaning a relatively small cluster of names may be driving an outsized share of results."
+            "Performance also appears somewhat concentrated, meaning a fairly small group of winning names is likely doing an outsized share of the work."
         )
     else:
         concentration_sentence = (
-            "Performance looks a bit more distributed, suggesting broader portfolio construction is contributing rather than one or two names alone."
+            "Performance looks more balanced across holdings, which is usually a healthier sign that the results are coming from broader construction rather than one or two outsized winners."
         )
 
-    parking_sentence = (
-        f"If I were parking money based only on this snapshot, I would lean toward {best['Portfolio']} and portfolios aligned with the current leadership theme, "
-        f"while staying more cautious around portfolios exposed to the weaker names and softer macro pocket."
-    )
+    # -----------------------------
+    # Directional recommendation
+    # -----------------------------
+    if best_theme:
+        parking_sentence = (
+            f"If I were parking fresh money based on this snapshot alone, I would lean toward portfolios or sectors with exposure to {best_theme} and similar areas of leadership, "
+            f"while avoiding overexposure to the weaker pocket of the tape. The broader message here is to stay aligned with the parts of the market already attracting strength rather than forcing money into areas still trying to stabilize."
+        )
+    else:
+        parking_sentence = (
+            "If I were parking fresh money based on this snapshot alone, I would lean toward the portfolios already showing stronger relative performance and healthier breadth, while being more selective around the laggards. The broader message is to follow strength rather than trying to catch weak areas too early."
+        )
 
     return " ".join(
         [
             benchmark_sentence,
             leadership_sentence,
+            winners_losers_sentence,
             repeat_sentence,
             theme_sentence,
             concentration_sentence,
