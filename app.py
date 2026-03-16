@@ -37,11 +37,14 @@ st.markdown(APP_CSS, unsafe_allow_html=True)
 
 st.title("From Noise to Action")
 
-refresh_col1, refresh_col2 = st.columns([1, 6])
+refresh_col1, refresh_col2 = st.columns([0.6, 7])
+
 with refresh_col1:
-    if st.button("Refresh prices", use_container_width=True):
+    st.markdown('<div class="refresh-btn-wrap">', unsafe_allow_html=True)
+    if st.button("↻ Refresh", key="refresh_prices_button"):
         fetch_price_history.clear()
         st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 try:
     portfolios, prices = load_data()
