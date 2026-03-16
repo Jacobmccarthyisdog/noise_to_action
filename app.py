@@ -16,7 +16,7 @@ from calculations import (
     format_summary_table,
     format_holdings_table,
 )
-from ai_dvisor_insights import ai_dvisor_insights
+from ai_dvisor_insights import  build_ai_dvisor_insights
 from charts import (
     build_return_bar_colors,
     build_portfolio_heatmap,
