@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from config import APP_CSS, BENCHMARK_MAP
-from data_loader import load_data
+from data_loader import load_data, fetch_price_history
 from calculations import (
     money,
     pct,
@@ -36,6 +36,12 @@ st.set_page_config(
 st.markdown(APP_CSS, unsafe_allow_html=True)
 
 st.title("From Noise to Action")
+
+refresh_col1, refresh_col2 = st.columns([1, 6])
+with refresh_col1:
+    if st.button("Refresh prices", use_container_width=True):
+        fetch_price_history.clear()
+        st.rerun()
 
 try:
     portfolios, prices = load_data()
@@ -386,4 +392,3 @@ with st.expander("See portfolio summary table"):
 
 with st.expander("See price table preview"):
     st.dataframe(prices.head(20), use_container_width=True, hide_index=True)
-    
