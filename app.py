@@ -278,6 +278,7 @@ if not summary_f.empty:
     avg_return = alpha_summary_f["Return"].mean() if not alpha_summary_f.empty else None
 
     relative_vs_benchmark = None
+    avg_dollar_alpha = None
     if (
         not alpha_summary_f.empty
         and benchmark_summary is not None
@@ -286,13 +287,22 @@ if not summary_f.empty:
     ):
         relative_vs_benchmark = avg_return - benchmark_summary["Return"]
 
+    if (
+        avg_dollar_gain is not None
+        and benchmark_summary is not None
+        and benchmark_summary["Start Value"] is not None
+        and benchmark_summary["End Value"] is not None
+    ):
+        benchmark_dollar_change = benchmark_summary["End Value"] - benchmark_summary["Start Value"]
+        avg_dollar_alpha = avg_dollar_gain - benchmark_dollar_change
+
     c1, c2, c3 = st.columns(3)
 
     with c1:
         metric_card(
             f"Avg Alfa vs {benchmark_choice}",
             pct(relative_vs_benchmark) if relative_vs_benchmark is not None else "-",
-            f"{money(avg_dollar_gain)} average return",
+            f"{money(avg_dollar_alpha)} average excess return",
         )
 
     with c2:
