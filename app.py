@@ -119,7 +119,7 @@ benchmark_summary_initial = summarize_benchmark(
     end_date=initial_end_date,
 )
 
-ai_dvisor_text = build_ai_dvisor_insights(
+ai_dvisor_text = ai_dvisor_insights(
     summary_df=summary_initial,
     holdings_df=holdings_snapshot_initial,
     benchmark_summary=benchmark_summary_initial,
