@@ -363,7 +363,7 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     best_theme = usable_themes.iloc[0]["Theme"] if not usable_themes.empty else None
     worst_theme = usable_themes.iloc[-1]["Theme"] if not usable_themes.empty else None
 
-    leadership_sentence = (
+    portfolio_sentence = (
         f"{best['Portfolio']} is currently the strongest portfolio at {pct(best['Return'])}, while {worst['Portfolio']} is the weakest at {pct(worst['Return'])}. "
         f"That {pct(return_spread)} gap between first and last place suggests this has not been a flat market where everything is moving together."
     )
