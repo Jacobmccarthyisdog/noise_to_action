@@ -13,10 +13,10 @@ from calculations import (
     build_datasets,
     build_summary,
     summarize_benchmark,
-    build_ai_dvisor_insights,
     format_summary_table,
     format_holdings_table,
 )
+from ai_advisor import build_ai_dvisor_insights
 from charts import (
     build_return_bar_colors,
     build_portfolio_heatmap,
