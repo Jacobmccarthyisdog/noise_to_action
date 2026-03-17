@@ -168,38 +168,44 @@ APP_CSS = """
     }
 
     .metric-card {
-        background: linear-gradient(180deg, rgba(20,24,31,0.80) 0%, rgba(11,14,20,0.72) 100%);
-        border: 1px solid rgba(255,255,255,0.08);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        background:
+            radial-gradient(circle at top left, rgba(59,130,246,0.14), transparent 34%),
+            linear-gradient(180deg, rgba(14,20,34,0.94) 0%, rgba(8,12,20,0.90) 100%);
+        border: 1px solid rgba(96,165,250,0.22);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border-radius: 18px;
         padding: 18px 18px 14px 18px;
         box-shadow:
-            0 8px 30px rgba(0,0,0,0.34),
-            inset 0 1px 0 rgba(255,255,255,0.04);
+            0 0 0 1px rgba(59,130,246,0.08),
+            0 14px 34px rgba(0,0,0,0.42),
+            0 0 26px rgba(37,99,235,0.18),
+            inset 0 1px 0 rgba(255,255,255,0.06),
+            inset 0 -18px 30px rgba(2,6,23,0.24);
         margin-bottom: 12px;
     }
 
     .metric-label {
-        font-size: 0.82rem;
+        font-size: 0.84rem;
         text-transform: uppercase;
-        letter-spacing: 0.09em;
-        color: #94a3b8;
-        margin-bottom: 8px;
-        font-weight: 700;
+        letter-spacing: 0.11em;
+        color: #a5b4cc;
+        margin-bottom: 10px;
+        font-weight: 800;
     }
 
     .metric-value {
-        font-size: 1.8rem;
-        font-weight: 800;
+        font-size: 2.05rem;
+        font-weight: 850;
         color: #f8fafc;
-        line-height: 1.08;
+        line-height: 1.04;
+        text-shadow: 0 0 18px rgba(255,255,255,0.05);
     }
 
     .metric-sub {
-        font-size: 0.92rem;
-        margin-top: 8px;
-        color: #cbd5e1;
+        font-size: 0.98rem;
+        margin-top: 10px;
+        color: #d6deea;
         white-space: pre-line;
     }
 
