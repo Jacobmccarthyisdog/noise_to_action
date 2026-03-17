@@ -41,7 +41,7 @@ st.markdown(
     .top-action-wrap {
         display: flex;
         justify-content: flex-end;
-        margin-top: -0.25rem;
+        margin-top: -0.10rem;
         margin-bottom: 0.35rem;
     }
     </style>
@@ -76,7 +76,7 @@ if "benchmark_choice" not in st.session_state:
 if "date_range" not in st.session_state:
     st.session_state.date_range = default_dates
 
-title_col, action_col = st.columns([7.8, 2.2])
+title_col, action_col = st.columns([8.8, 1.2])
 
 with title_col:
     st.title("From Noise to Action")
@@ -90,13 +90,17 @@ with action_col:
     refresh_a, controls_a = st.columns([1, 1], gap="small")
 
     with refresh_a:
-        if st.button("↻ Refresh", key="refresh_prices_button", use_container_width=True):
+        if st.button("↻ Refresh", key="refresh_prices_button"):
             fetch_price_history.clear()
             st.rerun()
 
     with controls_a:
-        with st.popover("Controls", use_container_width=True):
-            if st.button("Reset to Defaults", key="reset_defaults_button", use_container_width=True):
+        with st.popover("Controls"):
+            if st.button("↻ Refresh Data", key="refresh_prices_button_popover"):
+                fetch_price_history.clear()
+                st.rerun()
+
+            if st.button("Reset to Defaults", key="reset_defaults_button"):
                 st.session_state.selected_portfolios = default_portfolios
                 st.session_state.benchmark_choice = default_benchmark
                 st.session_state.date_range = default_dates
@@ -195,7 +199,6 @@ ai_dvisor_text = build_ai_dvisor_insights(
     benchmark_summary=benchmark_summary_initial,
     benchmark_choice=initial_benchmark,
 )
-
 
 with st.expander("AI Insights", expanded=False):
     st.write(ai_dvisor_text)
