@@ -268,24 +268,30 @@ benchmark_summary = summarize_benchmark(
     end_date=end_date,
 )
 
-if not summary_f.empty:
-    best_row = summary_f.sort_values("Return", ascending=False).iloc[0]
-    riskiest_row = summary_f.sort_values("Volatility", ascending=False).iloc[0]
+alpha_summary_f = exclude_benchmark_portfolios(summary_f, portfolio_col="Portfolio")
 
-    alpha_summary_f = exclude_benchmark_portfolios(summary_f, portfolio_col="Portfolio")
+avg_dollar_gain = alpha_summary_f["Dollar Change"].mean() if not alpha_summary_f.empty else None
+avg_return = alpha_summary_f["Return"].mean() if not alpha_summary_f.empty else None
 
-    avg_dollar_gain = alpha_summary_f["Dollar Change"].mean() if not alpha_summary_f.empty else None
-    avg_return = alpha_summary_f["Return"].mean() if not alpha_summary_f.empty else None
+benchmark_row = summary_f[summary_f["Portfolio"] == benchmark_choice].copy()
+benchmark_dollar_change = (
+    benchmark_row["Dollar Change"].iloc[0]
+    if not benchmark_row.empty
+    else None
+)
 
-    relative_vs_benchmark = None
-    avg_dollar_alpha = None
-    if (
-        not alpha_summary_f.empty
-        and benchmark_summary is not None
-        and benchmark_summary["Return"] is not None
-        and avg_return is not None
-    ):
-        relative_vs_benchmark = avg_return - benchmark_summary["Return"]
+relative_vs_benchmark = None
+if (
+    not alpha_summary_f.empty
+    and benchmark_summary is not None
+    and benchmark_summary["Return"] is not None
+    and avg_return is not None
+):
+    relative_vs_benchmark = avg_return - benchmark_summary["Return"]
+
+avg_dollar_alpha = None
+if avg_dollar_gain is not None and benchmark_dollar_change is not None:
+    avg_dollar_alpha = avg_dollar_gain - benchmark_dollar_change
 
     if (
         avg_dollar_gain is not None
