@@ -273,7 +273,7 @@ ai_dvisor_text = build_ai_dvisor_insights(
     benchmark_choice=initial_benchmark,
 )
 
-st.markdown("### AI-dvisor Insights")
+st.markdown("### AI Insights")
 with st.expander("Read more", expanded=False):
     st.write(ai_dvisor_text)
 
