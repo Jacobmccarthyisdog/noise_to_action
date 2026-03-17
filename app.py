@@ -285,7 +285,8 @@ if not summary_f.empty:
         and avg_return is not None
     ):
         relative_vs_benchmark = avg_return - benchmark_summary["Return"]
-        avg_dollar_alpha = relative_vs_benchmark * 1000
+        display_alpha_pct = round(relative_vs_benchmark * 100, 2)
+        avg_dollar_alpha = display_alpha_pct * 10
 
     c1, c2, c3 = st.columns(3)
 
