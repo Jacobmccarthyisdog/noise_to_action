@@ -162,10 +162,14 @@ APP_CSS = """
         margin-bottom: 0.75rem;
     }
 
-    [data-testid="stSidebar"],
     [data-testid="collapsedControl"] {
-        display: none !important;
-    }
+    display: block !important;
+}
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, rgba(10,16,28,0.96) 0%, rgba(7,11,18,0.94) 100%);
+    border-right: 1px solid rgba(96,165,250,0.16);
+}
 
     .metric-card {
         background:
