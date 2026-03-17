@@ -139,6 +139,43 @@ if "benchmark_choice" not in st.session_state:
 if "date_range" not in st.session_state:
     st.session_state.date_range = default_dates
 
+with st.sidebar:
+    st.markdown("## Dashboard Controls")
+
+    if st.button("Reset to Defaults", use_container_width=True):
+        st.session_state.selected_portfolios = default_portfolios
+        st.session_state.benchmark_choice = default_benchmark
+        st.session_state.date_range = default_dates
+        st.rerun()
+
+    st.multiselect(
+        "Select portfolios",
+        options=all_portfolios,
+        default=st.session_state.selected_portfolios,
+        key="selected_portfolios",
+    )
+
+    benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
+    if not benchmark_options:
+        benchmark_options = list(BENCHMARK_MAP.keys())
+
+    if st.session_state.benchmark_choice not in benchmark_options:
+        st.session_state.benchmark_choice = benchmark_options[0]
+
+    st.selectbox(
+        "Benchmark comparison",
+        options=benchmark_options,
+        key="benchmark_choice",
+    )
+
+    st.date_input(
+        "Date range",
+        value=st.session_state.date_range,
+        min_value=date_min,
+        max_value=date_max,
+        key="date_range",
+    )
+
 initial_start_date, initial_end_date = normalize_date_range(
     st.session_state.date_range,
     date_min,
@@ -184,50 +221,10 @@ st.markdown("### AI-dvisor Insights")
 with st.expander("Read more", expanded=False):
     st.write(ai_dvisor_text)
 
-with st.expander("Dashboard Controls", expanded=False):
-    b1, b2 = st.columns([1, 6])
-
-    with b1:
-        if st.button("Reset to Defaults", use_container_width=True):
-            st.session_state.selected_portfolios = default_portfolios
-            st.session_state.benchmark_choice = default_benchmark
-            st.session_state.date_range = default_dates
-            st.rerun()
-
-    f1, f2, f3 = st.columns([1.8, 0.9, 1.2])
-
-    with f1:
-        selected_portfolios = st.multiselect(
-            "Select portfolios",
-            options=all_portfolios,
-            default=st.session_state.selected_portfolios,
-            key="selected_portfolios",
-        )
-
-    with f2:
-        benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
-        if not benchmark_options:
-            benchmark_options = list(BENCHMARK_MAP.keys())
-
-        if st.session_state.benchmark_choice not in benchmark_options:
-            st.session_state.benchmark_choice = benchmark_options[0]
-
-        benchmark_choice = st.selectbox(
-            "Benchmark comparison",
-            options=benchmark_options,
-            key="benchmark_choice",
-        )
-
-    with f3:
-        date_range = st.date_input(
-            "Date range",
-            value=st.session_state.date_range,
-            min_value=date_min,
-            max_value=date_max,
-            key="date_range",
-        )
-
 selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
+benchmark_choice = st.session_state.benchmark_choice
+date_range = st.session_state.date_range
+
 if not selected_portfolios:
     st.warning("Select at least one portfolio.")
     st.stop()
