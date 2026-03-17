@@ -329,15 +329,27 @@ if not cumret_plot_df.empty:
     cumret_line_styles = build_line_style_map(cumret_plot_df["Portfolio"].unique().tolist())
 
     fig_cumret = px.line(
-        cumret_plot_df,
-        x="Date",
-        y="Cumulative Return",
-        color="Portfolio",
-    )
-    apply_line_styles(fig_cumret, cumret_line_styles)
-    chart_layout(fig_cumret, height=450, yaxis_title="Cumulative Return (%)")
-    fig_cumret.update_yaxes(tickformat=".0%")
-    render_chart(fig_cumret, key="fig_cumret")
+    cumret_plot_df,
+    x="Date",
+    y="Cumulative Return",
+    color="Portfolio",
+)
+apply_line_styles(fig_cumret, cumret_line_styles)
+chart_layout(fig_cumret, height=450, yaxis_title="Cumulative Return (%)")
+fig_cumret.update_yaxes(tickformat=".0%")
+fig_cumret.update_layout(
+    legend=dict(
+        orientation="h",
+        yanchor="top",
+        y=-0.22,
+        xanchor="center",
+        x=0.5,
+        title=None,
+    ),
+    margin=dict(b=110),
+)
+render_chart(fig_cumret, key="fig_cumret")
+
 else:
     st.info("No cumulative return data available.")
 
