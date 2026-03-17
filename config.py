@@ -237,22 +237,25 @@ APP_CSS = """
         color: #f8fafc !important;
     }
 
-    .stButton > button {
-        background: linear-gradient(180deg, rgba(28,32,40,0.95) 0%, rgba(12,14,20,0.95) 100%);
-        color: #f8fafc;
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 14px;
-        font-weight: 700;
-        padding: 0.6rem 1rem;
-        box-shadow:
-            0 8px 18px rgba(0,0,0,0.28),
-            inset 0 1px 0 rgba(255,255,255,0.04);
-    }
+.stButton > button {
+    background: rgba(12,16,22,0.88);
+    color: #f8fafc;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    min-height: 2.2rem;
+    padding: 0.32rem 0.75rem;
+    box-shadow:
+        0 6px 14px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+}
 
-    .stButton > button:hover {
-        border-color: rgba(255,255,255,0.18);
-        background: linear-gradient(180deg, rgba(35,40,49,0.98) 0%, rgba(16,19,25,0.98) 100%);
-        color: white;
+.stButton > button:hover {
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(16,21,28,0.96);
+    color: #ffffff;
+}
     }
 
     label, .stMarkdown, p, span {
