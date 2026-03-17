@@ -361,7 +361,11 @@ st.markdown(
 
 cumret_plot_df = portfolio_cumret_f[["Date", "Portfolio", "Cumulative Return"]].copy()
 
-if not benchmark_cumret_f.empty:
+benchmark_already_present = benchmark_choice in {
+    str(name).strip() for name in cumret_plot_df["Portfolio"].dropna().unique()
+}
+
+if not benchmark_cumret_f.empty and not benchmark_already_present:
     benchmark_line = benchmark_cumret_f[benchmark_cumret_f["Portfolio"] == benchmark_choice].copy()
     if not benchmark_line.empty:
         cumret_plot_df = pd.concat(
