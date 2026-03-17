@@ -204,19 +204,38 @@ APP_CSS = """
     }
 
     div[data-testid="stExpander"] {
-        background: linear-gradient(180deg, rgba(17,22,30,0.78) 0%, rgba(9,12,18,0.70) 100%);
-        border: 1px solid rgba(255,255,255,0.08);
+        background:
+            linear-gradient(180deg, rgba(10,16,28,0.88) 0%, rgba(7,11,18,0.82) 100%);
+        border: 1px solid rgba(96,165,250,0.24);
         border-radius: 18px;
         overflow: hidden;
         box-shadow:
-            0 10px 28px rgba(0,0,0,0.26),
-            inset 0 1px 0 rgba(255,255,255,0.04);
+            0 0 0 1px rgba(59,130,246,0.08),
+            0 12px 30px rgba(0,0,0,0.34),
+            0 0 22px rgba(37,99,235,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.05);
         margin-bottom: 1rem;
     }
 
+    div[data-testid="stExpander"] details {
+        background: transparent !important;
+    }
+
     div[data-testid="stExpander"] details summary {
-        font-weight: 700;
+        font-weight: 800;
         color: #f8fafc;
+        letter-spacing: -0.01em;
+        padding-top: 0.15rem;
+        padding-bottom: 0.15rem;
+    }
+
+    div[data-testid="stExpander"] details summary:hover {
+        background: rgba(59,130,246,0.05);
+    }
+
+    div[data-testid="stExpander"] details[open] summary {
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        margin-bottom: 0.35rem;
     }
 
     div[data-testid="stDataFrame"] {
@@ -237,7 +256,6 @@ APP_CSS = """
         color: #f8fafc !important;
     }
 
-    /* Standard Streamlit buttons */
     .stButton > button {
         background: linear-gradient(180deg, rgba(28,32,40,0.95) 0%, rgba(12,14,20,0.95) 100%) !important;
         color: #f8fafc !important;
@@ -266,7 +284,6 @@ APP_CSS = """
             inset 0 1px 0 rgba(255,255,255,0.04) !important;
     }
 
-    /* Make popover/menu triggers match the refresh button */
     div[data-testid="stPopover"] button,
     div[data-testid="stPopover"] [data-baseweb="button"],
     button[kind="secondary"],
