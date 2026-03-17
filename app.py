@@ -389,9 +389,9 @@ if not cumret_plot_df.empty:
 else:
     st.info("No cumulative return data available.")
 
-with st.sidebar:
-    st.markdown("### Portfolio Drilldown")
-    chosen_portfolio = st.selectbox("Choose a portfolio", selected_portfolios)
+st.markdown("### Portfolio Drilldown")
+
+chosen_portfolio = st.selectbox("Choose a portfolio", selected_portfolios)
 
 detail_holdings = holdings_snapshot_f[holdings_snapshot_f["Portfolio"] == chosen_portfolio].copy()
 detail_history = portfolio_history_f[portfolio_history_f["Portfolio"] == chosen_portfolio].copy()
