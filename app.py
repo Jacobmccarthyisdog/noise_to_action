@@ -196,8 +196,8 @@ ai_dvisor_text = build_ai_dvisor_insights(
     benchmark_choice=initial_benchmark,
 )
 
-st.markdown("### AI Insights")
-with st.expander("Read more", expanded=False):
+
+with st.expander("AI Insights", expanded=False):
     st.write(ai_dvisor_text)
 
 selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
