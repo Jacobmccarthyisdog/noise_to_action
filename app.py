@@ -30,24 +30,10 @@ from charts import (
 st.set_page_config(
     page_title="Portfolio Dashboard",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 st.markdown(APP_CSS, unsafe_allow_html=True)
-
-st.markdown(
-    """
-    <style>
-    .top-action-wrap {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: -0.10rem;
-        margin-bottom: 0.35rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 try:
     portfolios, prices = load_data()
@@ -76,65 +62,52 @@ if "benchmark_choice" not in st.session_state:
 if "date_range" not in st.session_state:
     st.session_state.date_range = default_dates
 
-title_col, action_col = st.columns([8.8, 1.2])
+with st.sidebar:
+    st.markdown("### Controls")
 
-with title_col:
-    st.title("From Noise to Action")
-    st.markdown(
-        f'<div class="small-note"><b>Data through:</b> {latest_available_date.strftime("%B %d, %Y")}</div>',
-        unsafe_allow_html=True,
+    if st.button("↻ Refresh Data", key="refresh_prices_button", use_container_width=True):
+        fetch_price_history.clear()
+        st.rerun()
+
+    if st.button("Reset to Defaults", key="reset_defaults_button", use_container_width=True):
+        st.session_state.selected_portfolios = default_portfolios
+        st.session_state.benchmark_choice = default_benchmark
+        st.session_state.date_range = default_dates
+        st.rerun()
+
+    st.multiselect(
+        "Select portfolios",
+        options=all_portfolios_source,
+        default=st.session_state.selected_portfolios,
+        key="selected_portfolios",
     )
 
-with action_col:
-    st.markdown('<div class="top-action-wrap">', unsafe_allow_html=True)
-    refresh_a, controls_a = st.columns([1, 1], gap="small")
+    benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
+    if not benchmark_options:
+        benchmark_options = list(BENCHMARK_MAP.keys())
 
-    with refresh_a:
-        if st.button("↻ Refresh", key="refresh_prices_button"):
-            fetch_price_history.clear()
-            st.rerun()
+    if st.session_state.benchmark_choice not in benchmark_options:
+        st.session_state.benchmark_choice = benchmark_options[0]
 
-    with controls_a:
-        with st.popover("Controls"):
-            if st.button("↻ Refresh Data", key="refresh_prices_button_popover"):
-                fetch_price_history.clear()
-                st.rerun()
+    st.selectbox(
+        "Benchmark comparison",
+        options=benchmark_options,
+        key="benchmark_choice",
+    )
 
-            if st.button("Reset to Defaults", key="reset_defaults_button"):
-                st.session_state.selected_portfolios = default_portfolios
-                st.session_state.benchmark_choice = default_benchmark
-                st.session_state.date_range = default_dates
-                st.rerun()
+    st.date_input(
+        "Date range",
+        value=st.session_state.date_range,
+        min_value=date_min,
+        max_value=date_max,
+        key="date_range",
+    )
 
-            st.multiselect(
-                "Select portfolios",
-                options=all_portfolios_source,
-                default=st.session_state.selected_portfolios,
-                key="selected_portfolios",
-            )
-
-            benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
-            if not benchmark_options:
-                benchmark_options = list(BENCHMARK_MAP.keys())
-
-            if st.session_state.benchmark_choice not in benchmark_options:
-                st.session_state.benchmark_choice = benchmark_options[0]
-
-            st.selectbox(
-                "Benchmark comparison",
-                options=benchmark_options,
-                key="benchmark_choice",
-            )
-
-            st.date_input(
-                "Date range",
-                value=st.session_state.date_range,
-                min_value=date_min,
-                max_value=date_max,
-                key="date_range",
-            )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+st.title("From Noise to Action")
+st.markdown(
+    f'<div class="small-note"><b>Data through:</b> {latest_available_date.strftime("%B %d, %Y")}</div>',
+    unsafe_allow_html=True,
+)
 
 try:
     (
