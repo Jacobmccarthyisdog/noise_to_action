@@ -125,7 +125,7 @@ with action_col:
 
     with controls_a:
         with st.popover("⚙ Controls", use_container_width=True):
-            if st.button("Reset to Defaults", use_container_width=True):
+            if st.button("Reset to Defaults"):
                 st.session_state.selected_portfolios = default_portfolios
                 st.session_state.benchmark_choice = default_benchmark
                 st.session_state.date_range = default_dates
