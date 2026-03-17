@@ -95,7 +95,7 @@ with action_col:
             st.rerun()
 
     with controls_a:
-        with st.popover("⚙ Controls", use_container_width=True):
+        with st.popover("Controls", use_container_width=True):
             if st.button("Reset to Defaults", key="reset_defaults_button", use_container_width=True):
                 st.session_state.selected_portfolios = default_portfolios
                 st.session_state.benchmark_choice = default_benchmark
