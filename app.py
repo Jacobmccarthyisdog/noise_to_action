@@ -41,7 +41,6 @@ st.markdown(
     .top-action-wrap {
         display: flex;
         justify-content: flex-end;
-        gap: 0.5rem;
         margin-top: -0.25rem;
         margin-bottom: 0.35rem;
     }
@@ -73,37 +72,6 @@ st.markdown(
     .top-action-wrap .stButton > button:active,
     .top-action-wrap button[kind="secondary"]:active {
         transform: scale(0.98);
-    }
-
-    .top-controls details {
-        border: 1px solid rgba(255,255,255,0.14);
-        border-radius: 12px;
-        background: rgba(255,255,255,0.05);
-        box-shadow: 0 4px 14px rgba(0,0,0,0.22);
-        overflow: hidden;
-    }
-
-    .top-controls details summary {
-        list-style: none;
-        cursor: pointer;
-        padding: 0.52rem 0.78rem;
-        font-size: 0.80rem;
-        font-weight: 600;
-        color: white;
-        user-select: none;
-    }
-
-    .top-controls details summary::-webkit-details-marker {
-        display: none;
-    }
-
-    .top-controls details[open] summary {
-        border-bottom: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.06);
-    }
-
-    .top-controls .controls-inner {
-        padding: 0.8rem 0.8rem 0.3rem 0.8rem;
     }
     </style>
     """,
@@ -156,58 +124,42 @@ with action_col:
             st.rerun()
 
     with controls_a:
-        pass
+        with st.popover("⚙ Controls", use_container_width=True):
+            if st.button("Reset to Defaults", use_container_width=True):
+                st.session_state.selected_portfolios = default_portfolios
+                st.session_state.benchmark_choice = default_benchmark
+                st.session_state.date_range = default_dates
+                st.rerun()
+
+            st.multiselect(
+                "Select portfolios",
+                options=all_portfolios_source,
+                default=st.session_state.selected_portfolios,
+                key="selected_portfolios",
+            )
+
+            benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
+            if not benchmark_options:
+                benchmark_options = list(BENCHMARK_MAP.keys())
+
+            if st.session_state.benchmark_choice not in benchmark_options:
+                st.session_state.benchmark_choice = benchmark_options[0]
+
+            st.selectbox(
+                "Benchmark comparison",
+                options=benchmark_options,
+                key="benchmark_choice",
+            )
+
+            st.date_input(
+                "Date range",
+                value=st.session_state.date_range,
+                min_value=date_min,
+                max_value=date_max,
+                key="date_range",
+            )
 
     st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown('<div class="top-controls">', unsafe_allow_html=True)
-with st.expander("▾ Controls", expanded=False):
-    st.markdown('<div class="controls-inner">', unsafe_allow_html=True)
-
-    b1, b2 = st.columns([1, 6])
-
-    with b1:
-        if st.button("Reset to Defaults", use_container_width=True):
-            st.session_state.selected_portfolios = default_portfolios
-            st.session_state.benchmark_choice = default_benchmark
-            st.session_state.date_range = default_dates
-            st.rerun()
-
-    f1, f2, f3 = st.columns([1.8, 0.9, 1.2])
-
-    with f1:
-        st.multiselect(
-            "Select portfolios",
-            options=all_portfolios_source,
-            default=st.session_state.selected_portfolios,
-            key="selected_portfolios",
-        )
-
-    with f2:
-        benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
-        if not benchmark_options:
-            benchmark_options = list(BENCHMARK_MAP.keys())
-
-        if st.session_state.benchmark_choice not in benchmark_options:
-            st.session_state.benchmark_choice = benchmark_options[0]
-
-        st.selectbox(
-            "Benchmark comparison",
-            options=benchmark_options,
-            key="benchmark_choice",
-        )
-
-    with f3:
-        st.date_input(
-            "Date range",
-            value=st.session_state.date_range,
-            min_value=date_min,
-            max_value=date_max,
-            key="date_range",
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)
 
 try:
     (
@@ -273,7 +225,7 @@ ai_dvisor_text = build_ai_dvisor_insights(
     benchmark_choice=initial_benchmark,
 )
 
-st.markdown("### AI Insights")
+st.markdown("### AI-dvisor Insights")
 with st.expander("Read more", expanded=False):
     st.write(ai_dvisor_text)
 
