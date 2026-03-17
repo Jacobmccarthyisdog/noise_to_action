@@ -44,35 +44,6 @@ st.markdown(
         margin-top: -0.25rem;
         margin-bottom: 0.35rem;
     }
-
-    .top-action-wrap .stButton > button,
-    .top-action-wrap button[kind="secondary"] {
-        padding: 0.34rem 0.72rem;
-        font-size: 0.80rem;
-        font-weight: 600;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.05);
-        color: white;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border 0.18s ease;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.22);
-        min-height: 2.2rem;
-    }
-
-    .top-action-wrap .stButton > button:hover,
-    .top-action-wrap button[kind="secondary"]:hover {
-        transform: translateY(-1px) scale(1.02);
-        border: 1px solid rgba(255,255,255,0.24);
-        background: rgba(255,255,255,0.10);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.28);
-    }
-
-    .top-action-wrap .stButton > button:active,
-    .top-action-wrap button[kind="secondary"]:active {
-        transform: scale(0.98);
-    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -116,7 +87,7 @@ with title_col:
 
 with action_col:
     st.markdown('<div class="top-action-wrap">', unsafe_allow_html=True)
-    refresh_a, controls_a = st.columns([1, 1])
+    refresh_a, controls_a = st.columns([1, 1], gap="small")
 
     with refresh_a:
         if st.button("↻ Refresh", key="refresh_prices_button", use_container_width=True):
@@ -125,7 +96,7 @@ with action_col:
 
     with controls_a:
         with st.popover("⚙ Controls", use_container_width=True):
-            if st.button("Reset to Defaults"):
+            if st.button("Reset to Defaults", key="reset_defaults_button", use_container_width=True):
                 st.session_state.selected_portfolios = default_portfolios
                 st.session_state.benchmark_choice = default_benchmark
                 st.session_state.date_range = default_dates
