@@ -237,25 +237,62 @@ APP_CSS = """
         color: #f8fafc !important;
     }
 
-.stButton > button {
-    background: rgba(12,16,22,0.88);
-    color: #f8fafc;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.88rem;
-    min-height: 2.2rem;
-    padding: 0.32rem 0.75rem;
-    box-shadow:
-        0 6px 14px rgba(0,0,0,0.22),
-        inset 0 1px 0 rgba(255,255,255,0.03);
-}
+    /* Standard Streamlit buttons */
+    .stButton > button {
+        background: linear-gradient(180deg, rgba(28,32,40,0.95) 0%, rgba(12,14,20,0.95) 100%) !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+        font-size: 0.88rem !important;
+        min-height: 2.15rem !important;
+        padding: 0.28rem 0.85rem !important;
+        box-shadow:
+            0 8px 18px rgba(0,0,0,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.04) !important;
+    }
 
-.stButton > button:hover {
-    border-color: rgba(255,255,255,0.14);
-    background: rgba(16,21,28,0.96);
-    color: #ffffff;
-}
+    .stButton > button:hover {
+        border-color: rgba(255,255,255,0.18) !important;
+        background: linear-gradient(180deg, rgba(35,40,49,0.98) 0%, rgba(16,19,25,0.98) 100%) !important;
+        color: #ffffff !important;
+    }
+
+    .stButton > button:focus,
+    .stButton > button:focus-visible {
+        outline: none !important;
+        box-shadow:
+            0 8px 18px rgba(0,0,0,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.04) !important;
+    }
+
+    /* Make popover/menu triggers match the refresh button */
+    div[data-testid="stPopover"] button,
+    div[data-testid="stPopover"] [data-baseweb="button"],
+    button[kind="secondary"],
+    button[data-testid="baseButton-secondary"],
+    [data-baseweb="button"] {
+        background: linear-gradient(180deg, rgba(28,32,40,0.95) 0%, rgba(12,14,20,0.95) 100%) !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+        font-size: 0.88rem !important;
+        min-height: 2.15rem !important;
+        padding: 0.28rem 0.85rem !important;
+        box-shadow:
+            0 8px 18px rgba(0,0,0,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.04) !important;
+    }
+
+    div[data-testid="stPopover"] button:hover,
+    div[data-testid="stPopover"] [data-baseweb="button"]:hover,
+    button[kind="secondary"]:hover,
+    button[data-testid="baseButton-secondary"]:hover,
+    [data-baseweb="button"]:hover {
+        border-color: rgba(255,255,255,0.18) !important;
+        background: linear-gradient(180deg, rgba(35,40,49,0.98) 0%, rgba(16,19,25,0.98) 100%) !important;
+        color: #ffffff !important;
     }
 
     label, .stMarkdown, p, span {
