@@ -38,14 +38,16 @@ st.markdown(APP_CSS, unsafe_allow_html=True)
 st.markdown(
     """
     <style>
-    .refresh-top-right {
+    .top-action-wrap {
         display: flex;
         justify-content: flex-end;
+        gap: 0.5rem;
         margin-top: -0.25rem;
         margin-bottom: 0.35rem;
     }
 
-    .refresh-top-right .stButton > button {
+    .top-action-wrap .stButton > button,
+    .top-action-wrap button[kind="secondary"] {
         padding: 0.34rem 0.72rem;
         font-size: 0.80rem;
         font-weight: 600;
@@ -60,32 +62,53 @@ st.markdown(
         min-height: 2.2rem;
     }
 
-    .refresh-top-right .stButton > button:hover {
+    .top-action-wrap .stButton > button:hover,
+    .top-action-wrap button[kind="secondary"]:hover {
         transform: translateY(-1px) scale(1.02);
         border: 1px solid rgba(255,255,255,0.24);
         background: rgba(255,255,255,0.10);
         box-shadow: 0 8px 20px rgba(0,0,0,0.28);
     }
 
-    .refresh-top-right .stButton > button:active {
+    .top-action-wrap .stButton > button:active,
+    .top-action-wrap button[kind="secondary"]:active {
         transform: scale(0.98);
+    }
+
+    .top-controls details {
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.05);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+        overflow: hidden;
+    }
+
+    .top-controls details summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.52rem 0.78rem;
+        font-size: 0.80rem;
+        font-weight: 600;
+        color: white;
+        user-select: none;
+    }
+
+    .top-controls details summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .top-controls details[open] summary {
+        border-bottom: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.06);
+    }
+
+    .top-controls .controls-inner {
+        padding: 0.8rem 0.8rem 0.3rem 0.8rem;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
-
-title_col, refresh_col = st.columns([8.5, 1.5])
-
-with title_col:
-    st.title("From Noise to Action")
-
-with refresh_col:
-    st.markdown('<div class="refresh-top-right">', unsafe_allow_html=True)
-    if st.button("↻ Refresh", key="refresh_prices_button"):
-        fetch_price_history.clear()
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
 try:
     portfolios, prices = load_data()
@@ -98,10 +121,93 @@ if prices.empty:
     st.stop()
 
 latest_available_date = prices["Date"].max()
-st.markdown(
-    f'<div class="small-note"><b>Data through:</b> {latest_available_date.strftime("%B %d, %Y")}</div>',
-    unsafe_allow_html=True,
-)
+
+all_portfolios_source = sorted(portfolios["Portfolio"].dropna().astype(str).unique().tolist())
+date_min = prices["Date"].min().date()
+date_max = prices["Date"].max().date()
+
+default_portfolios = all_portfolios_source
+default_benchmark = "SPY" if "SPY" in BENCHMARK_MAP else next(iter(BENCHMARK_MAP))
+default_dates = (date_min, date_max)
+
+if "selected_portfolios" not in st.session_state:
+    st.session_state.selected_portfolios = default_portfolios
+if "benchmark_choice" not in st.session_state:
+    st.session_state.benchmark_choice = default_benchmark
+if "date_range" not in st.session_state:
+    st.session_state.date_range = default_dates
+
+title_col, action_col = st.columns([7.8, 2.2])
+
+with title_col:
+    st.title("From Noise to Action")
+    st.markdown(
+        f'<div class="small-note"><b>Data through:</b> {latest_available_date.strftime("%B %d, %Y")}</div>',
+        unsafe_allow_html=True,
+    )
+
+with action_col:
+    st.markdown('<div class="top-action-wrap">', unsafe_allow_html=True)
+    refresh_a, controls_a = st.columns([1, 1])
+
+    with refresh_a:
+        if st.button("↻ Refresh", key="refresh_prices_button", use_container_width=True):
+            fetch_price_history.clear()
+            st.rerun()
+
+    with controls_a:
+        pass
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown('<div class="top-controls">', unsafe_allow_html=True)
+with st.expander("▾ Controls", expanded=False):
+    st.markdown('<div class="controls-inner">', unsafe_allow_html=True)
+
+    b1, b2 = st.columns([1, 6])
+
+    with b1:
+        if st.button("Reset to Defaults", use_container_width=True):
+            st.session_state.selected_portfolios = default_portfolios
+            st.session_state.benchmark_choice = default_benchmark
+            st.session_state.date_range = default_dates
+            st.rerun()
+
+    f1, f2, f3 = st.columns([1.8, 0.9, 1.2])
+
+    with f1:
+        st.multiselect(
+            "Select portfolios",
+            options=all_portfolios_source,
+            default=st.session_state.selected_portfolios,
+            key="selected_portfolios",
+        )
+
+    with f2:
+        benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
+        if not benchmark_options:
+            benchmark_options = list(BENCHMARK_MAP.keys())
+
+        if st.session_state.benchmark_choice not in benchmark_options:
+            st.session_state.benchmark_choice = benchmark_options[0]
+
+        st.selectbox(
+            "Benchmark comparison",
+            options=benchmark_options,
+            key="benchmark_choice",
+        )
+
+    with f3:
+        st.date_input(
+            "Date range",
+            value=st.session_state.date_range,
+            min_value=date_min,
+            max_value=date_max,
+            key="date_range",
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 try:
     (
@@ -125,56 +231,6 @@ if portfolio_history.empty:
     st.stop()
 
 all_portfolios = sorted(portfolio_history["Portfolio"].dropna().unique().tolist())
-date_min = prices["Date"].min().date()
-date_max = prices["Date"].max().date()
-
-default_portfolios = all_portfolios
-default_benchmark = "SPY" if "SPY" in BENCHMARK_MAP else next(iter(BENCHMARK_MAP))
-default_dates = (date_min, date_max)
-
-if "selected_portfolios" not in st.session_state:
-    st.session_state.selected_portfolios = default_portfolios
-if "benchmark_choice" not in st.session_state:
-    st.session_state.benchmark_choice = default_benchmark
-if "date_range" not in st.session_state:
-    st.session_state.date_range = default_dates
-
-with st.sidebar:
-    st.markdown("## Dashboard Controls")
-
-    if st.button("Reset to Defaults", use_container_width=True):
-        st.session_state.selected_portfolios = default_portfolios
-        st.session_state.benchmark_choice = default_benchmark
-        st.session_state.date_range = default_dates
-        st.rerun()
-
-    st.multiselect(
-        "Select portfolios",
-        options=all_portfolios,
-        default=st.session_state.selected_portfolios,
-        key="selected_portfolios",
-    )
-
-    benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
-    if not benchmark_options:
-        benchmark_options = list(BENCHMARK_MAP.keys())
-
-    if st.session_state.benchmark_choice not in benchmark_options:
-        st.session_state.benchmark_choice = benchmark_options[0]
-
-    st.selectbox(
-        "Benchmark comparison",
-        options=benchmark_options,
-        key="benchmark_choice",
-    )
-
-    st.date_input(
-        "Date range",
-        value=st.session_state.date_range,
-        min_value=date_min,
-        max_value=date_max,
-        key="date_range",
-    )
 
 initial_start_date, initial_end_date = normalize_date_range(
     st.session_state.date_range,
