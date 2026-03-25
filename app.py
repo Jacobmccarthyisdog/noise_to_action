@@ -34,6 +34,301 @@ st.set_page_config(
 )
 
 st.markdown(APP_CSS, unsafe_allow_html=True)
+st.markdown(
+    """
+    <style>
+        .hero-banner {
+            position: relative;
+            overflow: hidden;
+            padding: 28px 30px 24px 30px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+            margin-bottom: 0.9rem;
+        }
+
+        .hero-kicker {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 212, 170, 0.10);
+            border: 1px solid rgba(0, 212, 170, 0.28);
+            color: #9BE7D8;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .hero-title {
+            font-size: 2.6rem;
+            line-height: 1.05;
+            font-weight: 800;
+            color: #F6FBFF;
+            margin: 0;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-subtitle {
+            margin-top: 10px;
+            color: rgba(235, 244, 255, 0.78);
+            font-size: 1rem;
+            max-width: 920px;
+        }
+
+        .hero-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .hero-meta-pill {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(240, 247, 255, 0.90);
+            font-size: 0.85rem;
+        }
+
+        .hero-right-stat {
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            min-height: 116px;
+        }
+
+        .hero-right-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(210, 225, 240, 0.68);
+            margin-bottom: 8px;
+        }
+
+        .hero-right-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #F7FBFF;
+            margin-bottom: 6px;
+        }
+
+        .hero-right-detail {
+            font-size: 0.88rem;
+            color: rgba(220, 232, 244, 0.72);
+        }
+
+        .portfolio-strip-title {
+            font-size: 0.86rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(208, 224, 240, 0.72);
+            margin: 0.25rem 0 0.5rem 0;
+        }
+
+        div[data-testid="stMetric"] {
+            background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 12px 14px;
+            border-radius: 18px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+        }
+
+        div[data-testid="stMetricLabel"] {
+            font-weight: 700;
+        }
+
+        div[data-testid="stMetricValue"] {
+            font-size: 1.15rem;
+        }
+
+        div[data-testid="stMetricDelta"] {
+            font-size: 0.86rem;
+        }
+
+        .strip-note {
+            margin-top: 0.35rem;
+            margin-bottom: 0.85rem;
+            color: rgba(208, 224, 240, 0.68);
+            font-size: 0.84rem;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFrame) -> pd.DataFrame:
+    if portfolio_history_df.empty or summary_df.empty:
+        return pd.DataFrame(
+            columns=[
+                "Portfolio",
+                "Latest Value",
+                "Daily Move",
+                "Daily Move Display",
+                "Overall Return",
+                "Overall Return Display",
+                "Sparkline",
+            ]
+        )
+
+    history_sorted = portfolio_history_df.sort_values(["Portfolio", "Date"]).copy()
+
+    records = []
+    for portfolio_name, group in history_sorted.groupby("Portfolio"):
+        group = group.sort_values("Date").copy()
+        values = group["Portfolio Value"].dropna().tolist()
+        if not values:
+            continue
+
+        latest_value = float(values[-1])
+
+        daily_move = None
+        if len(values) >= 2 and values[-2] not in (0, None):
+            prior_value = float(values[-2])
+            if prior_value != 0:
+                daily_move = (latest_value / prior_value) - 1
+
+        sparkline = values[-20:] if len(values) >= 2 else values
+
+        records.append(
+            {
+                "Portfolio": portfolio_name,
+                "Latest Value": latest_value,
+                "Daily Move": daily_move,
+                "Sparkline": sparkline,
+            }
+        )
+
+    banner_df = pd.DataFrame(records)
+    if banner_df.empty:
+        return banner_df
+
+    summary_cols = ["Portfolio", "Return"]
+    summary_slice = summary_df[summary_cols].copy()
+    banner_df = banner_df.merge(summary_slice, on="Portfolio", how="left")
+    banner_df = banner_df.rename(columns={"Return": "Overall Return"})
+
+    banner_df["Daily Move Display"] = banner_df["Daily Move"].apply(
+        lambda x: "Last session: -" if pd.isna(x) else f"Last session: {pct(x)}"
+    )
+    banner_df["Overall Return Display"] = banner_df["Overall Return"].apply(
+        lambda x: "Overall: -" if pd.isna(x) else f"Overall: {pct(x)}"
+    )
+
+    return banner_df.sort_values("Overall Return", ascending=False).reset_index(drop=True)
+
+
+def render_hero_banner(
+    summary_df: pd.DataFrame,
+    banner_df: pd.DataFrame,
+    latest_date,
+    benchmark_choice: str,
+):
+    best_name = "-"
+    best_detail = "No return data available"
+    volatile_name = "-"
+    volatile_detail = "No volatility data available"
+
+    if not summary_df.empty:
+        best_row = summary_df.sort_values("Return", ascending=False).iloc[0]
+        risk_row = summary_df.sort_values("Volatility", ascending=False).iloc[0]
+
+        best_name = str(best_row["Portfolio"])
+        best_detail = f"{pct(best_row['Return'])} | {money(best_row['Dollar Change'])}"
+
+        volatile_name = str(risk_row["Portfolio"])
+        volatile_detail = f"{pct(risk_row['Volatility'])} daily vol"
+
+    active_count = len(banner_df["Portfolio"].unique()) if not banner_df.empty else 0
+
+    left_col, right_col = st.columns([2.6, 1.2], gap="large")
+
+    with left_col:
+        st.markdown(
+            f"""
+            <div class="hero-banner">
+                <div class="hero-kicker">Portfolio Intelligence</div>
+                <h1 class="hero-title">From Noise to Action</h1>
+                <div class="hero-subtitle">
+                    Monitor your custom portfolios, compare them against {benchmark_choice},
+                    and surface the leaders, laggards, and risk pockets in one place.
+                </div>
+                <div class="hero-meta-row">
+                    <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
+                    <div class="hero-meta-pill"><b>Portfolios loaded:</b> {active_count}</div>
+                    <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with right_col:
+        r1, r2 = st.columns(2, gap="small")
+
+        with r1:
+            st.markdown(
+                f"""
+                <div class="hero-right-stat">
+                    <div class="hero-right-label">Top performer</div>
+                    <div class="hero-right-value">{best_name}</div>
+                    <div class="hero-right-detail">{best_detail}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with r2:
+            st.markdown(
+                f"""
+                <div class="hero-right-stat">
+                    <div class="hero-right-label">Highest volatility</div>
+                    <div class="hero-right-value">{volatile_name}</div>
+                    <div class="hero-right-detail">{volatile_detail}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
+def render_portfolio_tape(banner_df: pd.DataFrame):
+    st.markdown('<div class="portfolio-strip-title">Portfolio tape</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="strip-note">Cards refresh whenever the app refreshes. "Last session" is based on the most recent two available portfolio values.</div>',
+        unsafe_allow_html=True,
+    )
+
+    if banner_df.empty:
+        st.info("No portfolio banner data is available.")
+        return
+
+    cards_per_row = 4
+    for start_idx in range(0, len(banner_df), cards_per_row):
+        row_slice = banner_df.iloc[start_idx : start_idx + cards_per_row]
+        cols = st.columns(len(row_slice), gap="small")
+
+        for col, (_, row) in zip(cols, row_slice.iterrows()):
+            with col:
+                st.metric(
+                    label=row["Portfolio"],
+                    value=money(row["Latest Value"]),
+                    delta=f"{row['Daily Move Display']} • {row['Overall ReturnDisplay']}"
+                    if "Overall ReturnDisplay" in row
+                    else f"{row['Daily Move Display']} • {row['Overall Return Display']}",
+                    border=True,
+                    chart_data=row["Sparkline"],
+                    chart_type="area",
+                )
+
 
 try:
     portfolios, prices = load_data()
@@ -103,12 +398,6 @@ with st.sidebar:
         key="date_range",
     )
 
-st.title("From Noise to Action")
-st.markdown(
-    f'<div class="small-note"><b>Data through:</b> {latest_available_date.strftime("%B %d, %Y")}</div>',
-    unsafe_allow_html=True,
-)
-
 try:
     (
         portfolio_history,
@@ -172,6 +461,20 @@ ai_dvisor_text = build_ai_dvisor_insights(
     benchmark_summary=benchmark_summary_initial,
     benchmark_choice=initial_benchmark,
 )
+
+banner_df = build_banner_stats(
+    portfolio_history_df=portfolio_history_initial,
+    summary_df=summary_initial,
+)
+
+render_hero_banner(
+    summary_df=summary_initial,
+    banner_df=banner_df,
+    latest_date=latest_available_date,
+    benchmark_choice=initial_benchmark,
+)
+
+render_portfolio_tape(banner_df)
 
 with st.expander("AI Insights", expanded=False):
     st.write(ai_dvisor_text)
