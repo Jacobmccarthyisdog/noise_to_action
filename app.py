@@ -173,7 +173,7 @@ def render_hero_banner(
     st.markdown(
         f"""
         <div class="hero-banner">
-            <div class="hero-kicker">Portfolio Intelligence</div>
+            
             <h1 class="hero-title">From Noise to Action</h1>
             <div class="hero-subtitle">
                 Live view of the AI investment portfolios compared to key stock market benchmarks
