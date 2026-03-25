@@ -180,7 +180,7 @@ def render_hero_banner(
             </div>
             <div class="hero-meta-row">
                 <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-                
+                <div class="hero-meta-pill"><b>Portfolios loaded:</b> {active_count}</div>
                 <div class="hero-meta-pill"><b>Selected Benchmark:</b> {benchmark_choice}</div>
             </div>
         </div>
