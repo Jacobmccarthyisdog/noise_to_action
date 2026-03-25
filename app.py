@@ -93,7 +93,7 @@ st.markdown(
             padding: 8px 12px;
             border-radius: 999px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);st
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
         }
@@ -171,22 +171,22 @@ def render_hero_banner(
     active_count = len(banner_df["Portfolio"].unique()) if not banner_df.empty else 0
 
     st.markdown(
-        f"""
-        <div class="hero-banner">
-            
-            <h1 class="hero-title">From Noise to Action</h1>
-            <div class="hero-subtitle">
-                Live view of the AI investment portfolios compared to key stock market benchmarks
-            </div>
-            <div class="hero-meta-row">
-                <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-                <div class="hero-meta-pill"><b>Portfolios loaded:</b> {active_count}</div>
-                <div class="hero-meta-pill"><b>Selected Benchmark:</b> {benchmark_choice}</div>
-            </div>
+    f"""
+    <div class="hero-banner">
+        <h1 class="hero-title">From Noise to Action</h1>
+        <div class="hero-subtitle">
+            Monitor your custom portfolios, compare them against {benchmark_choice},
+            and surface the leaders, laggards, and risk pockets in one place.
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        <div class="hero-meta-row">
+            <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
+            <div class="hero-meta-pill"><b>Portfolios loaded:</b> {active_count}</div>
+            <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 def render_portfolio_ticker(banner_df: pd.DataFrame):
