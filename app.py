@@ -175,8 +175,7 @@ def render_hero_banner(
             <div class="hero-kicker">Portfolio Intelligence</div>
             <h1 class="hero-title">From Noise to Action</h1>
             <div class="hero-subtitle">
-                Monitor your custom portfolios, compare them against {benchmark_choice},
-                and surface the leaders, laggards, and risk pockets in one place.
+                Live - almost - view of the AI investment portfolios compared to key stock market benchmarks
             </div>
             <div class="hero-meta-row">
                 <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
