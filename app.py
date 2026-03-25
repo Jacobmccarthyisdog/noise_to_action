@@ -125,38 +125,18 @@ st.markdown(
             color: rgba(220, 232, 244, 0.72);
         }
 
-        .portfolio-strip-title {
+        .ticker-label {
             font-size: 0.86rem;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             color: rgba(208, 224, 240, 0.72);
-            margin: 0.25rem 0 0.5rem 0;
+            margin: 0.25rem 0 0.35rem 0;
         }
 
-        div[data-testid="stMetric"] {
-            background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.03));
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 12px 14px;
-            border-radius: 18px;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-        }
-
-        div[data-testid="stMetricLabel"] {
-            font-weight: 700;
-        }
-
-        div[data-testid="stMetricValue"] {
-            font-size: 1.15rem;
-        }
-
-        div[data-testid="stMetricDelta"] {
-            font-size: 0.86rem;
-        }
-
-        .strip-note {
-            margin-top: 0.35rem;
-            margin-bottom: 0.85rem;
+        .ticker-note {
+            margin-top: 0.2rem;
+            margin-bottom: 0.75rem;
             color: rgba(208, 224, 240, 0.68);
             font-size: 0.84rem;
         }
@@ -212,16 +192,15 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
     if banner_df.empty:
         return banner_df
 
-    summary_cols = ["Portfolio", "Return"]
-    summary_slice = summary_df[summary_cols].copy()
+    summary_slice = summary_df[["Portfolio", "Return"]].copy()
     banner_df = banner_df.merge(summary_slice, on="Portfolio", how="left")
     banner_df = banner_df.rename(columns={"Return": "Overall Return"})
 
     banner_df["Daily Move Display"] = banner_df["Daily Move"].apply(
-        lambda x: "Last session: -" if pd.isna(x) else f"Last session: {pct(x)}"
+        lambda x: "-" if pd.isna(x) else pct(x)
     )
     banner_df["Overall Return Display"] = banner_df["Overall Return"].apply(
-        lambda x: "Overall: -" if pd.isna(x) else f"Overall: {pct(x)}"
+        lambda x: "-" if pd.isna(x) else pct(x)
     )
 
     return banner_df.sort_values("Overall Return", ascending=False).reset_index(drop=True)
@@ -300,10 +279,10 @@ def render_hero_banner(
             )
 
 
-def render_portfolio_tape(banner_df: pd.DataFrame):
-    st.markdown('<div class="portfolio-strip-title">Portfolio tape</div>', unsafe_allow_html=True)
+def render_portfolio_ticker(banner_df: pd.DataFrame):
+    st.markdown('<div class="ticker-label">Portfolio tape</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="strip-note">Cards refresh whenever the app refreshes. "Last session" is based on the most recent two available portfolio values.</div>',
+        '<div class="ticker-note">Refreshes when the app refreshes. Day move uses the latest two available portfolio values.</div>',
         unsafe_allow_html=True,
     )
 
@@ -311,23 +290,136 @@ def render_portfolio_tape(banner_df: pd.DataFrame):
         st.info("No portfolio banner data is available.")
         return
 
-    cards_per_row = 4
-    for start_idx in range(0, len(banner_df), cards_per_row):
-        row_slice = banner_df.iloc[start_idx : start_idx + cards_per_row]
-        cols = st.columns(len(row_slice), gap="small")
+    items = []
+    for _, row in banner_df.iterrows():
+        daily_text = row["Daily Move Display"]
+        overall_text = row["Overall Return Display"]
+        latest_value = money(row["Latest Value"])
 
-        for col, (_, row) in zip(cols, row_slice.iterrows()):
-            with col:
-                st.metric(
-                    label=row["Portfolio"],
-                    value=money(row["Latest Value"]),
-                    delta=f"{row['Daily Move Display']} • {row['Overall ReturnDisplay']}"
-                    if "Overall ReturnDisplay" in row
-                    else f"{row['Daily Move Display']} • {row['Overall Return Display']}",
-                    border=True,
-                    chart_data=row["Sparkline"],
-                    chart_type="area",
-                )
+        daily_class = "ticker-flat"
+        if pd.notna(row["Daily Move"]):
+            daily_class = "ticker-up" if row["Daily Move"] >= 0 else "ticker-down"
+
+        overall_class = "ticker-flat"
+        if pd.notna(row["Overall Return"]):
+            overall_class = "ticker-up" if row["Overall Return"] >= 0 else "ticker-down"
+
+        items.append(
+            f"""
+            <div class="ticker-card">
+                <div class="ticker-name">{row["Portfolio"]}</div>
+                <div class="ticker-price">{latest_value}</div>
+                <div class="ticker-stats">
+                    <span class="{daily_class}">Day {daily_text}</span>
+                    <span class="{overall_class}">Overall {overall_text}</span>
+                </div>
+            </div>
+            """
+        )
+
+    cards_html = "".join(items)
+
+    html = f"""
+    <style>
+        .ticker-wrap {{
+            width: 100%;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.025));
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+            padding: 10px 0;
+            margin: 0.2rem 0 1rem 0;
+        }}
+
+        .ticker-track {{
+            display: flex;
+            width: max-content;
+            animation: ticker-scroll 38s linear infinite;
+            will-change: transform;
+        }}
+
+        .ticker-group {{
+            display: flex;
+            gap: 12px;
+            padding-right: 12px;
+        }}
+
+        .ticker-card {{
+            min-width: 240px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            backdrop-filter: blur(4px);
+        }}
+
+        .ticker-name {{
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: rgba(208,224,240,0.72);
+            margin-bottom: 6px;
+            font-weight: 700;
+            white-space: nowrap;
+        }}
+
+        .ticker-price {{
+            font-size: 1.08rem;
+            font-weight: 800;
+            color: #F7FBFF;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }}
+
+        .ticker-stats {{
+            display: flex;
+            gap: 10px;
+            flex-wrap: nowrap;
+            font-size: 0.83rem;
+            white-space: nowrap;
+        }}
+
+        .ticker-up {{
+            color: #7CE3C3;
+            font-weight: 700;
+        }}
+
+        .ticker-down {{
+            color: #FF8D8D;
+            font-weight: 700;
+        }}
+
+        .ticker-flat {{
+            color: rgba(220, 232, 244, 0.72);
+            font-weight: 700;
+        }}
+
+        @keyframes ticker-scroll {{
+            from {{ transform: translateX(0); }}
+            to {{ transform: translateX(-50%); }}
+        }}
+
+        @media (prefers-reduced-motion: reduce) {{
+            .ticker-track {{
+                animation: none;
+            }}
+        }}
+    </style>
+
+    <div class="ticker-wrap">
+        <div class="ticker-track">
+            <div class="ticker-group">{cards_html}</div>
+            <div class="ticker-group">{cards_html}</div>
+        </div>
+    </div>
+    """
+
+    if hasattr(st, "html"):
+        st.html(html)
+    else:
+        st.markdown(html, unsafe_allow_html=True)
 
 
 try:
@@ -474,7 +566,7 @@ render_hero_banner(
     benchmark_choice=initial_benchmark,
 )
 
-render_portfolio_tape(banner_df)
+render_portfolio_ticker(banner_df)
 
 with st.expander("AI Insights", expanded=False):
     st.write(ai_dvisor_text)
