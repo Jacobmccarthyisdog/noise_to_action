@@ -96,50 +96,6 @@ st.markdown(
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
         }
-
-        .hero-right-stat {
-            padding: 16px 18px;
-            border-radius: 18px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            min-height: 116px;
-        }
-
-        .hero-right-label {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(210, 225, 240, 0.68);
-            margin-bottom: 8px;
-        }
-
-        .hero-right-value {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #F7FBFF;
-            margin-bottom: 6px;
-        }
-
-        .hero-right-detail {
-            font-size: 0.88rem;
-            color: rgba(220, 232, 244, 0.72);
-        }
-
-        .ticker-label {
-            font-size: 0.86rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: rgba(208, 224, 240, 0.72);
-            margin: 0.25rem 0 0.35rem 0;
-        }
-
-        .ticker-note {
-            margin-top: 0.2rem;
-            margin-bottom: 0.75rem;
-            color: rgba(208, 224, 240, 0.68);
-            font-size: 0.84rem;
-        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -207,87 +163,34 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
 
 
 def render_hero_banner(
-    summary_df: pd.DataFrame,
     banner_df: pd.DataFrame,
     latest_date,
     benchmark_choice: str,
 ):
-    best_name = "-"
-    best_detail = "No return data available"
-    volatile_name = "-"
-    volatile_detail = "No volatility data available"
-
-    if not summary_df.empty:
-        best_row = summary_df.sort_values("Return", ascending=False).iloc[0]
-        risk_row = summary_df.sort_values("Volatility", ascending=False).iloc[0]
-
-        best_name = str(best_row["Portfolio"])
-        best_detail = f"{pct(best_row['Return'])} | {money(best_row['Dollar Change'])}"
-
-        volatile_name = str(risk_row["Portfolio"])
-        volatile_detail = f"{pct(risk_row['Volatility'])} daily vol"
-
     active_count = len(banner_df["Portfolio"].unique()) if not banner_df.empty else 0
 
-    left_col, right_col = st.columns([2.6, 1.2], gap="large")
-
-    with left_col:
-        st.markdown(
-            f"""
-            <div class="hero-banner">
-                <div class="hero-kicker">Portfolio Intelligence</div>
-                <h1 class="hero-title">From Noise to Action</h1>
-                <div class="hero-subtitle">
-                    Monitor your custom portfolios, compare them against {benchmark_choice},
-                    and surface the leaders, laggards, and risk pockets in one place.
-                </div>
-                <div class="hero-meta-row">
-                    <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-                    <div class="hero-meta-pill"><b>Portfolios loaded:</b> {active_count}</div>
-                    <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    with right_col:
-        r1, r2 = st.columns(2, gap="small")
-
-        with r1:
-            st.markdown(
-                f"""
-                <div class="hero-right-stat">
-                    <div class="hero-right-label">Top performer</div>
-                    <div class="hero-right-value">{best_name}</div>
-                    <div class="hero-right-detail">{best_detail}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        with r2:
-            st.markdown(
-                f"""
-                <div class="hero-right-stat">
-                    <div class="hero-right-label">Highest volatility</div>
-                    <div class="hero-right-value">{volatile_name}</div>
-                    <div class="hero-right-detail">{volatile_detail}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-
-def render_portfolio_ticker(banner_df: pd.DataFrame):
-    st.markdown('<div class="ticker-label">Portfolio tape</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="ticker-note">Refreshes when the app refreshes. Day move uses the latest two available portfolio values.</div>',
+        f"""
+        <div class="hero-banner">
+            <div class="hero-kicker">Portfolio Intelligence</div>
+            <h1 class="hero-title">From Noise to Action</h1>
+            <div class="hero-subtitle">
+                Monitor your custom portfolios, compare them against {benchmark_choice},
+                and surface the leaders, laggards, and risk pockets in one place.
+            </div>
+            <div class="hero-meta-row">
+                <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
+                <div class="hero-meta-pill"><b>Portfolios loaded:</b> {active_count}</div>
+                <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
+
+def render_portfolio_ticker(banner_df: pd.DataFrame):
     if banner_df.empty:
-        st.info("No portfolio banner data is available.")
         return
 
     items = []
@@ -560,7 +463,6 @@ banner_df = build_banner_stats(
 )
 
 render_hero_banner(
-    summary_df=summary_initial,
     banner_df=banner_df,
     latest_date=latest_available_date,
     benchmark_choice=initial_benchmark,
