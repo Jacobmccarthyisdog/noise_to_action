@@ -175,7 +175,7 @@ def render_hero_banner(
     <div class="hero-banner">
         <h1 class="hero-title">From Noise to Action</h1>
         <div class="hero-subtitle">
-            Measure the AI portfolios against key stock market benchmarks.
+            Measure the AI portfolios against key stock market benchmarks.<br>
             Disclaimer; This is personal exploration, NOT financial advice.
         </div>
         <div class="hero-meta-row">
