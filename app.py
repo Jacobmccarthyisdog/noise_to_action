@@ -67,7 +67,7 @@ st.markdown(
         }
 
         .hero-title {
-            font-size: 3rem;
+            font-size: 5rem;
             line-height: 1.05;
             font-weight: 800;
             color: #F6FBFF;
