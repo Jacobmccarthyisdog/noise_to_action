@@ -207,7 +207,7 @@ def metric_card(title, value, subtitle=""):
             .metric-card {{
                 position: relative;
                 overflow: hidden;
-                padding: 18px 20px 16px 20px;
+                padding: 10px 10px 10px 10px;
                 border-radius: 22px;
                 background:
                     radial-gradient(circle at top right, rgba(0, 212, 170, 0.12), transparent 30%),
