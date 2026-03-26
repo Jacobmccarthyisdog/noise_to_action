@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 
 from config import GOOGLE_BLUES, OPENAI_ORANGES
 
-
 def is_google_portfolio(name):
     return "GOOGLE" in str(name).strip().upper()
 
@@ -208,7 +207,7 @@ def metric_card(title, value, subtitle=""):
                 position: relative;
                 overflow: hidden;
                 padding: 18px 20px 16px 20px;
-                border-radius: 10px;
+                border-radius: 22px;
                 background:
                     radial-gradient(circle at top right, rgba(0, 212, 170, 0.12), transparent 30%),
                     radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.10), transparent 26%),
