@@ -42,11 +42,12 @@ st.markdown(
     overflow: hidden;
     padding: 28px 30px 24px 30px;
     border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.025));
+    background:
+        radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
+        linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
     border: 1px solid rgba(255,255,255,0.08);
-    box-shadow:
-        0 10px 24px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,0.03);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.28);
     margin-top: 1.2rem;
     margin-bottom: 0.9rem;
 }
