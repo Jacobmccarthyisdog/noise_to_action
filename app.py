@@ -227,12 +227,14 @@ def render_portfolio_ticker(banner_df: pd.DataFrame):
         .ticker-wrap {{
             width: 100%;
             overflow: hidden;
-            border-radius: 18px;
+            border-radius: 22px;
             border: 1px solid rgba(255,255,255,0.08);
             background:
-                linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.025));
-            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-            padding: 10px 0;
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.12), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.10), transparent 26%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+            padding: 12px 0;
             margin: 0.2rem 0 1rem 0;
         }}
 
@@ -245,16 +247,20 @@ def render_portfolio_ticker(banner_df: pd.DataFrame):
 
         .ticker-group {{
             display: flex;
-            gap: 12px;
-            padding-right: 12px;
+            gap: 14px;
+            padding-right: 14px;
         }}
 
         .ticker-card {{
             min-width: 240px;
-            padding: 12px 14px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
+            padding: 14px 16px;
+            border-radius: 18px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.025));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.03),
+                0 10px 24px rgba(0,0,0,0.18);
             backdrop-filter: blur(4px);
         }}
 
@@ -263,7 +269,7 @@ def render_portfolio_ticker(banner_df: pd.DataFrame):
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: rgba(208,224,240,0.72);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 700;
             white-space: nowrap;
         }}
@@ -272,13 +278,13 @@ def render_portfolio_ticker(banner_df: pd.DataFrame):
             font-size: 1.08rem;
             font-weight: 800;
             color: #F7FBFF;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             white-space: nowrap;
         }}
 
         .ticker-stats {{
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: nowrap;
             font-size: 0.83rem;
             white-space: nowrap;
