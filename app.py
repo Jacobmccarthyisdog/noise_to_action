@@ -547,7 +547,7 @@ if not summary_f.empty:
 
     with c1:
         metric_card(
-            f"Avg Alfa vs {benchmark_choice}",
+            f"Avg Alpha vs {benchmark_choice}",
             pct(relative_vs_benchmark) if relative_vs_benchmark is not None else "-",
             f"{money(avg_dollar_alpha)} higher than the {benchmark_choice}",
         )
