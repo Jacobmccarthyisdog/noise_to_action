@@ -203,6 +203,47 @@ def render_chart(fig, key=None):
 def metric_card(title, value, subtitle=""):
     st.markdown(
         f"""
+        <style>
+            .metric-card {{
+                position: relative;
+                overflow: hidden;
+                padding: 18px 20px 16px 20px;
+                border-radius: 22px;
+                background:
+                    radial-gradient(circle at top right, rgba(0, 212, 170, 0.12), transparent 30%),
+                    radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.10), transparent 26%),
+                    linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+                border: 1px solid rgba(255,255,255,0.08);
+                box-shadow:
+                    0 18px 50px rgba(0,0,0,0.28),
+                    inset 0 1px 0 rgba(255,255,255,0.03);
+                min-height: 132px;
+            }}
+
+            .metric-label {{
+                font-size: 0.78rem;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: rgba(208,224,240,0.72);
+                margin-bottom: 10px;
+                font-weight: 700;
+            }}
+
+            .metric-value {{
+                font-size: 1.45rem;
+                font-weight: 800;
+                color: #F7FBFF;
+                line-height: 1.15;
+                margin-bottom: 8px;
+            }}
+
+            .metric-sub {{
+                font-size: 0.88rem;
+                color: rgba(220, 232, 244, 0.72);
+                line-height: 1.35;
+            }}
+        </style>
+
         <div class="metric-card">
             <div class="metric-label">{title}</div>
             <div class="metric-value">{value}</div>
