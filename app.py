@@ -179,13 +179,12 @@ def render_hero_banner(
             Live Dashboard to tracking the AI portfolios against key stock market benchmarks.<br>
             Disclaimer; This is personal exploration, NOT financial advice.
        
-        </div>
-        <div class="hero-meta-row">
-            <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-            <div class="hero-meta-pill"><b>Portfolio Settings</b></div>
-            <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
-        </div>
-    </div>
+           </div>
+            <div class="hero-meta-row">
+                <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
+                <div class="hero-meta-pill"><b>Portfolio Settings</b></div>
+                <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
+            </div>
     """,
     unsafe_allow_html=True,
 )
