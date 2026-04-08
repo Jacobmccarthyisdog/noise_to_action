@@ -13,7 +13,7 @@ from calculations import (
     build_datasets,
     build_summary,
     summarize_benchmark,
-    build_ai_dvisor_insights,
+    build_ai_insights,
     format_summary_table,
     format_holdings_table,
 )
@@ -456,7 +456,7 @@ benchmark_summary_initial = summarize_benchmark(
     end_date=initial_end_date,
 )
 
-ai_dvisor_text = build_ai_dvisor_insights(
+ai_dvisor_text = build_ai_insights(
     summary_df=summary_initial,
     holdings_df=holdings_snapshot_initial,
     benchmark_summary=benchmark_summary_initial,
