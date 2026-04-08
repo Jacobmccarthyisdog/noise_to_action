@@ -142,41 +142,55 @@ def normalize_for_heatmap(series, invert=False):
     return scaled.fillna(0.5).clip(0, 1)
 
 
-def normalize_signed_for_heatmap(series, positive_floor=0.62, negative_ceiling=0.38):
+def normalize_signed_for_heatmap(
+    series,
+    positive_floor=0.56,
+    negative_ceiling=0.44,
+    neutral_score=0.50,
+    rank_weight=0.70,
+):
     """
-    Force signed values onto the correct side of the heatmap:
-    positive -> green side
-    negative -> red side
-    zero -> neutral
+    Sign-aware normalization for heatmap rows.
+
+    Goals:
+    - positive values always land on the green side
+    - negative values always land on the red side
+    - values with the same sign get more visible color separation
+
+    A blended rank + magnitude score creates a smoother visual progression
+    than raw min-max scaling when many values are clustered together.
     """
     series = pd.to_numeric(series, errors="coerce").astype(float)
-    valid = series.dropna()
+    scaled = pd.Series(neutral_score, index=series.index, dtype=float)
 
-    if valid.empty:
-        return pd.Series([0.5] * len(series), index=series.index)
-
-    scaled = pd.Series(0.5, index=series.index, dtype=float)
-
-    pos_mask = series > 0
-    if pos_mask.any():
-        pos_max = series.loc[pos_mask].max()
-        if np.isclose(pos_max, 0):
-            scaled.loc[pos_mask] = positive_floor
+    pos = series[series > 0]
+    if not pos.empty:
+        if len(pos) == 1:
+            scaled.loc[pos.index] = 1.0
+        elif np.isclose(pos.min(), pos.max()):
+            scaled.loc[pos.index] = (positive_floor + 1.0) / 2.0
         else:
-            scaled.loc[pos_mask] = positive_floor + (
-                (series.loc[pos_mask] / pos_max) * (1 - positive_floor)
-            )
+            pos_rank = pos.rank(method="dense", ascending=True)
+            pos_rank_scaled = (pos_rank - 1) / (pos_rank.max() - 1)
+            pos_mag_scaled = (pos - pos.min()) / (pos.max() - pos.min())
+            pos_strength = (rank_weight * pos_rank_scaled) + ((1 - rank_weight) * pos_mag_scaled)
+            scaled.loc[pos.index] = positive_floor + pos_strength * (1 - positive_floor)
 
-    neg_mask = series < 0
-    if neg_mask.any():
-        neg_min = series.loc[neg_mask].min()
-        if np.isclose(neg_min, 0):
-            scaled.loc[neg_mask] = negative_ceiling
+    neg = series[series < 0]
+    if not neg.empty:
+        neg_abs = neg.abs()
+        if len(neg) == 1:
+            scaled.loc[neg.index] = 0.0
+        elif np.isclose(neg_abs.min(), neg_abs.max()):
+            scaled.loc[neg.index] = negative_ceiling / 2.0
         else:
-            relative_strength = (series.loc[neg_mask] / neg_min).clip(0, 1)
-            scaled.loc[neg_mask] = negative_ceiling * (1 - relative_strength)
+            neg_rank = neg_abs.rank(method="dense", ascending=True)
+            neg_rank_scaled = (neg_rank - 1) / (neg_rank.max() - 1)
+            neg_mag_scaled = (neg_abs - neg_abs.min()) / (neg_abs.max() - neg_abs.min())
+            neg_strength = (rank_weight * neg_rank_scaled) + ((1 - rank_weight) * neg_mag_scaled)
+            scaled.loc[neg.index] = negative_ceiling * (1 - neg_strength)
 
-    return scaled.fillna(0.5).clip(0, 1)
+    return scaled.fillna(neutral_score).clip(0, 1)
 
 
 def chart_layout(fig, height=420, yaxis_title="", xaxis_title=""):
@@ -349,11 +363,11 @@ def build_portfolio_heatmap(summary_df, money_fn, pct_fn):
             ygap=8,
             colorscale=[
                 [0.00, "#2b0a0a"],
-                [0.24, "#5b1520"],
-                [0.49, "#8b2a3a"],
+                [0.16, "#5b1520"],
+                [0.32, "#8b2a3a"],
                 [0.50, "#1a2333"],
-                [0.51, "#12484a"],
-                [0.76, "#1c7f72"],
+                [0.62, "#12484a"],
+                [0.80, "#1c7f72"],
                 [1.00, "#36cfa2"],
             ],
             colorbar=dict(
