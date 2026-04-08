@@ -30,7 +30,7 @@ from charts import (
 st.set_page_config(
     page_title="Portfolio Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapesed",
 )
 
 st.markdown(APP_CSS, unsafe_allow_html=True)
