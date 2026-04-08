@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 
 from config import GOOGLE_BLUES, OPENAI_ORANGES
 
+
 def is_google_portfolio(name):
     return "GOOGLE" in str(name).strip().upper()
 
@@ -141,6 +142,43 @@ def normalize_for_heatmap(series, invert=False):
     return scaled.fillna(0.5).clip(0, 1)
 
 
+def normalize_signed_for_heatmap(series, positive_floor=0.62, negative_ceiling=0.38):
+    """
+    Force signed values onto the correct side of the heatmap:
+    positive -> green side
+    negative -> red side
+    zero -> neutral
+    """
+    series = pd.to_numeric(series, errors="coerce").astype(float)
+    valid = series.dropna()
+
+    if valid.empty:
+        return pd.Series([0.5] * len(series), index=series.index)
+
+    scaled = pd.Series(0.5, index=series.index, dtype=float)
+
+    pos_mask = series > 0
+    if pos_mask.any():
+        pos_max = series.loc[pos_mask].max()
+        if np.isclose(pos_max, 0):
+            scaled.loc[pos_mask] = positive_floor
+        else:
+            scaled.loc[pos_mask] = positive_floor + (
+                (series.loc[pos_mask] / pos_max) * (1 - positive_floor)
+            )
+
+    neg_mask = series < 0
+    if neg_mask.any():
+        neg_min = series.loc[neg_mask].min()
+        if np.isclose(neg_min, 0):
+            scaled.loc[neg_mask] = negative_ceiling
+        else:
+            relative_strength = (series.loc[neg_mask] / neg_min).clip(0, 1)
+            scaled.loc[neg_mask] = negative_ceiling * (1 - relative_strength)
+
+    return scaled.fillna(0.5).clip(0, 1)
+
+
 def chart_layout(fig, height=420, yaxis_title="", xaxis_title=""):
     fig.update_layout(
         template="plotly_dark",
@@ -259,14 +297,15 @@ def build_portfolio_heatmap(summary_df, money_fn, pct_fn):
 
     heat_df = summary_df.sort_values("Return", ascending=False).copy()
     metrics = [
-        {"col": "Volatility", "label": "Volatility", "invert": True, "fmt": pct_fn},
-        {"col": "Dollar Change", "label": "$ Return", "invert": False, "fmt": money_fn},
-        {"col": "Return", "label": "% Return", "invert": False, "fmt": pct_fn},
+        {"col": "Volatility", "label": "Volatility", "fmt": pct_fn},
+        {"col": "Dollar Change", "label": "$ Return", "fmt": money_fn},
+        {"col": "Return", "label": "% Return", "fmt": pct_fn},
     ]
 
     scores = {
-        item["col"]: normalize_for_heatmap(heat_df[item["col"]], invert=item["invert"])
-        for item in metrics
+        "Volatility": normalize_for_heatmap(heat_df["Volatility"], invert=True),
+        "Dollar Change": normalize_signed_for_heatmap(heat_df["Dollar Change"]),
+        "Return": normalize_signed_for_heatmap(heat_df["Return"]),
     }
 
     z_matrix = []
@@ -287,7 +326,7 @@ def build_portfolio_heatmap(summary_df, money_fn, pct_fn):
             hover_row.append(
                 f"<b>{row['Portfolio']}</b><br>"
                 f"{item['label']}: {item['fmt'](raw)}<br>"
-                f"Relative Score: {score:.0%}"
+                f"Heatmap Score: {score:.0%}"
             )
 
         z_matrix.append(z_row)
@@ -310,11 +349,11 @@ def build_portfolio_heatmap(summary_df, money_fn, pct_fn):
             ygap=8,
             colorscale=[
                 [0.00, "#2b0a0a"],
-                [0.18, "#5b1520"],
-                [0.40, "#8b2a3a"],
-                [0.55, "#1a2333"],
-                [0.72, "#12484a"],
-                [0.88, "#1c7f72"],
+                [0.24, "#5b1520"],
+                [0.49, "#8b2a3a"],
+                [0.50, "#1a2333"],
+                [0.51, "#12484a"],
+                [0.76, "#1c7f72"],
                 [1.00, "#36cfa2"],
             ],
             colorbar=dict(
