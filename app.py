@@ -27,43 +27,37 @@ from charts import (
     metric_card,
 )
 
+if "sidebar_state" not in st.session_state:
+    st.session_state.sidebar_state = "collapsed"
+
 st.set_page_config(
     page_title="Portfolio Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state=st.session_state.sidebar_state,
 )
 
 st.markdown(APP_CSS, unsafe_allow_html=True)
 st.markdown(
     """
     <style>
-        .hero-banner {
-    position: relative;
-    overflow: hidden;
-    padding: 28px 30px 24px 30px;
-    border-radius: 22px;
-    background:
-        radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
-        radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
-        linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 18px 50px rgba(0,0,0,0.28);
-    margin-top: 1.2rem;
-    margin-bottom: 0.9rem;
-}
+        /* Hide Streamlit's default top-left collapsed sidebar toggle */
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
 
-        .hero-kicker {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 212, 170, 0.10);
-            border: 1px solid rgba(0, 212, 170, 0.28);
-            color: #9BE7D8;
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 12px;
+        .hero-banner {
+            position: relative;
+            overflow: hidden;
+            padding: 28px 30px 24px 30px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+            margin-top: 1.2rem;
+            margin-bottom: 0.55rem;
         }
 
         .hero-title {
@@ -93,9 +87,27 @@ st.markdown(
             padding: 8px 12px;
             border-radius: 999px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);st
+            border: 1px solid rgba(255,255,255,0.08);
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
+        }
+
+        .seam-toggle-spacer {
+            margin-top: -0.15rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .seam-caption {
+            text-align: center;
+            font-size: 0.72rem;
+            color: rgba(196, 210, 224, 0.55);
+            margin-top: -0.15rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Make the seam button compact */
+        div.stButton > button[kind="secondary"] {
+            border-radius: 999px;
         }
     </style>
     """,
@@ -168,25 +180,38 @@ def render_hero_banner(
     latest_date,
     benchmark_choice: str,
 ):
-   
-
     st.markdown(
-    f"""
-    <div class="hero-banner">
-        <h1 class="hero-title">From Noise to Action</h1>
-        <div class="hero-subtitle">
-            Measure the AI portfolios against key stock market benchmarks.<br>
-            Disclaimer; This is personal exploration, NOT financial advice.
+        f"""
+        <div class="hero-banner">
+            <h1 class="hero-title">From Noise to Action</h1>
+            <div class="hero-subtitle">
+                Measure the AI portfolios against key stock market benchmarks.<br>
+                Disclaimer; This is personal exploration, NOT financial advice.
+            </div>
+            <div class="hero-meta-row">
+                <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
+                <div class="hero-meta-pill"><b>Portfolio Settings</b></div>
+                <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
+            </div>
         </div>
-        <div class="hero-meta-row">
-            <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-            <div class="hero-meta-pill"><b>Portfolio Settings</b></div>
-            <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_sidebar_seam_toggle():
+    st.markdown('<div class="seam-toggle-spacer"></div>', unsafe_allow_html=True)
+
+    left, center, right = st.columns([8, 1.2, 8])
+    with center:
+        label = "Open" if st.session_state.sidebar_state == "collapsed" else "Close"
+        if st.button(label, key="seam_sidebar_toggle", use_container_width=True):
+            st.session_state.sidebar_state = (
+                "expanded"
+                if st.session_state.sidebar_state == "collapsed"
+                else "collapsed"
+            )
+            st.rerun()
 
 
 def render_portfolio_ticker(banner_df: pd.DataFrame):
@@ -474,12 +499,15 @@ render_hero_banner(
     benchmark_choice=initial_benchmark,
 )
 
+render_sidebar_seam_toggle()
 render_portfolio_ticker(banner_df)
 
 with st.expander("AI Insights", expanded=False):
     st.write(ai_dvisor_text)
 
-selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
+selected_portfolios = [
+    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
+]
 benchmark_choice = st.session_state.benchmark_choice
 date_range = st.session_state.date_range
 
