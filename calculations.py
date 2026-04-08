@@ -454,12 +454,12 @@ def render_ai_insight_text(facts):
 
     if facts.get("repeated_leaders"):
         parts.append(
-            f"{join_names(facts['repeated_leaders'])} are experiencing consistant above average perfromance."
+            f"{join_names(facts['repeated_leaders'])} are experiencing consistant above average perfromance, while"
         )
 
     if facts.get("repeated_laggards"):
         parts.append(
-            f"Repeated weakness is showing up in {join_names(facts['repeated_laggards'])}."
+            f"repeated weakness is showing up in {join_names(facts['repeated_laggards'])}."
         )
 
     best_theme = facts.get("best_theme")
