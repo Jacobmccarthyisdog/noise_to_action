@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -38,19 +39,19 @@ st.markdown(
     """
     <style>
         .hero-banner {
-    position: relative;
-    overflow: hidden;
-    padding: 28px 30px 24px 30px;
-    border-radius: 22px;
-    background:
-        radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
-        radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
-        linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 18px 50px rgba(0,0,0,0.28);
-    margin-top: 1.2rem;
-    margin-bottom: 0.9rem;
-}
+            position: relative;
+            overflow: hidden;
+            padding: 28px 30px 24px 30px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+            margin-top: 1.2rem;
+            margin-bottom: 0.9rem;
+        }
 
         .hero-kicker {
             display: inline-block;
@@ -93,9 +94,24 @@ st.markdown(
             padding: 8px 12px;
             border-radius: 999px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);st
+            border: 1px solid rgba(255,255,255,0.08);
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
+        }
+
+        div[data-testid="stButton"] > button[kind="secondary"],
+        div[data-testid="stButton"] > button[kind="primary"] {
+            border-radius: 999px;
+        }
+
+        div[data-testid="stButton"] > button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(240, 247, 255, 0.90);
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.2rem 0.8rem;
+            box-shadow: none;
         }
     </style>
     """,
@@ -168,25 +184,70 @@ def render_hero_banner(
     latest_date,
     benchmark_choice: str,
 ):
-   
-
     st.markdown(
-    f"""
-    <div class="hero-banner">
-        <h1 class="hero-title">From Noise to Action</h1>
-        <div class="hero-subtitle">
-            Measure the AI portfolios against key stock market benchmarks.<br>
-            Disclaimer; This is personal exploration, NOT financial advice.
+        """
+        <div class="hero-banner">
+            <h1 class="hero-title">From Noise to Action</h1>
+            <div class="hero-subtitle">
+                Measure the AI portfolios against key stock market benchmarks.<br>
+                Disclaimer; This is personal exploration, NOT financial advice.
+            </div>
         </div>
-        <div class="hero-meta-row">
-            <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-            <div class="hero-meta-pill"><b>Portfolio Settings</b></div>
-            <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+        """,
+        unsafe_allow_html=True,
+    )
+
+    meta_col_1, meta_col_2, meta_col_3 = st.columns([1.35, 1.0, 1.0])
+
+    with meta_col_1:
+        st.markdown(
+            f'<div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>',
+            unsafe_allow_html=True,
+        )
+
+    with meta_col_2:
+        if st.button("Portfolio Settings", key="open_portfolio_settings", use_container_width=True):
+            components.html(
+                """
+                <script>
+                (function () {
+                    const doc = window.parent.document;
+
+                    const tryClick = () => {
+                        const selectors = [
+                            '[data-testid="collapsedControl"]',
+                            'button[kind="header"][aria-label*="sidebar" i]',
+                            'button[aria-label*="sidebar" i]',
+                            '[data-testid="stSidebarCollapsedControl"]'
+                        ];
+
+                        for (const selector of selectors) {
+                            const el = doc.querySelector(selector);
+                            if (el) {
+                                el.click();
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+
+                    if (!tryClick()) {
+                        setTimeout(tryClick, 150);
+                        setTimeout(tryClick, 400);
+                        setTimeout(tryClick, 800);
+                    }
+                })();
+                </script>
+                """,
+                height=0,
+                width=0,
+            )
+
+    with meta_col_3:
+        st.markdown(
+            f'<div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>',
+            unsafe_allow_html=True,
+        )
 
 
 def render_portfolio_ticker(banner_df: pd.DataFrame):
