@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -94,32 +93,10 @@ st.markdown(
             padding: 8px 12px;
             border-radius: 999px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);st
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
         }
-
-        div[data-testid="stButton"] > button[kind="secondary"],
-        div[data-testid="stButton"] > button[kind="primary"] {
-            border-radius: 999px;
-        }
-
-        div[data-testid="stButton"] > button#open_portfolio_settings,
-        div[data-testid="stButton"] > button[kind="secondary"][data-testid="baseButton-secondary"] {
-            min-height: 42px;
-        }
-
-        div[data-testid="stButton"]:has(button[key="open_portfolio_settings"]) button,
-        div[data-testid="stButton"] > button {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: rgba(240, 247, 255, 0.90);
-            font-size: 0.85rem;
-            font-weight: 700;
-            padding: 0.2rem 0.8rem;
-            box-shadow: none;
-        }
-
     </style>
     """,
     unsafe_allow_html=True,
@@ -191,51 +168,25 @@ def render_hero_banner(
     latest_date,
     benchmark_choice: str,
 ):
+   
+
     st.markdown(
-        f"""
-        <div class="hero-banner">
-            <h1 class="hero-title">From Noise to Action</h1>
-            <div class="hero-subtitle">
-                Measure the AI portfolios against key stock market benchmarks.<br>
-                Disclaimer; This is personal exploration, NOT financial advice.
-            </div>
+    f"""
+    <div class="hero-banner">
+        <h1 class="hero-title">From Noise to Action</h1>
+        <div class="hero-subtitle">
+            Measure the AI portfolios against key stock market benchmarks.<br>
+            Disclaimer; This is personal exploration, NOT financial advice.
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    meta_col_1, meta_col_2, meta_col_3 = st.columns([1.35, 1.0, 1.0])
-
-    with meta_col_1:
-        st.markdown(
-            f'<div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>',
-            unsafe_allow_html=True,
-        )
-
-    with meta_col_2:
-        if st.button("Portfolio Settings", key="open_portfolio_settings", use_container_width=True):
-            components.html(
-                """
-                <script>
-                const doc = window.parent.document;
-                const collapsedControl = doc.querySelector('[data-testid="collapsedControl"]');
-                if (collapsedControl) {
-                    collapsedControl.click();
-                }
-                const sidebar = doc.querySelector('[data-testid="stSidebar"]');
-                if (sidebar) {
-                    sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-                </script>
-                """,
-                height=0,
-            )
-
-    with meta_col_3:
-        st.markdown(
-            f'<div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>',
-            unsafe_allow_html=True,
-        )
+        <div class="hero-meta-row">
+            <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
+            <div class="hero-meta-pill"><b>Portfolio Settings</b></div>
+            <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 def render_portfolio_ticker(banner_df: pd.DataFrame):
