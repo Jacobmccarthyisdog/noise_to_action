@@ -462,27 +462,7 @@ def render_ai_insight_text(facts):
             f"repeated weakness is showing up in {join_names(facts['repeated_laggards'])}."
         )
 
-    best_theme = facts.get("best_theme")
-    worst_theme = facts.get("worst_theme")
-    theme_comment = facts.get("theme_comment")
-    if best_theme and worst_theme and best_theme != worst_theme:
-        parts.append(
-            f"By theme, the strongest area is {best_theme}, while the weakest area is {worst_theme}. {theme_comment}"
-        )
-    elif best_theme:
-        parts.append(
-            f"By theme, leadership is centered around {best_theme}. {theme_comment}"
-        )
-
-    if facts.get("winner_top_holdings"):
-        parts.append(
-            f"Top holdings in the leading portfolio: {join_names(facts['winner_top_holdings'])}."
-        )
-
-    if facts.get("concentration_note"):
-        parts.append(facts["concentration_note"])
-
-    return " ".join(parts)
+    
 
 
 def build_ai_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
