@@ -240,19 +240,39 @@ def join_names(names):
 
 def get_theme_regime_comment(theme):
     if theme in {"AI / Semis", "Mega-cap Growth", "High-beta Growth", "Software"}:
-        return "That points to a more risk-on tape where growth, innovation, and narrative-heavy leaders are doing more of the work."
+        return "Leadership is tilted toward growth-oriented and narrative-heavy exposures."
     if theme in {"Energy", "Financials", "Industrials"}:
-        return "That points to a more cyclical backdrop, where macro sensitivity, rate expectations, or commodity linkage may be playing a bigger role."
+        return "Leadership is tilted toward more cyclical exposures."
     if theme in {"Healthcare", "Defensive / Quality"}:
-        return "That points to a steadier, more defensive market tone where resilience and earnings durability are being rewarded."
+        return "Leadership is tilted toward steadier, more defensive exposures."
     if theme in {"Rate-sensitive", "Consumer / Housing"}:
-        return "That suggests moves in rates and consumer demand may be having an outsized influence on returns."
-    return "That suggests leadership is coming from a narrower pocket of the market rather than broad beta alone."
+        return "Rates and consumer sensitivity may be playing a larger role in relative performance."
+    return "Leadership appears to be coming from a narrower part of the market."
 
 
-def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
-    if summary_df.empty:
-        return "There is not enough filtered portfolio history to generate AI-dvisor insights yet."
+def compute_ai_insight_facts(summary_df, holdings_df, benchmark_summary, benchmark_choice):
+    facts = {
+        "benchmark_choice": benchmark_choice,
+        "benchmark_return": None,
+        "avg_return": None,
+        "avg_alpha": None,
+        "winner": None,
+        "loser": None,
+        "most_volatile": None,
+        "return_spread": None,
+        "strongest_ticker": None,
+        "weakest_ticker": None,
+        "repeated_leaders": [],
+        "repeated_laggards": [],
+        "best_theme": None,
+        "worst_theme": None,
+        "theme_comment": None,
+        "concentration_note": None,
+        "winner_top_holdings": [],
+    }
+
+    if summary_df is None or summary_df.empty:
+        return facts
 
     alpha_summary = exclude_benchmark_portfolios(summary_df, portfolio_col="Portfolio").copy()
     alpha_holdings = exclude_benchmark_portfolios(holdings_df, portfolio_col="Portfolio").copy()
@@ -261,61 +281,38 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
     insight_holdings = alpha_holdings if not alpha_holdings.empty else holdings_df.copy()
 
     ranked = insight_summary.sort_values("Return", ascending=False).reset_index(drop=True)
-    best = ranked.iloc[0]
-    worst = ranked.iloc[-1]
+    facts["winner"] = ranked.iloc[0].to_dict()
+    facts["loser"] = ranked.iloc[-1].to_dict()
+    facts["avg_return"] = ranked["Return"].mean()
 
-    avg_return = ranked["Return"].mean()
-    avg_vol = ranked["Volatility"].mean()
-    return_spread = best["Return"] - worst["Return"]
+    vol_sorted = insight_summary.sort_values("Volatility", ascending=False).reset_index(drop=True)
+    facts["most_volatile"] = vol_sorted.iloc[0].to_dict()
 
-    # -----------------------------
-    # Market tone / benchmark framing
-    # -----------------------------
-    if benchmark_summary is not None and pd.notna(benchmark_summary["Return"]) and pd.notna(avg_return):
-        spread = avg_return - benchmark_summary["Return"]
+    winner_return = facts["winner"].get("Return")
+    loser_return = facts["loser"].get("Return")
+    if pd.notna(winner_return) and pd.notna(loser_return):
+        facts["return_spread"] = winner_return - loser_return
 
-        if spread >= 0.03:
-            benchmark_sentence = (
-                f"Across the selected window, the portfolio group is clearly outperforming {benchmark_choice}, "
-                f"which points to stock selection and portfolio construction adding real value in this stretch."
-            )
-        elif spread >= 0:
-            benchmark_sentence = (
-                f"Across the selected window, the portfolio group is modestly ahead of {benchmark_choice}, "
-                f"suggesting a slight edge versus simply owning the benchmark."
-            )
-        elif spread > -0.03:
-            benchmark_sentence = (
-                f"Across the selected window, the portfolio group is slightly trailing {benchmark_choice}, "
-                f"so results have been competitive but not strong enough yet to decisively beat the market."
-            )
-        else:
-            benchmark_sentence = (
-                f"Across the selected window, the portfolio group is lagging {benchmark_choice} by a noticeable margin, "
-                f"which suggests the current market environment is rewarding exposures outside the core portfolio mix."
-            )
-    else:
-        benchmark_sentence = (
-            f"Across the selected window, the portfolio group is posting mixed results, "
-            f"with average daily volatility around {pct(avg_vol)}."
-        )
+    if (
+        benchmark_summary is not None
+        and benchmark_summary.get("Return") is not None
+        and pd.notna(benchmark_summary.get("Return"))
+        and pd.notna(facts["avg_return"])
+    ):
+        facts["benchmark_return"] = benchmark_summary["Return"]
+        facts["avg_alpha"] = facts["avg_return"] - benchmark_summary["Return"]
 
-    # -----------------------------
-    # Fallback if no holdings
-    # -----------------------------
-    if insight_holdings.empty:
-        return " ".join(
-            [
-                benchmark_sentence,
-                f"At the portfolio level, {best['Portfolio']} is the strongest performer at {pct(best['Return'])}, while {worst['Portfolio']} is the weakest at {pct(worst['Return'])}.",
-                f"The spread between the top and bottom portfolios is {pct(return_spread)}, which suggests positioning is mattering meaningfully right now.",
-                "Without holding-level detail, the clearest takeaway is to lean toward the portfolios already showing stronger momentum and be more cautious with the laggards until leadership improves.",
-            ]
-        )
+    if insight_holdings is None or insight_holdings.empty:
+        return facts
 
-    # -----------------------------
-    # Stock-level analysis
-    # -----------------------------
+    winner_name = facts["winner"]["Portfolio"]
+    winner_holdings = insight_holdings[insight_holdings["Portfolio"] == winner_name].copy()
+    if not winner_holdings.empty:
+        sort_col = "Current Value" if "Current Value" in winner_holdings.columns else "Initial Investment"
+        if sort_col in winner_holdings.columns:
+            winner_holdings = winner_holdings.sort_values(sort_col, ascending=False)
+            facts["winner_top_holdings"] = winner_holdings["Ticker"].head(3).astype(str).tolist()
+
     ticker_stats = (
         insight_holdings.groupby("Ticker", as_index=False)
         .agg(
@@ -324,35 +321,50 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
             Portfolio_Count=("Portfolio", "nunique"),
             Total_Current_Value=("Current Value", "sum"),
         )
-        .sort_values(
-            ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-            ascending=[False, False, False],
-        )
         .reset_index(drop=True)
     )
 
-    strongest = ticker_stats.iloc[0]
-    weakest = ticker_stats.sort_values(
-        ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-        ascending=[True, False, False],
-    ).iloc[0]
+    if not ticker_stats.empty:
+        strongest = ticker_stats.sort_values(
+            ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
+            ascending=[False, False, False],
+        ).iloc[0]
+        weakest = ticker_stats.sort_values(
+            ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
+            ascending=[True, False, False],
+        ).iloc[0]
 
-    repeated = ticker_stats[ticker_stats["Portfolio_Count"] >= 2].copy()
-    repeated_leaders = repeated.sort_values(
-        ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-        ascending=[False, False, False],
-    )
-    repeated_laggards = repeated.sort_values(
-        ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-        ascending=[True, False, False],
-    )
+        facts["strongest_ticker"] = strongest.to_dict()
+        facts["weakest_ticker"] = weakest.to_dict()
 
-    top_names = repeated_leaders["Ticker"].head(3).tolist()
-    weak_names = repeated_laggards["Ticker"].head(2).tolist()
+        repeated = ticker_stats[ticker_stats["Portfolio_Count"] >= 2].copy()
+        if not repeated.empty:
+            repeated_leaders = repeated.sort_values(
+                ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
+                ascending=[False, False, False],
+            )
+            repeated_laggards = repeated.sort_values(
+                ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
+                ascending=[True, False, False],
+            )
 
-    # -----------------------------
-    # Theme / sector analysis
-    # -----------------------------
+            facts["repeated_leaders"] = repeated_leaders["Ticker"].head(3).astype(str).tolist()
+            facts["repeated_laggards"] = repeated_laggards["Ticker"].head(2).astype(str).tolist()
+
+            max_repeat_count = repeated["Portfolio_Count"].max()
+            if max_repeat_count >= 3:
+                facts["concentration_note"] = (
+                    "Performance appears somewhat concentrated in a relatively small group of names."
+                )
+            else:
+                facts["concentration_note"] = (
+                    "Performance appears relatively balanced across holdings."
+                )
+        else:
+            facts["concentration_note"] = (
+                "Leadership looks narrower, with fewer repeat winners across portfolios."
+            )
+
     holdings_with_theme = insight_holdings.copy()
     holdings_with_theme["Theme"] = holdings_with_theme["Ticker"].map(TICKER_THEME_MAP).fillna("Other")
 
@@ -364,87 +376,131 @@ def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchma
             Name_Count=("Ticker", "nunique"),
             Total_Current_Value=("Current Value", "sum"),
         )
-        .sort_values(
-            ["Avg_Return", "Portfolio_Count", "Name_Count", "Total_Current_Value"],
-            ascending=[False, False, False, False],
-        )
         .reset_index(drop=True)
     )
 
-    best_theme = theme_stats.iloc[0]["Theme"] if not theme_stats.empty else None
-    worst_theme = theme_stats.iloc[-1]["Theme"] if not theme_stats.empty else None
+    if not theme_stats.empty:
+        best_theme_row = theme_stats.sort_values(
+            ["Avg_Return", "Portfolio_Count", "Name_Count", "Total_Current_Value"],
+            ascending=[False, False, False, False],
+        ).iloc[0]
+        worst_theme_row = theme_stats.sort_values(
+            ["Avg_Return", "Portfolio_Count", "Name_Count", "Total_Current_Value"],
+            ascending=[True, False, False, False],
+        ).iloc[0]
 
-    # -----------------------------
-    # Narrative sections
-    # -----------------------------
-    leadership_sentence = (
-        f"{best['Portfolio']} is setting the pace at {pct(best['Return'])}, while {worst['Portfolio']} is trailing at {pct(worst['Return'])}. "
-        f"That gap of {pct(return_spread)} between first and last place tells us this has not been a flat market where everything is moving together."
+        facts["best_theme"] = best_theme_row["Theme"]
+        facts["worst_theme"] = worst_theme_row["Theme"]
+        facts["theme_comment"] = get_theme_regime_comment(facts["best_theme"])
+
+    return facts
+
+
+def render_ai_insight_text(facts):
+    if not facts or facts["winner"] is None:
+        return "There is not enough filtered portfolio history to generate insights yet."
+
+    parts = []
+
+    winner_name = facts["winner"]["Portfolio"]
+    winner_return = facts["winner"].get("Return")
+    loser_name = facts["loser"]["Portfolio"]
+    loser_return = facts["loser"].get("Return")
+    spread = facts.get("return_spread")
+
+    parts.append(
+        f"Winner: {winner_name} at {pct(winner_return)} total return. "
+        f"Laggard: {loser_name} at {pct(loser_return)}."
     )
 
-    winners_losers_sentence = (
-        f"At the holding level, {strongest['Ticker']} has been one of the biggest tailwinds across the portfolios, "
-        f"while {weakest['Ticker']} has been the clearest drag."
-    )
-
-    repeat_sentence = ""
-    if top_names:
-        repeat_sentence = (
-            f"The strongest leadership is showing up repeatedly in {join_names(top_names)}, which suggests the winning positions are not isolated one-offs but part of a broader pattern across the portfolio set. "
-        )
-    else:
-        repeat_sentence = (
-            f"Leadership looks a bit narrower right now, with {strongest['Ticker']} standing out more than any broader cluster of repeat winners. "
+    if spread is not None and pd.notna(spread):
+        parts.append(
+            f"The spread between the top and bottom portfolios is {pct(spread)}, which shows that positioning has mattered meaningfully over this window."
         )
 
-    if weak_names:
-        repeat_sentence += f"On the weaker side, repeated pressure is coming from {join_names(weak_names)}."
+    if facts.get("avg_alpha") is not None and pd.notna(facts["avg_alpha"]):
+        alpha = facts["avg_alpha"]
+        benchmark_choice = facts["benchmark_choice"]
 
-    theme_sentence = ""
+        if alpha >= 0.03:
+            parts.append(
+                f"Against {benchmark_choice}, the average non-benchmark portfolio is ahead by {pct(alpha)}, indicating clear outperformance."
+            )
+        elif alpha >= 0:
+            parts.append(
+                f"Against {benchmark_choice}, the average non-benchmark portfolio is ahead by {pct(alpha)}, indicating modest outperformance."
+            )
+        elif alpha > -0.03:
+            parts.append(
+                f"Against {benchmark_choice}, the average non-benchmark portfolio is behind by {pct(abs(alpha))}, indicating roughly competitive but weaker performance."
+            )
+        else:
+            parts.append(
+                f"Against {benchmark_choice}, the average non-benchmark portfolio is behind by {pct(abs(alpha))}, indicating meaningful underperformance."
+            )
+
+    most_volatile = facts.get("most_volatile")
+    if most_volatile is not None:
+        parts.append(
+            f"Highest volatility: {most_volatile['Portfolio']} at {pct(most_volatile.get('Volatility'))} daily volatility."
+        )
+
+    strongest_ticker = facts.get("strongest_ticker")
+    weakest_ticker = facts.get("weakest_ticker")
+    if strongest_ticker is not None and weakest_ticker is not None:
+        parts.append(
+            f"At the holding level, {strongest_ticker['Ticker']} has been one of the strongest contributors on average, while {weakest_ticker['Ticker']} has been the weakest."
+        )
+
+    if facts.get("repeated_leaders"):
+        parts.append(
+            f"Repeated leadership is showing up in {join_names(facts['repeated_leaders'])}."
+        )
+
+    if facts.get("repeated_laggards"):
+        parts.append(
+            f"Repeated weakness is showing up in {join_names(facts['repeated_laggards'])}."
+        )
+
+    best_theme = facts.get("best_theme")
+    worst_theme = facts.get("worst_theme")
+    theme_comment = facts.get("theme_comment")
     if best_theme and worst_theme and best_theme != worst_theme:
-        theme_sentence = (
-            f"From a sector and exposure standpoint, leadership is strongest in {best_theme}, while the weakest pocket of the market appears to be {worst_theme}. "
-            f"{get_theme_regime_comment(best_theme)}"
+        parts.append(
+            f"By theme, the strongest area is {best_theme}, while the weakest area is {worst_theme}. {theme_comment}"
         )
     elif best_theme:
-        theme_sentence = (
-            f"From a sector and exposure standpoint, current leadership is centered around {best_theme}. "
-            f"{get_theme_regime_comment(best_theme)}"
+        parts.append(
+            f"By theme, leadership is centered around {best_theme}. {theme_comment}"
         )
 
-    max_repeat_count = repeated["Portfolio_Count"].max() if not repeated.empty else 1
-    if max_repeat_count >= 3:
-        concentration_sentence = (
-            "Performance also appears somewhat concentrated, meaning a fairly small group of winning names is likely doing an outsized share of the work."
-        )
-    else:
-        concentration_sentence = (
-            "Performance looks more balanced across holdings, which is usually a healthier sign that the results are coming from broader construction rather than one or two outsized winners."
+    if facts.get("winner_top_holdings"):
+        parts.append(
+            f"Top holdings in the leading portfolio: {join_names(facts['winner_top_holdings'])}."
         )
 
-    # -----------------------------
-    # Directional recommendation
-    # -----------------------------
-    if best_theme:
-        parking_sentence = (
-            f"If I were parking fresh money based on this snapshot alone, I would lean toward portfolios or sectors with exposure to {best_theme} and similar areas of leadership, "
-            f"while avoiding overexposure to the weaker pocket of the tape. The broader message here is to stay aligned with the parts of the market already attracting strength rather than forcing money into areas still trying to stabilize."
-        )
-    else:
-        parking_sentence = (
-            "If I were parking fresh money based on this snapshot alone, I would lean toward the portfolios already showing stronger relative performance and healthier breadth, while being more selective around the laggards. The broader message is to follow strength rather than trying to catch weak areas too early."
-        )
+    if facts.get("concentration_note"):
+        parts.append(facts["concentration_note"])
 
-    return " ".join(
-        [
-            benchmark_sentence,
-            leadership_sentence,
-            winners_losers_sentence,
-            repeat_sentence,
-            theme_sentence,
-            concentration_sentence,
-            parking_sentence,
-        ]
+    return " ".join(parts)
+
+
+def build_ai_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
+    facts = compute_ai_insight_facts(
+        summary_df=summary_df,
+        holdings_df=holdings_df,
+        benchmark_summary=benchmark_summary,
+        benchmark_choice=benchmark_choice,
+    )
+    return render_ai_insight_text(facts)
+
+
+def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
+    return build_ai_insights(
+        summary_df=summary_df,
+        holdings_df=holdings_df,
+        benchmark_summary=benchmark_summary,
+        benchmark_choice=benchmark_choice,
     )
 
 
