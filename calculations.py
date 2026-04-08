@@ -454,7 +454,7 @@ def render_ai_insight_text(facts):
 
     if facts.get("repeated_leaders"):
         parts.append(
-            f"Repeated leadership is showing up in {join_names(facts['repeated_leaders'])}."
+            f"{join_names(facts['repeated_leaders'])} are experiencing consistant above average perfromance."
         )
 
     if facts.get("repeated_laggards"):
