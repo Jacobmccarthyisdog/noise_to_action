@@ -175,7 +175,7 @@ def render_hero_banner(
     <div class="hero-banner">
         <h1 class="hero-title">From Noise to Action</h1>
         <div class="hero-subtitle">
-            Live Dashboard to tracking the AI portfolios against key stock market benchmarks. <br>
+            Live Dashboard to track the AI portfolios against key stock market benchmarks. <br>
             **Acesss Portfolio Settings in the top left ">>" <br>
             **Disclaimer; This is personal exploration, NOT financial advice.
         </div>
