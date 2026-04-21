@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-from config import BENCHMARK_MAP, TICKER_THEME_MAP
+from config import BENCHMARK_MAP
 
 
 def money(x):
@@ -151,12 +151,21 @@ def build_datasets(portfolios, prices):
     benchmark_cumret = pd.DataFrame()
     if not benchmark_history.empty:
         benchmark_cumret = build_cumulative_return_series(
-            benchmark_history.rename(columns={"Benchmark Value": "Portfolio Value", "Benchmark": "Portfolio"}),
+            benchmark_history.rename(
+                columns={"Benchmark Value": "Portfolio Value", "Benchmark": "Portfolio"}
+            ),
             value_col="Portfolio Value",
             group_col="Portfolio",
         )
 
-    return portfolio_history, merged, holdings_snapshot, benchmark_history, portfolio_cumret, benchmark_cumret
+    return (
+        portfolio_history,
+        merged,
+        holdings_snapshot,
+        benchmark_history,
+        portfolio_cumret,
+        benchmark_cumret,
+    )
 
 
 def build_summary(portfolio_history):
@@ -225,263 +234,6 @@ def summarize_benchmark(benchmark_history, benchmark_label, start_date, end_date
         "End Value": end,
         "Return": safe_divide(end, start) - 1 if start != 0 else np.nan,
     }
-
-
-def join_names(names):
-    names = [str(name).strip() for name in names if pd.notna(name) and str(name).strip()]
-    if not names:
-        return ""
-    if len(names) == 1:
-        return names[0]
-    if len(names) == 2:
-        return f"{names[0]} and {names[1]}"
-    return f"{names[0]}, {names[1]}, and {names[2]}"
-
-
-def get_theme_regime_comment(theme):
-    if theme in {"AI / Semis", "Mega-cap Growth", "High-beta Growth", "Software"}:
-        return "Leadership is tilted toward growth-oriented and narrative-heavy exposures."
-    if theme in {"Energy", "Financials", "Industrials"}:
-        return "Leadership is tilted toward more cyclical exposures."
-    if theme in {"Healthcare", "Defensive / Quality"}:
-        return "Leadership is tilted toward steadier, more defensive exposures."
-    if theme in {"Rate-sensitive", "Consumer / Housing"}:
-        return "Rates and consumer sensitivity may be playing a larger role in relative performance."
-    return "Leadership appears to be coming from a narrower part of the market."
-
-
-def compute_ai_insight_facts(summary_df, holdings_df, benchmark_summary, benchmark_choice):
-    facts = {
-        "benchmark_choice": benchmark_choice,
-        "benchmark_return": None,
-        "avg_return": None,
-        "avg_alpha": None,
-        "winner": None,
-        "loser": None,
-        "most_volatile": None,
-        "return_spread": None,
-        "strongest_ticker": None,
-        "weakest_ticker": None,
-        "repeated_leaders": [],
-        "repeated_laggards": [],
-        "best_theme": None,
-        "worst_theme": None,
-        "theme_comment": None,
-        "concentration_note": None,
-        "winner_top_holdings": [],
-    }
-
-    if summary_df is None or summary_df.empty:
-        return facts
-
-    alpha_summary = exclude_benchmark_portfolios(summary_df, portfolio_col="Portfolio").copy()
-    alpha_holdings = exclude_benchmark_portfolios(holdings_df, portfolio_col="Portfolio").copy()
-
-    insight_summary = alpha_summary if not alpha_summary.empty else summary_df.copy()
-    insight_holdings = alpha_holdings if not alpha_holdings.empty else holdings_df.copy()
-
-    ranked = insight_summary.sort_values("Return", ascending=False).reset_index(drop=True)
-    facts["winner"] = ranked.iloc[0].to_dict()
-    facts["loser"] = ranked.iloc[-1].to_dict()
-    facts["avg_return"] = ranked["Return"].mean()
-
-    vol_sorted = insight_summary.sort_values("Volatility", ascending=False).reset_index(drop=True)
-    facts["most_volatile"] = vol_sorted.iloc[0].to_dict()
-
-    winner_return = facts["winner"].get("Return")
-    loser_return = facts["loser"].get("Return")
-    if pd.notna(winner_return) and pd.notna(loser_return):
-        facts["return_spread"] = winner_return - loser_return
-
-    if (
-        benchmark_summary is not None
-        and benchmark_summary.get("Return") is not None
-        and pd.notna(benchmark_summary.get("Return"))
-        and pd.notna(facts["avg_return"])
-    ):
-        facts["benchmark_return"] = benchmark_summary["Return"]
-        facts["avg_alpha"] = facts["avg_return"] - benchmark_summary["Return"]
-
-    if insight_holdings is None or insight_holdings.empty:
-        return facts
-
-    winner_name = facts["winner"]["Portfolio"]
-    winner_holdings = insight_holdings[insight_holdings["Portfolio"] == winner_name].copy()
-    if not winner_holdings.empty:
-        sort_col = "Current Value" if "Current Value" in winner_holdings.columns else "Initial Investment"
-        if sort_col in winner_holdings.columns:
-            winner_holdings = winner_holdings.sort_values(sort_col, ascending=False)
-            facts["winner_top_holdings"] = winner_holdings["Ticker"].head(3).astype(str).tolist()
-
-    ticker_stats = (
-        insight_holdings.groupby("Ticker", as_index=False)
-        .agg(
-            Avg_Return=("Return", "mean"),
-            Avg_Dollar_Change=("Dollar Change", "mean"),
-            Portfolio_Count=("Portfolio", "nunique"),
-            Total_Current_Value=("Current Value", "sum"),
-        )
-        .reset_index(drop=True)
-    )
-
-    if not ticker_stats.empty:
-        strongest = ticker_stats.sort_values(
-            ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-            ascending=[False, False, False],
-        ).iloc[0]
-        weakest = ticker_stats.sort_values(
-            ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-            ascending=[True, False, False],
-        ).iloc[0]
-
-        facts["strongest_ticker"] = strongest.to_dict()
-        facts["weakest_ticker"] = weakest.to_dict()
-
-        repeated = ticker_stats[ticker_stats["Portfolio_Count"] >= 2].copy()
-        if not repeated.empty:
-            repeated_leaders = repeated.sort_values(
-                ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-                ascending=[False, False, False],
-            )
-            repeated_laggards = repeated.sort_values(
-                ["Avg_Return", "Portfolio_Count", "Total_Current_Value"],
-                ascending=[True, False, False],
-            )
-
-            facts["repeated_leaders"] = repeated_leaders["Ticker"].head(3).astype(str).tolist()
-            facts["repeated_laggards"] = repeated_laggards["Ticker"].head(2).astype(str).tolist()
-
-            max_repeat_count = repeated["Portfolio_Count"].max()
-            if max_repeat_count >= 3:
-                facts["concentration_note"] = (
-                    "Performance appears somewhat concentrated in a relatively small group of names."
-                )
-            else:
-                facts["concentration_note"] = (
-                    "Performance appears relatively balanced across holdings."
-                )
-        else:
-            facts["concentration_note"] = (
-                "Leadership looks narrower, with fewer repeat winners across portfolios."
-            )
-
-    holdings_with_theme = insight_holdings.copy()
-    holdings_with_theme["Theme"] = holdings_with_theme["Ticker"].map(TICKER_THEME_MAP).fillna("Other")
-
-    theme_stats = (
-        holdings_with_theme.groupby("Theme", as_index=False)
-        .agg(
-            Avg_Return=("Return", "mean"),
-            Portfolio_Count=("Portfolio", "nunique"),
-            Name_Count=("Ticker", "nunique"),
-            Total_Current_Value=("Current Value", "sum"),
-        )
-        .reset_index(drop=True)
-    )
-
-    if not theme_stats.empty:
-        best_theme_row = theme_stats.sort_values(
-            ["Avg_Return", "Portfolio_Count", "Name_Count", "Total_Current_Value"],
-            ascending=[False, False, False, False],
-        ).iloc[0]
-        worst_theme_row = theme_stats.sort_values(
-            ["Avg_Return", "Portfolio_Count", "Name_Count", "Total_Current_Value"],
-            ascending=[True, False, False, False],
-        ).iloc[0]
-
-        facts["best_theme"] = best_theme_row["Theme"]
-        facts["worst_theme"] = worst_theme_row["Theme"]
-        facts["theme_comment"] = get_theme_regime_comment(facts["best_theme"])
-
-    return facts
-
-
-def render_ai_insight_text(facts):
-    if not facts or facts["winner"] is None:
-        return "There is not enough filtered portfolio history to generate insights yet."
-
-    parts = []
-
-    winner_name = facts["winner"]["Portfolio"]
-    winner_return = facts["winner"].get("Return")
-    loser_name = facts["loser"]["Portfolio"]
-    loser_return = facts["loser"].get("Return")
-    spread = facts.get("return_spread")
-
-    parts.append(
-        f"Winner: {winner_name} at {pct(winner_return)} total return. "
-        f"Laggard: {loser_name} at {pct(loser_return)}."
-    )
-
-    if spread is not None and pd.notna(spread):
-        parts.append(
-            f"The spread between the top and bottom portfolios is {pct(spread)}, which shows that positioning has mattered meaningfully over this window."
-        )
-
-    if facts.get("avg_alpha") is not None and pd.notna(facts["avg_alpha"]):
-        alpha = facts["avg_alpha"]
-        benchmark_choice = facts["benchmark_choice"]
-
-        if alpha >= 0.03:
-            parts.append(
-                f"Against {benchmark_choice}, the average non-benchmark portfolio is ahead by {pct(alpha)}, indicating clear outperformance."
-            )
-        elif alpha >= 0:
-            parts.append(
-                f"Against {benchmark_choice}, the average non-benchmark portfolio is ahead by {pct(alpha)}, indicating modest outperformance."
-            )
-        elif alpha > -0.03:
-            parts.append(
-                f"Against {benchmark_choice}, the average non-benchmark portfolio is behind by {pct(abs(alpha))}, indicating roughly competitive but weaker performance."
-            )
-        else:
-            parts.append(
-                f"Against {benchmark_choice}, the average non-benchmark portfolio is behind by {pct(abs(alpha))}, indicating meaningful underperformance."
-            )
-
-    most_volatile = facts.get("most_volatile")
-    if most_volatile is not None:
-        parts.append(
-            f"Highest volatility: {most_volatile['Portfolio']} at {pct(most_volatile.get('Volatility'))} daily volatility."
-        )
-
-    strongest_ticker = facts.get("strongest_ticker")
-    weakest_ticker = facts.get("weakest_ticker")
-    if strongest_ticker is not None and weakest_ticker is not None:
-        parts.append(
-            f"At the holding level, {strongest_ticker['Ticker']} has been one of the strongest contributors on average, while {weakest_ticker['Ticker']} has been the weakest."
-        )
-
-    if facts.get("repeated_leaders"):
-        parts.append(
-            f"{join_names(facts['repeated_leaders'])} are experiencing consistant above average perfromance, while"
-        )
-
-    if facts.get("repeated_laggards"):
-        parts.append(
-            f"repeated weakness is showing up in {join_names(facts['repeated_laggards'])}."
-        )
-
-    
-
-
-def build_ai_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
-    facts = compute_ai_insight_facts(
-        summary_df=summary_df,
-        holdings_df=holdings_df,
-        benchmark_summary=benchmark_summary,
-        benchmark_choice=benchmark_choice,
-    )
-    return render_ai_insight_text(facts)
-
-
-def build_ai_dvisor_insights(summary_df, holdings_df, benchmark_summary, benchmark_choice):
-    return build_ai_insights(
-        summary_df=summary_df,
-        holdings_df=holdings_df,
-        benchmark_summary=benchmark_summary,
-        benchmark_choice=benchmark_choice,
-    )
 
 
 def format_summary_table(df):
