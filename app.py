@@ -60,6 +60,13 @@ st.markdown(
             letter-spacing: -0.03em;
         }
 
+        .hero-subtitle {
+            margin-top: 10px;
+            color: rgba(235, 244, 255, 0.78);
+            font-size: 1rem;
+            max-width: 920px;
+        }
+
         .hero-meta-row {
             display: flex;
             flex-wrap: wrap;
@@ -146,6 +153,9 @@ def render_hero_banner(latest_date, benchmark_choice: str):
         f"""
         <div class="hero-banner">
             <h1 class="hero-title">Portfolio Dashboard</h1>
+            <div class="hero-subtitle">
+                <b>Access portfolio settings in the top left ">>"</b>
+            </div>
             <div class="hero-meta-row">
                 <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
                 <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
