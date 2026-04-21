@@ -236,6 +236,151 @@ def summarize_benchmark(benchmark_history, benchmark_label, start_date, end_date
     }
 
 
+def _serialize_number(value):
+    if pd.isna(value):
+        return None
+    return float(value)
+
+
+def _serialize_text(value):
+    if pd.isna(value):
+        return None
+    return str(value)
+
+
+def _serialize_portfolio_row(row, include_volatility=False):
+    if row is None or len(row) == 0:
+        return None
+
+    result = {
+        "name": _serialize_text(row.get("Portfolio")),
+        "return": _serialize_number(row.get("Return")),
+        "dollar_change": _serialize_number(row.get("Dollar Change")),
+        "current_value": _serialize_number(row.get("Current Value")),
+        "max_drawdown": _serialize_number(row.get("Max Drawdown")),
+    }
+
+    if include_volatility:
+        result["volatility"] = _serialize_number(row.get("Volatility"))
+
+    return result
+
+
+def _serialize_holding_row(row):
+    if row is None or len(row) == 0:
+        return None
+
+    return {
+        "ticker": _serialize_text(row.get("Ticker")),
+        "portfolio": _serialize_text(row.get("Portfolio")),
+        "return": _serialize_number(row.get("Return")),
+        "dollar_change": _serialize_number(row.get("Dollar Change")),
+        "current_value": _serialize_number(row.get("Current Value")),
+    }
+
+
+def build_ytd_metrics_snapshot(
+    portfolio_history,
+    holdings_snapshot,
+    benchmark_history,
+    benchmark_choice="SPY",
+):
+    empty_payload = {
+        "as_of_date": None,
+        "period": "YTD",
+        "benchmark": benchmark_choice,
+        "benchmark_return": None,
+        "portfolio_count": 0,
+        "avg_portfolio_return": None,
+        "avg_alpha": None,
+        "top_portfolio": None,
+        "bottom_portfolio": None,
+        "most_volatile": None,
+        "top_holding": None,
+        "bottom_holding": None,
+        "generated_from": "build_ytd_metrics_snapshot_v1",
+    }
+
+    if portfolio_history is None or portfolio_history.empty:
+        return empty_payload
+
+    latest_date = pd.to_datetime(portfolio_history["Date"]).max()
+    if pd.isna(latest_date):
+        return empty_payload
+
+    year_start = pd.Timestamp(year=latest_date.year, month=1, day=1)
+
+    portfolio_history_ytd = portfolio_history[
+        (portfolio_history["Date"] >= year_start)
+        & (portfolio_history["Date"] <= latest_date)
+    ].copy()
+
+    if portfolio_history_ytd.empty:
+        return empty_payload
+
+    summary_ytd = build_summary(portfolio_history_ytd)
+    alpha_summary_ytd = exclude_benchmark_portfolios(summary_ytd, portfolio_col="Portfolio")
+
+    benchmark_summary_ytd = summarize_benchmark(
+        benchmark_history=benchmark_history,
+        benchmark_label=benchmark_choice,
+        start_date=year_start,
+        end_date=latest_date,
+    )
+
+    benchmark_return = None
+    if benchmark_summary_ytd is not None:
+        benchmark_return = benchmark_summary_ytd.get("Return")
+
+    avg_portfolio_return = None
+    avg_alpha = None
+    top_portfolio = None
+    bottom_portfolio = None
+    most_volatile = None
+
+    if not alpha_summary_ytd.empty:
+        avg_portfolio_return = alpha_summary_ytd["Return"].mean()
+
+        if benchmark_return is not None and pd.notna(benchmark_return):
+            avg_alpha = avg_portfolio_return - benchmark_return
+
+        ranked_return = alpha_summary_ytd.sort_values("Return", ascending=False).reset_index(drop=True)
+        ranked_vol = alpha_summary_ytd.sort_values("Volatility", ascending=False).reset_index(drop=True)
+
+        top_portfolio = _serialize_portfolio_row(ranked_return.iloc[0])
+        bottom_portfolio = _serialize_portfolio_row(ranked_return.iloc[-1])
+        most_volatile = _serialize_portfolio_row(ranked_vol.iloc[0], include_volatility=True)
+
+    holdings_ytd = exclude_benchmark_portfolios(holdings_snapshot, portfolio_col="Portfolio").copy()
+    top_holding = None
+    bottom_holding = None
+
+    if not holdings_ytd.empty:
+        holdings_ytd = holdings_ytd.dropna(subset=["Return"]).copy()
+        if not holdings_ytd.empty:
+            ranked_holdings = holdings_ytd.sort_values("Return", ascending=False).reset_index(drop=True)
+            top_holding = _serialize_holding_row(ranked_holdings.iloc[0])
+            bottom_holding = _serialize_holding_row(ranked_holdings.iloc[-1])
+
+    payload = {
+        "as_of_date": latest_date.strftime("%Y-%m-%d"),
+        "period": "YTD",
+        "benchmark": benchmark_choice,
+        "benchmark_return": _serialize_number(benchmark_return),
+        "portfolio_count": int(alpha_summary_ytd["Portfolio"].nunique()) if not alpha_summary_ytd.empty else 0,
+        "avg_portfolio_return": _serialize_number(avg_portfolio_return),
+        "avg_alpha": _serialize_number(avg_alpha),
+        "top_portfolio": top_portfolio,
+        "bottom_portfolio": bottom_portfolio,
+        "most_volatile": most_volatile,
+        "top_holding": top_holding,
+        "bottom_holding": bottom_holding,
+        "generated_from": "build_ytd_metrics_snapshot_v1",
+    }
+
+    return payload
+
+
 def format_summary_table(df):
     out = df.copy()
     out["Start Value"] = out["Start Value"].map(money)
