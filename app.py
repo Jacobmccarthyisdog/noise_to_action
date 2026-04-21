@@ -51,20 +51,6 @@ st.markdown(
             margin-bottom: 0.9rem;
         }
 
-        .hero-kicker {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 212, 170, 0.10);
-            border: 1px solid rgba(0, 212, 170, 0.28);
-            color: #9BE7D8;
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-
         .hero-title {
             font-size: 2.6rem;
             line-height: 1.05;
@@ -72,13 +58,6 @@ st.markdown(
             color: #F6FBFF;
             margin: 0;
             letter-spacing: -0.03em;
-        }
-
-        .hero-subtitle {
-            margin-top: 10px;
-            color: rgba(235, 244, 255, 0.78);
-            font-size: 1rem;
-            max-width: 920px;
         }
 
         .hero-meta-row {
@@ -162,20 +141,11 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
     return banner_df.sort_values("Overall Return", ascending=False).reset_index(drop=True)
 
 
-def render_hero_banner(
-    banner_df: pd.DataFrame,
-    latest_date,
-    benchmark_choice: str,
-):
+def render_hero_banner(latest_date, benchmark_choice: str):
     st.markdown(
         f"""
         <div class="hero-banner">
-            <h1 class="hero-title">From Noise to Action</h1>
-            <div class="hero-subtitle">
-         
-                <b>Access portfolio settings in the top left ">>"</b><br>
-           
-            </div>
+            <h1 class="hero-title">Portfolio Dashboard</h1>
             <div class="hero-meta-row">
                 <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
                 <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
@@ -449,7 +419,6 @@ banner_df = build_banner_stats(
 )
 
 render_hero_banner(
-    banner_df=banner_df,
     latest_date=latest_available_date,
     benchmark_choice=initial_benchmark,
 )
