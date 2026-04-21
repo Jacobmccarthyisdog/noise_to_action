@@ -443,18 +443,6 @@ portfolio_history_initial = portfolio_history[
     & (portfolio_history["Date"] <= initial_end_date)
 ].copy()
 
-summary_initial = build_summary(portfolio_history_initial)
-holdings_snapshot_initial = holdings_snapshot[
-    holdings_snapshot["Portfolio"].isin(initial_selected)
-].copy()
-
-benchmark_summary_initial = summarize_benchmark(
-    benchmark_history=benchmark_history,
-    benchmark_label=initial_benchmark,
-    start_date=initial_start_date,
-    end_date=initial_end_date,
-)
-
 banner_df = build_banner_stats(
     portfolio_history_df=portfolio_history_initial,
     summary_df=summary_initial,
