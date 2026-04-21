@@ -172,9 +172,9 @@ def render_hero_banner(
         <div class="hero-banner">
             <h1 class="hero-title">From Noise to Action</h1>
             <div class="hero-subtitle">
-                Live dashboard to track the AI portfolios against key stock market benchmarks.<br>
+         
                 <b>Access portfolio settings in the top left ">>"</b><br>
-                <b>Disclaimer:</b> This is personal exploration, not financial advice.
+           
             </div>
             <div class="hero-meta-row">
                 <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
