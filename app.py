@@ -13,7 +13,6 @@ from calculations import (
     build_datasets,
     build_summary,
     summarize_benchmark,
-    build_ai_insights,
     format_summary_table,
     format_holdings_table,
 )
@@ -456,13 +455,6 @@ benchmark_summary_initial = summarize_benchmark(
     end_date=initial_end_date,
 )
 
-ai_dvisor_text = build_ai_insights(
-    summary_df=summary_initial,
-    holdings_df=holdings_snapshot_initial,
-    benchmark_summary=benchmark_summary_initial,
-    benchmark_choice=initial_benchmark,
-)
-
 banner_df = build_banner_stats(
     portfolio_history_df=portfolio_history_initial,
     summary_df=summary_initial,
@@ -475,9 +467,6 @@ render_hero_banner(
 )
 
 render_portfolio_ticker(banner_df)
-
-with st.expander("AI Insights", expanded=False):
-    st.write(ai_dvisor_text)
 
 selected_portfolios = [portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios]
 benchmark_choice = st.session_state.benchmark_choice
