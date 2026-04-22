@@ -1,62 +1,62 @@
-{
-  "schema_version": 1,
-  "as_of_date": "2026-04-21",
-  "generated_at": "2026-04-21T20:15:00Z",
-  "period": "YTD",
-  "benchmark": "SPY",
-  "model": null,
-  "prompt_version": null,
-  "status": "success",
-  "payload": {
-    "as_of_date": "2026-04-21",
-    "period": "YTD",
-    "benchmark": "SPY",
-    "benchmark_return": 0.0842,
-    "portfolio_count": 6,
-    "avg_portfolio_return": 0.1031,
-    "avg_alpha": 0.0189,
-    "top_portfolio": {
-      "name": "Google 100",
-      "return": 0.1562,
-      "dollar_change": 156.2,
-      "current_value": 1156.2,
-      "max_drawdown": -0.042
-    },
-    "bottom_portfolio": {
-      "name": "Random B",
-      "return": 0.0214,
-      "dollar_change": 21.4,
-      "current_value": 1021.4,
-      "max_drawdown": -0.088
-    },
-    "most_volatile": {
-      "name": "OpenAI 50",
-      "return": 0.0911,
-      "dollar_change": 91.1,
-      "current_value": 1091.1,
-      "max_drawdown": -0.097,
-      "volatility": 0.0241
-    },
-    "top_holding": {
-      "ticker": "NVDA",
-      "portfolio": "Google 100",
-      "return": 0.241,
-      "dollar_change": 88.4,
-      "current_value": 455.7
-    },
-    "bottom_holding": {
-      "ticker": "ARKK",
-      "portfolio": "OpenAI 50",
-      "return": -0.071,
-      "dollar_change": -15.2,
-      "current_value": 198.6
-    },
-    "generated_from": "build_ytd_metrics_snapshot_v1"
-  },
-  "insight_text": "Placeholder daily insight for 2026-04-21. This artifact confirms the daily insight pipeline is working. LLM generation is not enabled yet. Benchmark context: SPY.",
-  "takeaways": [
-    "Top portfolio YTD: Google 100",
-    "Bottom portfolio YTD: Random B",
-    "Highest volatility portfolio: OpenAI 50"
-  ]
-}
+import argparse
+import sys
+from pathlib import Path
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+from data_loader import load_data
+from calculations import build_datasets, build_ytd_metrics_snapshot
+from insights import (
+    generate_llm_insight,
+    insight_exists_for_date,
+    save_daily_insight,
+)
+
+
+def main(force=False):
+    portfolios, prices = load_data()
+
+    (
+        portfolio_history,
+        _merged_positions,
+        holdings_snapshot,
+        benchmark_history,
+        _portfolio_cumret,
+        _benchmark_cumret,
+    ) = build_datasets(portfolios, prices)
+
+    metrics_payload = build_ytd_metrics_snapshot(
+        portfolio_history=portfolio_history,
+        holdings_snapshot=holdings_snapshot,
+        benchmark_history=benchmark_history,
+        benchmark_choice="SPY",
+    )
+
+    as_of_date = metrics_payload.get("as_of_date")
+    if not as_of_date:
+        raise ValueError("Could not determine as_of_date for daily insight generation.")
+
+    if not force and insight_exists_for_date(as_of_date):
+        print(f"Daily insight already exists for {as_of_date}. Skipping generation.")
+        return
+
+    record = generate_llm_insight(metrics_payload)
+    output_path = save_daily_insight(record)
+
+    print(f"Saved daily insight for {as_of_date} to {output_path}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate the daily portfolio insight artifact.")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Regenerate the insight even if one already exists for the current as_of_date.",
+    )
+    args = parser.parse_args()
+
+    main(force=args.force)
