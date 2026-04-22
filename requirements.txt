@@ -3,3 +3,5 @@ pandas
 numpy
 plotly
 yfinance
+openai
+python-dotenv
