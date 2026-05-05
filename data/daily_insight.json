@@ -1,18 +1,21 @@
 {
-  "as_of_date": "not generated yet",
-  "headline": "AI generated summary pending",
-  "summary": "The AI generated summary dropdown is wired into the dashboard correctly. The daily insight file exists, but the scheduled generation job has not written a real AI summary yet.",
-  "bullets": [
-    "The dashboard is successfully reading data/daily_insight.json.",
-    "The empty JSON file was the reason the dropdown showed an error.",
-    "Once the GitHub Action runs successfully, this placeholder should be replaced by a real generated summary."
-  ],
-  "risks": [
-    "If this file becomes blank again after the workflow runs, the issue is in jobs/generate_daily_insight.py or the GitHub Actions commit step."
-  ],
-  "actions": [
-    "Commit this valid placeholder JSON.",
-    "Run the generate_daily_insight workflow manually.",
-    "Refresh the Streamlit app and confirm the placeholder is replaced by the real AI summary."
-  ]
+    "as_of_date": "2026-05-05",
+    "generated_at": "2026-05-05T18:36:53.399220+00:00",
+    "source": "openai",
+    "model": "gpt-4o-mini",
+    "headline": "Portfolio Outperforms Benchmark YTD",
+    "summary": "As of today, the portfolio has an average return of 13.16%, significantly outperforming the SPY benchmark return of 6.90%. The top performer, OpenAI 10, has delivered a strong return of 15.69%, while the bottom performer, Random A, has returned 7.65%. Overall, the portfolio shows robust performance with a positive alpha of 6.26%.",
+    "bullets": [
+        "OpenAI 10 leads with a dollar change of $156.93 and a current value of $1,156.93.",
+        "Random A, while the lowest performer, still shows a positive return of 7.65%.",
+        "The most volatile holding, Random B, has a return of 13.35% with a volatility of 2.05%."
+    ],
+    "risks": [
+        "Random A has a max drawdown of -6.96%, indicating potential risk.",
+        "The volatility of Random B could lead to larger fluctuations in value."
+    ],
+    "actions": [
+        "Consider reviewing the performance of Random A and its holdings.",
+        "Compare the portfolio's performance against the SPY benchmark for further insights."
+    ]
 }
