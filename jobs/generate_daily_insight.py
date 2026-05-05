@@ -17,7 +17,15 @@ from insights import (
 )
 
 
-def main(force=False):
+VALID_RUN_TYPES = {"premarket", "postclose", "manual"}
+
+
+def main(force=False, run_type="manual"):
+    if run_type not in VALID_RUN_TYPES:
+        raise ValueError(
+            f"Invalid run_type '{run_type}'. Expected one of: {sorted(VALID_RUN_TYPES)}"
+        )
+
     portfolios, prices = load_data()
 
     (
@@ -40,14 +48,17 @@ def main(force=False):
     if not as_of_date:
         raise ValueError("Could not determine as_of_date for daily insight generation.")
 
-    if not force and insight_exists_for_date(as_of_date):
-        print(f"Daily insight already exists for {as_of_date}. Skipping generation.")
+    if not force and insight_exists_for_date(as_of_date, run_type=run_type):
+        print(f"Daily insight already exists for {as_of_date} ({run_type}). Skipping generation.")
         return
 
-    record = generate_llm_insight(metrics_payload)
+    record = generate_llm_insight(
+        metrics_payload=metrics_payload,
+        run_type=run_type,
+    )
     output_path = save_daily_insight(record)
 
-    print(f"Saved daily insight for {as_of_date} to {output_path}")
+    print(f"Saved {run_type} daily insight for {as_of_date} to {output_path}")
 
 
 if __name__ == "__main__":
@@ -55,8 +66,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Regenerate the insight even if one already exists for the current as_of_date.",
+        help="Regenerate the insight even if one already exists for the current as_of_date and run type.",
+    )
+    parser.add_argument(
+        "--run-type",
+        choices=sorted(VALID_RUN_TYPES),
+        default="manual",
+        help="Type of scheduled insight to generate.",
     )
     args = parser.parse_args()
 
-    main(force=args.force)
+    main(force=args.force, run_type=args.run_type)
