@@ -255,38 +255,6 @@ def as_list(value: Any) -> list[Any]:
     return [value]
 
 
-def render_unknown_insight_fields(record: dict[str, Any], known_keys: set[str]) -> None:
-    extra_items = {
-        key: value
-        for key, value in record.items()
-        if key not in known_keys and value not in (None, "", [], {})
-    }
-
-    if not extra_items:
-        return
-
-    st.markdown('<div class="ai-summary-section-title">Additional detail</div>', unsafe_allow_html=True)
-
-    for key, value in extra_items.items():
-        label = key.replace("_", " ").title()
-
-        if isinstance(value, list):
-            if not value:
-                continue
-
-            st.markdown(f"**{label}**")
-            for item in value:
-                if isinstance(item, dict):
-                    st.json(item)
-                else:
-                    st.markdown(f"- {item}")
-        elif isinstance(value, dict):
-            st.markdown(f"**{label}**")
-            st.json(value)
-        else:
-            st.markdown(f"**{label}:** {value}")
-
-
 def render_daily_ai_summary() -> None:
     payload, error_message = read_daily_insight_payload()
     record = get_latest_daily_insight(payload) if payload is not None else {}
@@ -307,6 +275,7 @@ def render_daily_ai_summary() -> None:
         record,
         [
             "summary",
+            "insight_text",
             "insight",
             "narrative",
             "text",
@@ -319,24 +288,10 @@ def render_daily_ai_summary() -> None:
     )
 
     bullets = as_list(
-        record.get("bullets")
+        record.get("takeaways")
+        or record.get("bullets")
         or record.get("key_points")
         or record.get("highlights")
-        or record.get("takeaways")
-    )
-
-    risks = as_list(
-        record.get("risks")
-        or record.get("watchouts")
-        or record.get("watch_outs")
-        or record.get("risk_factors")
-    )
-
-    actions = as_list(
-        record.get("actions")
-        or record.get("recommendations")
-        or record.get("suggested_actions")
-        or record.get("next_steps")
     )
 
     expander_label = f"AI generated summary • {as_of_date}"
@@ -365,7 +320,6 @@ def render_daily_ai_summary() -> None:
                 """,
                 unsafe_allow_html=True,
             )
-            st.json(payload)
             return
 
         st.markdown(f"### {headline}")
@@ -381,56 +335,13 @@ def render_daily_ai_summary() -> None:
             st.markdown('<div class="ai-summary-section-title">Key takeaways</div>', unsafe_allow_html=True)
             for bullet in bullets:
                 if isinstance(bullet, dict):
-                    st.json(bullet)
+                    bullet_text = " | ".join(
+                        f"{key}: {value}" for key, value in bullet.items() if value not in (None, "", [], {})
+                    )
+                    if bullet_text:
+                        st.markdown(f"- {bullet_text}")
                 else:
                     st.markdown(f"- {bullet}")
-
-        if risks:
-            st.markdown('<div class="ai-summary-section-title">Watchouts</div>', unsafe_allow_html=True)
-            for risk in risks:
-                if isinstance(risk, dict):
-                    st.json(risk)
-                else:
-                    st.markdown(f"- {risk}")
-
-        if actions:
-            st.markdown('<div class="ai-summary-section-title">Suggested actions</div>', unsafe_allow_html=True)
-            for action in actions:
-                if isinstance(action, dict):
-                    st.json(action)
-                else:
-                    st.markdown(f"- {action}")
-
-        known_keys = {
-            "date",
-            "as_of_date",
-            "generated_for",
-            "generated_at",
-            "headline",
-            "title",
-            "summary_title",
-            "summary",
-            "insight",
-            "narrative",
-            "text",
-            "analysis",
-            "ai_summary",
-            "daily_summary",
-            "portfolio_summary",
-            "bullets",
-            "key_points",
-            "highlights",
-            "takeaways",
-            "risks",
-            "watchouts",
-            "watch_outs",
-            "risk_factors",
-            "actions",
-            "recommendations",
-            "suggested_actions",
-            "next_steps",
-        }
-        render_unknown_insight_fields(record, known_keys)
 
 
 def render_hero_banner(latest_date, benchmark_choice: str):
