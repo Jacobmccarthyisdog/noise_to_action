@@ -287,6 +287,12 @@ def render_daily_ai_summary() -> None:
         "",
     )
 
+    update_note = first_present(
+        record,
+        ["update_note"],
+        "Updated 30 minutes before and after market close.",
+    )
+
     bullets = as_list(
         record.get("takeaways")
         or record.get("bullets")
@@ -325,6 +331,11 @@ def render_daily_ai_summary() -> None:
         st.markdown(f"### {headline}")
         st.markdown(
             f'<div class="ai-summary-meta">Source: <code>{DAILY_INSIGHT_PATH.as_posix()}</code></div>',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            f'<div class="ai-summary-meta">{update_note}</div>',
             unsafe_allow_html=True,
         )
 
