@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -25,6 +28,8 @@ from charts import (
     render_chart,
     metric_card,
 )
+
+DAILY_INSIGHT_PATH = Path("data/daily_insight.json")
 
 st.set_page_config(
     page_title="Portfolio Dashboard",
@@ -146,6 +151,101 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
     )
 
     return banner_df.sort_values("Overall Return", ascending=False).reset_index(drop=True)
+
+
+def load_latest_daily_insight(path: Path = DAILY_INSIGHT_PATH) -> dict | None:
+    if not path.exists():
+        return None
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+    if isinstance(payload, list):
+        if not payload:
+            return None
+
+        return sorted(
+            payload,
+            key=lambda item: str(item.get("date", item.get("as_of_date", ""))),
+            reverse=True,
+        )[0]
+
+    if isinstance(payload, dict):
+        records = payload.get("insights") or payload.get("records")
+
+        if isinstance(records, list) and records:
+            return sorted(
+                records,
+                key=lambda item: str(item.get("date", item.get("as_of_date", ""))),
+                reverse=True,
+            )[0]
+
+        return payload
+
+    return None
+
+
+def render_daily_ai_summary() -> None:
+    insight = load_latest_daily_insight()
+
+    if not insight:
+        return
+
+    as_of_date = (
+        insight.get("date")
+        or insight.get("as_of_date")
+        or insight.get("generated_for")
+        or insight.get("generated_at")
+        or "latest"
+    )
+
+    headline = (
+        insight.get("headline")
+        or insight.get("title")
+        or "AI generated portfolio summary"
+    )
+
+    summary = (
+        insight.get("summary")
+        or insight.get("insight")
+        or insight.get("narrative")
+        or insight.get("text")
+        or ""
+    )
+
+    bullets = (
+        insight.get("bullets")
+        or insight.get("key_points")
+        or insight.get("highlights")
+        or []
+    )
+
+    risks = insight.get("risks") or insight.get("watchouts") or []
+    actions = insight.get("actions") or insight.get("recommendations") or []
+
+    with st.expander(f"AI generated summary • {as_of_date}", expanded=False):
+        st.markdown(f"### {headline}")
+
+        if summary:
+            st.markdown(summary)
+
+        if bullets:
+            st.markdown("**Key takeaways**")
+            for bullet in bullets:
+                st.markdown(f"- {bullet}")
+
+        if risks:
+            st.markdown("**Watchouts**")
+            for risk in risks:
+                st.markdown(f"- {risk}")
+
+        if actions:
+            st.markdown("**Suggested actions**")
+            for action in actions:
+                st.markdown(f"- {action}")
 
 
 def render_hero_banner(latest_date, benchmark_choice: str):
@@ -432,6 +532,8 @@ render_hero_banner(
     latest_date=latest_available_date,
     benchmark_choice=initial_benchmark,
 )
+
+render_daily_ai_summary()
 
 render_portfolio_ticker(banner_df)
 
