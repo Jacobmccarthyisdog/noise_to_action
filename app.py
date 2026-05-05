@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
 import pandas as pd
@@ -87,6 +88,27 @@ st.markdown(
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
         }
+
+        .ai-summary-status {
+            color: rgba(235, 244, 255, 0.78);
+            font-size: 0.95rem;
+            line-height: 1.55;
+            margin-bottom: 0.4rem;
+        }
+
+        .ai-summary-meta {
+            color: rgba(208, 224, 240, 0.70);
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .ai-summary-section-title {
+            color: #F6FBFF;
+            font-weight: 800;
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -153,99 +175,262 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
     return banner_df.sort_values("Overall Return", ascending=False).reset_index(drop=True)
 
 
-def load_latest_daily_insight(path: Path = DAILY_INSIGHT_PATH) -> dict | None:
+def read_daily_insight_payload(path: Path = DAILY_INSIGHT_PATH) -> tuple[Any | None, str | None]:
     if not path.exists():
-        return None
+        return None, f"Could not find `{path.as_posix()}`. The daily insight job has not written the file into this app deployment yet."
 
     try:
         with path.open("r", encoding="utf-8") as file:
             payload = json.load(file)
-    except (json.JSONDecodeError, OSError):
-        return None
+    except json.JSONDecodeError as exc:
+        return None, f"`{path.as_posix()}` exists, but it is not valid JSON: {exc}"
+    except OSError as exc:
+        return None, f"`{path.as_posix()}` exists, but Streamlit could not read it: {exc}"
 
+    return payload, None
+
+
+def get_latest_daily_insight(payload: Any) -> dict[str, Any]:
     if isinstance(payload, list):
         if not payload:
-            return None
+            return {}
+
+        dict_records = [item for item in payload if isinstance(item, dict)]
+        if not dict_records:
+            return {}
 
         return sorted(
-            payload,
-            key=lambda item: str(item.get("date", item.get("as_of_date", ""))),
+            dict_records,
+            key=lambda item: str(
+                item.get("date")
+                or item.get("as_of_date")
+                or item.get("generated_for")
+                or item.get("generated_at")
+                or ""
+            ),
             reverse=True,
         )[0]
 
     if isinstance(payload, dict):
-        records = payload.get("insights") or payload.get("records")
-
-        if isinstance(records, list) and records:
-            return sorted(
-                records,
-                key=lambda item: str(item.get("date", item.get("as_of_date", ""))),
-                reverse=True,
-            )[0]
+        for collection_key in ["insights", "records", "daily_insights", "items"]:
+            records = payload.get(collection_key)
+            if isinstance(records, list) and records:
+                dict_records = [item for item in records if isinstance(item, dict)]
+                if dict_records:
+                    return sorted(
+                        dict_records,
+                        key=lambda item: str(
+                            item.get("date")
+                            or item.get("as_of_date")
+                            or item.get("generated_for")
+                            or item.get("generated_at")
+                            or ""
+                        ),
+                        reverse=True,
+                    )[0]
 
         return payload
 
-    return None
+    return {}
+
+
+def first_present(record: dict[str, Any], keys: list[str], default: str = "") -> str:
+    for key in keys:
+        value = record.get(key)
+        if value is not None and value != "":
+            return str(value)
+    return default
+
+
+def as_list(value: Any) -> list[Any]:
+    if value is None or value == "":
+        return []
+
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, tuple):
+        return list(value)
+
+    return [value]
+
+
+def render_unknown_insight_fields(record: dict[str, Any], known_keys: set[str]) -> None:
+    extra_items = {
+        key: value
+        for key, value in record.items()
+        if key not in known_keys and value not in (None, "", [], {})
+    }
+
+    if not extra_items:
+        return
+
+    st.markdown('<div class="ai-summary-section-title">Additional detail</div>', unsafe_allow_html=True)
+
+    for key, value in extra_items.items():
+        label = key.replace("_", " ").title()
+
+        if isinstance(value, list):
+            if not value:
+                continue
+
+            st.markdown(f"**{label}**")
+            for item in value:
+                if isinstance(item, dict):
+                    st.json(item)
+                else:
+                    st.markdown(f"- {item}")
+        elif isinstance(value, dict):
+            st.markdown(f"**{label}**")
+            st.json(value)
+        else:
+            st.markdown(f"**{label}:** {value}")
 
 
 def render_daily_ai_summary() -> None:
-    insight = load_latest_daily_insight()
+    payload, error_message = read_daily_insight_payload()
+    record = get_latest_daily_insight(payload) if payload is not None else {}
 
-    if not insight:
-        return
-
-    as_of_date = (
-        insight.get("date")
-        or insight.get("as_of_date")
-        or insight.get("generated_for")
-        or insight.get("generated_at")
-        or "latest"
+    as_of_date = first_present(
+        record,
+        ["date", "as_of_date", "generated_for", "generated_at"],
+        "not generated yet",
     )
 
-    headline = (
-        insight.get("headline")
-        or insight.get("title")
-        or "AI generated portfolio summary"
+    headline = first_present(
+        record,
+        ["headline", "title", "summary_title"],
+        "AI generated summary",
     )
 
-    summary = (
-        insight.get("summary")
-        or insight.get("insight")
-        or insight.get("narrative")
-        or insight.get("text")
-        or ""
+    summary = first_present(
+        record,
+        [
+            "summary",
+            "insight",
+            "narrative",
+            "text",
+            "analysis",
+            "ai_summary",
+            "daily_summary",
+            "portfolio_summary",
+        ],
+        "",
     )
 
-    bullets = (
-        insight.get("bullets")
-        or insight.get("key_points")
-        or insight.get("highlights")
-        or []
+    bullets = as_list(
+        record.get("bullets")
+        or record.get("key_points")
+        or record.get("highlights")
+        or record.get("takeaways")
     )
 
-    risks = insight.get("risks") or insight.get("watchouts") or []
-    actions = insight.get("actions") or insight.get("recommendations") or []
+    risks = as_list(
+        record.get("risks")
+        or record.get("watchouts")
+        or record.get("watch_outs")
+        or record.get("risk_factors")
+    )
 
-    with st.expander(f"AI generated summary • {as_of_date}", expanded=False):
+    actions = as_list(
+        record.get("actions")
+        or record.get("recommendations")
+        or record.get("suggested_actions")
+        or record.get("next_steps")
+    )
+
+    expander_label = f"AI generated summary • {as_of_date}"
+
+    with st.expander(expander_label, expanded=False):
+        if error_message:
+            st.warning(error_message)
+            st.markdown(
+                """
+                <div class="ai-summary-status">
+                    This dropdown is rendering correctly. The missing piece is the generated JSON artifact.
+                    Once the GitHub Action writes <code>data/daily_insight.json</code>, the summary will appear here.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            return
+
+        if not record:
+            st.warning("The daily insight file loaded, but no usable insight record was found.")
+            st.markdown(
+                """
+                <div class="ai-summary-status">
+                    This dropdown is rendering correctly, but the JSON structure does not contain a readable insight record.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.json(payload)
+            return
+
         st.markdown(f"### {headline}")
+        st.markdown(
+            f'<div class="ai-summary-meta">Source: <code>{DAILY_INSIGHT_PATH.as_posix()}</code></div>',
+            unsafe_allow_html=True,
+        )
 
         if summary:
             st.markdown(summary)
 
         if bullets:
-            st.markdown("**Key takeaways**")
+            st.markdown('<div class="ai-summary-section-title">Key takeaways</div>', unsafe_allow_html=True)
             for bullet in bullets:
-                st.markdown(f"- {bullet}")
+                if isinstance(bullet, dict):
+                    st.json(bullet)
+                else:
+                    st.markdown(f"- {bullet}")
 
         if risks:
-            st.markdown("**Watchouts**")
+            st.markdown('<div class="ai-summary-section-title">Watchouts</div>', unsafe_allow_html=True)
             for risk in risks:
-                st.markdown(f"- {risk}")
+                if isinstance(risk, dict):
+                    st.json(risk)
+                else:
+                    st.markdown(f"- {risk}")
 
         if actions:
-            st.markdown("**Suggested actions**")
+            st.markdown('<div class="ai-summary-section-title">Suggested actions</div>', unsafe_allow_html=True)
             for action in actions:
-                st.markdown(f"- {action}")
+                if isinstance(action, dict):
+                    st.json(action)
+                else:
+                    st.markdown(f"- {action}")
+
+        known_keys = {
+            "date",
+            "as_of_date",
+            "generated_for",
+            "generated_at",
+            "headline",
+            "title",
+            "summary_title",
+            "summary",
+            "insight",
+            "narrative",
+            "text",
+            "analysis",
+            "ai_summary",
+            "daily_summary",
+            "portfolio_summary",
+            "bullets",
+            "key_points",
+            "highlights",
+            "takeaways",
+            "risks",
+            "watchouts",
+            "watch_outs",
+            "risk_factors",
+            "actions",
+            "recommendations",
+            "suggested_actions",
+            "next_steps",
+        }
+        render_unknown_insight_fields(record, known_keys)
 
 
 def render_hero_banner(latest_date, benchmark_choice: str):
