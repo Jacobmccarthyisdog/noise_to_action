@@ -40,21 +40,34 @@ def save_daily_insight(record, path=None):
     return insight_path
 
 
-def insight_exists_for_date(as_of_date, path=None):
+def insight_exists_for_date(as_of_date, run_type=None, path=None):
     record = load_daily_insight(path=path)
     if not record:
         return False
 
-    return record.get("as_of_date") == as_of_date
+    if record.get("as_of_date") != as_of_date:
+        return False
+
+    if run_type is None:
+        return True
+
+    return record.get("run_type") == run_type
 
 
-def _build_prompt(metrics_payload):
+def _build_prompt(metrics_payload, run_type):
+    run_type_label = {
+        "premarket": "pre-market",
+        "postclose": "post-close",
+        "manual": "manual",
+    }.get(run_type, run_type)
+
     return f"""
-You are generating a daily dashboard insight for an investment tracking app.
+You are generating a {run_type_label} daily dashboard insight for an investment tracking app.
 
 Use only the metrics provided below.
 Do not invent facts.
 Do not provide financial advice.
+Do not recommend buying, selling, holding, reallocating, or timing trades.
 Do not mention missing data unless it prevents a summary.
 Write concise, dashboard-ready output.
 
@@ -68,6 +81,12 @@ Focus on:
 - top and bottom portfolio
 - the highest-volatility portfolio
 - notable holding-level leadership or weakness if provided
+
+For pre-market insights:
+- frame the summary as a setup using the latest available close data.
+
+For post-close insights:
+- frame the summary as a recap using the latest available close data.
 
 Metrics payload:
 {json.dumps(metrics_payload, ensure_ascii=False, indent=2)}
@@ -104,7 +123,7 @@ def _parse_llm_json_response(raw_text):
     }
 
 
-def generate_llm_insight(metrics_payload):
+def generate_llm_insight(metrics_payload, run_type="manual"):
     as_of_date = metrics_payload.get("as_of_date")
     if not as_of_date:
         raise ValueError("metrics_payload must include a valid as_of_date")
@@ -117,7 +136,7 @@ def generate_llm_insight(metrics_payload):
     benchmark = metrics_payload.get("benchmark", "SPY")
 
     client = OpenAI(api_key=api_key)
-    prompt = _build_prompt(metrics_payload)
+    prompt = _build_prompt(metrics_payload, run_type)
 
     response = client.responses.create(
         model=model,
@@ -133,6 +152,7 @@ def generate_llm_insight(metrics_payload):
         "as_of_date": as_of_date,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "period": metrics_payload.get("period", "YTD"),
+        "run_type": run_type,
         "benchmark": benchmark,
         "model": model,
         "prompt_version": PROMPT_VERSION,
@@ -143,7 +163,7 @@ def generate_llm_insight(metrics_payload):
     }
 
 
-def generate_placeholder_insight(metrics_payload):
+def generate_placeholder_insight(metrics_payload, run_type="manual"):
     as_of_date = metrics_payload.get("as_of_date")
     benchmark = metrics_payload.get("benchmark", "SPY")
     top_portfolio = metrics_payload.get("top_portfolio") or {}
@@ -165,13 +185,14 @@ def generate_placeholder_insight(metrics_payload):
         "as_of_date": as_of_date,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "period": metrics_payload.get("period", "YTD"),
+        "run_type": run_type,
         "benchmark": benchmark,
         "model": None,
         "prompt_version": None,
         "status": "success",
         "payload": metrics_payload,
         "insight_text": (
-            f"Placeholder daily insight for {as_of_date}. "
+            f"Placeholder {run_type} daily insight for {as_of_date}. "
             f"This artifact confirms the daily insight pipeline is working. "
             f"LLM generation is not enabled yet. Benchmark context: {benchmark}."
         ),
