@@ -409,27 +409,6 @@ def render_daily_ai_summary() -> None:
             )
             return
 
-        bullet_html = ""
-        if bullets:
-            bullet_items = []
-            for bullet in bullets:
-                if isinstance(bullet, dict):
-                    bullet_text = " | ".join(
-                        f"{key}: {value}" for key, value in bullet.items() if value not in (None, "", [], {})
-                    )
-                    if bullet_text:
-                        bullet_items.append(f"<li>{bullet_text}</li>")
-                else:
-                    bullet_items.append(f"<li>{bullet}</li>")
-
-            if bullet_items:
-                bullet_html = f"""
-                    <div class="ai-summary-section-title">Key takeaways</div>
-                    <ul class="ai-summary-list">
-                        {''.join(bullet_items)}
-                    </ul>
-                """
-
         st.markdown(
             f"""
             <div class="ai-summary-card">
@@ -437,11 +416,28 @@ def render_daily_ai_summary() -> None:
                 <h3 class="ai-summary-headline">{headline}</h3>
                 <div class="ai-summary-meta">{update_note}</div>
                 <div class="ai-summary-body">{summary}</div>
-                {bullet_html}
             </div>
             """,
             unsafe_allow_html=True,
         )
+
+        if bullets:
+            st.markdown(
+                '<div class="ai-summary-section-title">Key takeaways</div>',
+                unsafe_allow_html=True,
+            )
+
+            for bullet in bullets:
+                if isinstance(bullet, dict):
+                    bullet_text = " | ".join(
+                        f"{key}: {value}"
+                        for key, value in bullet.items()
+                        if value not in (None, "", [], {})
+                    )
+                    if bullet_text:
+                        st.markdown(f"- {bullet_text}")
+                else:
+                    st.markdown(f"- {bullet}")
 
 
 def render_hero_banner(latest_date, benchmark_choice: str):
