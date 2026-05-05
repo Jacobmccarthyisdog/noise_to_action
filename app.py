@@ -381,7 +381,6 @@ def render_daily_ai_summary() -> None:
             st.markdown(
                 f"""
                 <div class="ai-summary-card">
-                    <div class="ai-summary-kicker">Daily AI readout</div>
                     <h3 class="ai-summary-headline">Daily insight unavailable</h3>
                     <div class="ai-summary-status">
                         This dropdown is rendering correctly. The missing piece is the generated JSON artifact.
