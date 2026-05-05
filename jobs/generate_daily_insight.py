@@ -11,7 +11,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from data_loader import load_data
 from calculations import build_datasets, build_ytd_metrics_snapshot
 from insights import (
-    generate_placeholder_insight,
+    generate_llm_insight,
     insight_exists_for_date,
     save_daily_insight,
 )
@@ -22,11 +22,11 @@ def main(force=False):
 
     (
         portfolio_history,
-        merged_positions,
+        _merged_positions,
         holdings_snapshot,
         benchmark_history,
-        portfolio_cumret,
-        benchmark_cumret,
+        _portfolio_cumret,
+        _benchmark_cumret,
     ) = build_datasets(portfolios, prices)
 
     metrics_payload = build_ytd_metrics_snapshot(
@@ -44,7 +44,7 @@ def main(force=False):
         print(f"Daily insight already exists for {as_of_date}. Skipping generation.")
         return
 
-    record = generate_placeholder_insight(metrics_payload)
+    record = generate_llm_insight(metrics_payload)
     output_path = save_daily_insight(record)
 
     print(f"Saved daily insight for {as_of_date} to {output_path}")
