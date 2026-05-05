@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -328,6 +329,20 @@ def as_list(value: Any) -> list[Any]:
     return [value]
 
 
+def format_generated_at(value: str) -> str:
+    if not value:
+        return ""
+
+    raw_value = str(value).strip()
+
+    try:
+        cleaned_value = raw_value.replace("Z", "+00:00")
+        parsed_value = datetime.fromisoformat(cleaned_value)
+        return parsed_value.strftime("%I:%M %p %B %d, %Y").lstrip("0")
+    except ValueError:
+        return raw_value
+
+
 def render_daily_ai_summary() -> None:
     payload, error_message = read_daily_insight_payload()
     record = get_latest_daily_insight(payload) if payload is not None else {}
@@ -337,6 +352,19 @@ def render_daily_ai_summary() -> None:
         ["date", "as_of_date", "generated_for", "generated_at"],
         "not generated yet",
     )
+
+    generated_at = first_present(
+        record,
+        ["generated_at"],
+        "",
+    )
+
+    formatted_generated_at = format_generated_at(generated_at)
+
+    if formatted_generated_at:
+        expander_label = f"AI Summary of Portfolio Performance • Updated {formatted_generated_at}"
+    else:
+        expander_label = f"AI Summary of Portfolio Performance • Updated {as_of_date}"
 
     headline = first_present(
         record,
@@ -372,8 +400,6 @@ def render_daily_ai_summary() -> None:
         or record.get("key_points")
         or record.get("highlights")
     )
-
-    expander_label = f"AI Summary of Portfolio Performance • Updated {as_of_date}"
 
     with st.expander(expander_label, expanded=False):
         if error_message:
