@@ -89,25 +89,98 @@ st.markdown(
             font-size: 0.85rem;
         }
 
-        .ai-summary-status {
-            color: rgba(235, 244, 255, 0.78);
-            font-size: 0.95rem;
-            line-height: 1.55;
+        div[data-testid="stExpander"] {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.10), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.08), transparent 26%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        div[data-testid="stExpander"] details {
+            border: none;
+        }
+
+        div[data-testid="stExpander"] summary {
+            color: #F6FBFF;
+            font-weight: 800;
+        }
+
+        .ai-summary-card {
+            position: relative;
+            overflow: hidden;
+            padding: 24px 26px 22px 26px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.12), transparent 24%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+            margin-top: 0.4rem;
             margin-bottom: 0.4rem;
         }
 
+        .ai-summary-kicker {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 212, 170, 0.10);
+            border: 1px solid rgba(0, 212, 170, 0.22);
+            color: rgba(180, 255, 235, 0.92);
+            font-size: 0.74rem;
+            line-height: 1;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+
+        .ai-summary-headline {
+            font-size: 1.45rem;
+            line-height: 1.18;
+            font-weight: 850;
+            color: #F6FBFF;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .ai-summary-status,
+        .ai-summary-body {
+            color: rgba(235, 244, 255, 0.86);
+            font-size: 0.98rem;
+            line-height: 1.62;
+            margin-top: 0.85rem;
+        }
+
         .ai-summary-meta {
-            color: rgba(208, 224, 240, 0.70);
+            color: rgba(208, 224, 240, 0.72);
             font-size: 0.82rem;
             margin-top: 0.25rem;
-            margin-bottom: 0.85rem;
+            margin-bottom: 0.9rem;
         }
 
         .ai-summary-section-title {
             color: #F6FBFF;
-            font-weight: 800;
-            margin-top: 1rem;
-            margin-bottom: 0.25rem;
+            font-weight: 850;
+            margin-top: 1.15rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .ai-summary-list {
+            margin-top: 0.25rem;
+            margin-bottom: 0;
+            padding-left: 1.2rem;
+            color: rgba(235, 244, 255, 0.84);
+            line-height: 1.55;
+        }
+
+        .ai-summary-list li {
+            margin-bottom: 0.42rem;
         }
     </style>
     """,
@@ -306,10 +379,14 @@ def render_daily_ai_summary() -> None:
         if error_message:
             st.warning(error_message)
             st.markdown(
-                """
-                <div class="ai-summary-status">
-                    This dropdown is rendering correctly. The missing piece is the generated JSON artifact.
-                    Once the GitHub Action writes <code>data/daily_insight.json</code>, the summary will appear here.
+                f"""
+                <div class="ai-summary-card">
+                    <div class="ai-summary-kicker">Daily AI readout</div>
+                    <h3 class="ai-summary-headline">Daily insight unavailable</h3>
+                    <div class="ai-summary-status">
+                        This dropdown is rendering correctly. The missing piece is the generated JSON artifact.
+                        Once the GitHub Action writes <code>{DAILY_INSIGHT_PATH.as_posix()}</code>, the summary will appear here.
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -320,36 +397,51 @@ def render_daily_ai_summary() -> None:
             st.warning("The daily insight file loaded, but no usable insight record was found.")
             st.markdown(
                 """
-                <div class="ai-summary-status">
-                    This dropdown is rendering correctly, but the JSON structure does not contain a readable insight record.
+                <div class="ai-summary-card">
+                    <div class="ai-summary-kicker">Daily AI readout</div>
+                    <h3 class="ai-summary-headline">Daily insight unavailable</h3>
+                    <div class="ai-summary-status">
+                        This dropdown is rendering correctly, but the JSON structure does not contain a readable insight record.
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
             return
 
-        st.markdown(f"### {headline}")
-
-        if update_note:
-            st.markdown(
-                f'<div class="ai-summary-meta">{update_note}</div>',
-                unsafe_allow_html=True,
-            )
-
-        if summary:
-            st.markdown(summary)
-
+        bullet_html = ""
         if bullets:
-            st.markdown('<div class="ai-summary-section-title">Key takeaways</div>', unsafe_allow_html=True)
+            bullet_items = []
             for bullet in bullets:
                 if isinstance(bullet, dict):
                     bullet_text = " | ".join(
                         f"{key}: {value}" for key, value in bullet.items() if value not in (None, "", [], {})
                     )
                     if bullet_text:
-                        st.markdown(f"- {bullet_text}")
+                        bullet_items.append(f"<li>{bullet_text}</li>")
                 else:
-                    st.markdown(f"- {bullet}")
+                    bullet_items.append(f"<li>{bullet}</li>")
+
+            if bullet_items:
+                bullet_html = f"""
+                    <div class="ai-summary-section-title">Key takeaways</div>
+                    <ul class="ai-summary-list">
+                        {''.join(bullet_items)}
+                    </ul>
+                """
+
+        st.markdown(
+            f"""
+            <div class="ai-summary-card">
+                <div class="ai-summary-kicker">Daily AI readout</div>
+                <h3 class="ai-summary-headline">{headline}</h3>
+                <div class="ai-summary-meta">{update_note}</div>
+                <div class="ai-summary-body">{summary}</div>
+                {bullet_html}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_hero_banner(latest_date, benchmark_choice: str):
