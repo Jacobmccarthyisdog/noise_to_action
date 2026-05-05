@@ -373,7 +373,7 @@ def render_daily_ai_summary() -> None:
         or record.get("highlights")
     )
 
-    expander_label = f"AI generated summary • {as_of_date}"
+    expander_label = f"AI Summary of Portfolio Performance • Updated {as_of_date}"
 
     with st.expander(expander_label, expanded=False):
         if error_message:
