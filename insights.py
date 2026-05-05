@@ -10,7 +10,8 @@ from openai import OpenAI
 
 DEFAULT_INSIGHT_PATH = Path("data/daily_insight.json")
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-PROMPT_VERSION = "daily_portfolio_insight_v1"
+PROMPT_VERSION = "daily_portfolio_insight_v2"
+UPDATE_NOTE = "Updated 30 minutes before and after market close."
 
 
 def get_default_insight_path() -> Path:
@@ -90,6 +91,56 @@ def _get_name(record: dict[str, Any] | None, fallback: str = "N/A") -> str:
     )
 
 
+def _safe_float(value: Any) -> float | None:
+    try:
+        if value is None:
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _build_outperformance_context(metrics_payload: dict[str, Any]) -> str:
+    avg_portfolio_return = _safe_float(metrics_payload.get("avg_portfolio_return"))
+    benchmark_return = _safe_float(metrics_payload.get("benchmark_return"))
+    avg_alpha = _safe_float(metrics_payload.get("avg_alpha"))
+    benchmark = metrics_payload.get("benchmark", "SPY")
+
+    if avg_portfolio_return is None or benchmark_return is None:
+        return (
+            f"The dashboard is positioned around comparing portfolio behavior against "
+            f"{benchmark}, but the current payload does not include enough benchmark "
+            f"return detail to quantify relative performance."
+        )
+
+    if avg_portfolio_return > benchmark_return:
+        alpha_text = _format_percent(avg_alpha) if avg_alpha is not None else "positive"
+        return (
+            f"The portfolio set is outperforming {benchmark}, which makes the current "
+            f"readout more useful than a simple return snapshot. Outperformance versus "
+            f"a broad benchmark like SPY can help show whether the portfolio is holding "
+            f"up during periods of market stress, macro uncertainty, rate volatility, "
+            f"or global conflict headlines. Current average alpha is {alpha_text}, "
+            f"meaning the portfolio group is not just rising in absolute terms, it is "
+            f"also ahead of the benchmark comparison."
+        )
+
+    if avg_portfolio_return == benchmark_return:
+        return (
+            f"The portfolio set is tracking closely with {benchmark}. In this kind of "
+            f"setup, the dashboard is useful for monitoring whether the portfolio starts "
+            f"to separate from the benchmark during market stress, macro uncertainty, "
+            f"or global conflict headlines."
+        )
+
+    return (
+        f"The portfolio set is currently trailing {benchmark}. That makes the benchmark "
+        f"comparison especially important because it shows whether the portfolios are "
+        f"absorbing market stress, macro uncertainty, or global conflict headlines better "
+        f"or worse than a broad market proxy."
+    )
+
+
 def generate_placeholder_insight(metrics_payload: dict[str, Any]) -> dict[str, Any]:
     as_of_date = metrics_payload.get("as_of_date")
     benchmark = metrics_payload.get("benchmark", "SPY")
@@ -105,34 +156,68 @@ def generate_placeholder_insight(metrics_payload: dict[str, Any]) -> dict[str, A
     top_holding_name = _get_name(top_holding)
     bottom_holding_name = _get_name(bottom_holding)
 
-    takeaways = [
-        f"Top portfolio YTD: {top_name} at {_format_percent(top_portfolio.get('return'))}.",
-        f"Bottom portfolio YTD: {bottom_name} at {_format_percent(bottom_portfolio.get('return'))}.",
-        f"Highest volatility portfolio: {volatile_name}.",
-    ]
-
-    if top_holding:
-        takeaways.append(
-            f"Best holding: {top_holding_name} at {_format_percent(top_holding.get('return'))}."
-        )
-
-    if bottom_holding:
-        takeaways.append(
-            f"Weakest holding: {bottom_holding_name} at {_format_percent(bottom_holding.get('return'))}."
-        )
-
     benchmark_return = metrics_payload.get("benchmark_return")
     avg_portfolio_return = metrics_payload.get("avg_portfolio_return")
     avg_alpha = metrics_payload.get("avg_alpha")
 
+    outperformance_context = _build_outperformance_context(metrics_payload)
+
+    headline = "Portfolio performance versus benchmark"
+
+    if _safe_float(avg_portfolio_return) is not None and _safe_float(benchmark_return) is not None:
+        if float(avg_portfolio_return) > float(benchmark_return):
+            headline = "Portfolio outperforms benchmark YTD"
+        elif float(avg_portfolio_return) < float(benchmark_return):
+            headline = "Portfolio trails benchmark YTD"
+        else:
+            headline = "Portfolio tracks benchmark YTD"
+
     insight_text = (
-        f"As of {as_of_date}, the portfolio set is being evaluated against {benchmark}. "
-        f"The average portfolio return is {_format_percent(avg_portfolio_return)}, "
-        f"versus benchmark return of {_format_percent(benchmark_return)}, "
-        f"for average alpha of {_format_percent(avg_alpha)}. "
-        f"{top_name} is the strongest YTD performer, while {bottom_name} is the weakest. "
-        f"{volatile_name} is the portfolio to monitor most closely for volatility."
+        f"As of {as_of_date}, the portfolio group has an average return of "
+        f"{_format_percent(avg_portfolio_return)} versus {benchmark} at "
+        f"{_format_percent(benchmark_return)}, producing average alpha of "
+        f"{_format_percent(avg_alpha)}. {outperformance_context} "
+        f"The strongest portfolio is {top_name}, with a return of "
+        f"{_format_percent(top_portfolio.get('return'))} and current value of "
+        f"{_format_currency(top_portfolio.get('current_value'))}. The weakest "
+        f"portfolio is {bottom_name}, with a return of "
+        f"{_format_percent(bottom_portfolio.get('return'))}, while {volatile_name} "
+        f"is the portfolio showing the highest volatility. "
+        f"Note: {UPDATE_NOTE}"
     )
+
+    takeaways = [
+        (
+            f"{top_name} is the strongest YTD performer, returning "
+            f"{_format_percent(top_portfolio.get('return'))} with a dollar change of "
+            f"{_format_currency(top_portfolio.get('dollar_change'))}."
+        ),
+        (
+            f"{bottom_name} is the lowest YTD performer, returning "
+            f"{_format_percent(bottom_portfolio.get('return'))}, which still needs to "
+            f"be interpreted against the {benchmark} benchmark return of "
+            f"{_format_percent(benchmark_return)}."
+        ),
+        (
+            f"The portfolio group average return of {_format_percent(avg_portfolio_return)} "
+            f"compares to {benchmark} at {_format_percent(benchmark_return)}, giving the "
+            f"dashboard a clear benchmark-relative read rather than just an absolute return view."
+        ),
+    ]
+
+    if top_holding:
+        takeaways.append(
+            f"{top_holding_name} is the strongest holding, returning "
+            f"{_format_percent(top_holding.get('return'))} with current value of "
+            f"{_format_currency(top_holding.get('current_value'))}."
+        )
+
+    if bottom_holding:
+        takeaways.append(
+            f"{bottom_holding_name} is the weakest holding, returning "
+            f"{_format_percent(bottom_holding.get('return'))} with current value of "
+            f"{_format_currency(bottom_holding.get('current_value'))}."
+        )
 
     return {
         "schema_version": 1,
@@ -141,41 +226,65 @@ def generate_placeholder_insight(metrics_payload: dict[str, Any]) -> dict[str, A
         "period": metrics_payload.get("period", "YTD"),
         "benchmark": benchmark,
         "model": None,
-        "prompt_version": None,
+        "prompt_version": PROMPT_VERSION,
         "status": "success",
+        "source": "fallback",
         "payload": metrics_payload,
-        "headline": "Daily portfolio insight",
+        "headline": headline,
         "insight_text": insight_text,
         "takeaways": takeaways,
+        "update_note": UPDATE_NOTE,
     }
 
 
 def _build_prompt(metrics_payload: dict[str, Any]) -> str:
+    outperformance_context = _build_outperformance_context(metrics_payload)
+
     return f"""
-You are generating a concise daily portfolio dashboard insight.
+You are generating a daily portfolio dashboard insight.
 
 Use only the metrics in the JSON payload below.
 Do not invent numbers.
 Do not give financial advice.
-Do not recommend buying or selling securities.
-Write for a portfolio dashboard user who wants a clear summary of what changed and what to watch.
+Do not recommend buying, selling, or reallocating securities.
+Write for a dashboard user who wants a specific, benchmark-relative explanation.
+
+The user does not want generic watchouts or suggested actions.
+Do not include risks.
+Do not include watchouts.
+Do not include suggested actions.
+Do not include recommendations.
+
+The insight should be more descriptive and less vague than a basic summary.
+It should explain whether the portfolio is outperforming or underperforming the benchmark, especially SPY.
+When the portfolio is outperforming SPY or the selected benchmark, frame that as a useful benchmark-relative signal during periods of broader market stress, macro uncertainty, rate volatility, or global conflict headlines.
+Do not claim that a specific war or conflict caused the returns unless the payload explicitly says so.
+Do not claim the portfolio is hedged or protected.
+Do not overstate the result.
+Focus on what the dashboard can show: relative performance, alpha, strongest portfolio, weakest portfolio, most volatile portfolio, strongest holding, and weakest holding.
+
+Include this exact sentence at the end of insight_text:
+Note: {UPDATE_NOTE}
 
 Return valid JSON only with this exact shape:
 {{
   "headline": "string",
   "insight_text": "string",
-  "takeaways": ["string", "string", "string"],
-  "risks": ["string"],
-  "actions": ["string"]
+  "takeaways": ["string", "string", "string"]
 }}
 
-Rules:
-- headline should be short.
-- insight_text should be 3 to 5 sentences.
+Writing rules:
+- headline should be short and specific.
+- insight_text should be 4 to 7 sentences.
 - takeaways should contain 3 to 5 bullets.
-- risks should contain 1 to 3 watchouts.
-- actions should contain 1 to 3 dashboard review actions, not trading instructions.
-- Keep the language plain and useful.
+- Use the benchmark name from the payload.
+- Mention SPY when the benchmark is SPY.
+- Explain why outperforming a benchmark matters.
+- Avoid vague phrases like "robust performance" unless supported by numbers.
+- Keep the tone clear and confident.
+
+Benchmark-relative context to use:
+{outperformance_context}
 
 Metrics payload:
 {json.dumps(metrics_payload, indent=2, ensure_ascii=False)}
@@ -207,6 +316,20 @@ def _extract_json_object(text: str) -> dict[str, Any]:
     return parsed
 
 
+def _normalize_list(value: Any, fallback: list[str]) -> list[str]:
+    if value is None:
+        return fallback
+
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+
+    value_as_string = str(value).strip()
+    if not value_as_string:
+        return fallback
+
+    return [value_as_string]
+
+
 def _normalize_llm_payload(
     llm_payload: dict[str, Any],
     metrics_payload: dict[str, Any],
@@ -215,20 +338,19 @@ def _normalize_llm_payload(
     placeholder = generate_placeholder_insight(metrics_payload)
 
     headline = llm_payload.get("headline") or placeholder["headline"]
-    insight_text = llm_payload.get("insight_text") or llm_payload.get("summary") or placeholder["insight_text"]
+    insight_text = (
+        llm_payload.get("insight_text")
+        or llm_payload.get("summary")
+        or placeholder["insight_text"]
+    )
 
-    takeaways = llm_payload.get("takeaways") or llm_payload.get("bullets") or placeholder["takeaways"]
-    risks = llm_payload.get("risks") or llm_payload.get("watchouts") or []
-    actions = llm_payload.get("actions") or llm_payload.get("recommendations") or []
+    if UPDATE_NOTE not in insight_text:
+        insight_text = f"{insight_text.rstrip()} Note: {UPDATE_NOTE}"
 
-    if not isinstance(takeaways, list):
-        takeaways = [str(takeaways)]
-
-    if not isinstance(risks, list):
-        risks = [str(risks)]
-
-    if not isinstance(actions, list):
-        actions = [str(actions)]
+    takeaways = _normalize_list(
+        llm_payload.get("takeaways") or llm_payload.get("bullets"),
+        placeholder["takeaways"],
+    )
 
     return {
         "schema_version": 1,
@@ -239,12 +361,12 @@ def _normalize_llm_payload(
         "model": model,
         "prompt_version": PROMPT_VERSION,
         "status": "success",
+        "source": "openai",
         "payload": metrics_payload,
         "headline": str(headline),
         "insight_text": str(insight_text),
-        "takeaways": [str(item) for item in takeaways],
-        "risks": [str(item) for item in risks],
-        "actions": [str(item) for item in actions],
+        "takeaways": takeaways,
+        "update_note": UPDATE_NOTE,
     }
 
 
@@ -259,6 +381,7 @@ def generate_llm_insight(metrics_payload: dict[str, Any]) -> dict[str, Any]:
         record["status"] = "fallback_no_openai_api_key"
         record["model"] = None
         record["prompt_version"] = PROMPT_VERSION
+        record["source"] = "fallback"
         return record
 
     try:
@@ -271,8 +394,8 @@ def generate_llm_insight(metrics_payload: dict[str, Any]) -> dict[str, Any]:
                 {
                     "role": "system",
                     "content": (
-                        "You write concise, factual portfolio dashboard insights. "
-                        "You return valid JSON only."
+                        "You write concise, factual, benchmark-relative portfolio dashboard insights. "
+                        "You return valid JSON only. You do not provide financial advice."
                     ),
                 },
                 {
@@ -296,5 +419,6 @@ def generate_llm_insight(metrics_payload: dict[str, Any]) -> dict[str, Any]:
         record["status"] = "fallback_llm_error"
         record["model"] = model
         record["prompt_version"] = PROMPT_VERSION
+        record["source"] = "fallback"
         record["error"] = str(exc)
         return record
