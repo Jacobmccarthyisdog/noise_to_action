@@ -2,6 +2,25 @@ name: Generate Daily Insight
 
 on:
   workflow_dispatch:
+    inputs:
+      run_type:
+        description: "Type of insight to generate"
+        required: true
+        default: "manual"
+        type: choice
+        options:
+          - manual
+          - premarket
+          - postclose
+
+  schedule:
+    # 9:00 AM Eastern during daylight saving time
+    # 30 minutes before market open
+    - cron: "0 13 * * 1-5"
+
+    # 4:30 PM Eastern during daylight saving time
+    # 30 minutes after market close
+    - cron: "30 20 * * 1-5"
 
 permissions:
   contents: write
@@ -11,6 +30,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Determine run type
+        id: run_type
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.run_type }}" >> "$GITHUB_OUTPUT"
+          else
+            current_hour="$(date -u +%H)"
+            if [ "$current_hour" = "13" ]; then
+              echo "value=premarket" >> "$GITHUB_OUTPUT"
+            else
+              echo "value=postclose" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - name: Check out repository
         uses: actions/checkout@v4
         with:
@@ -28,7 +62,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: gpt-4.1-mini
-        run: python jobs/generate_daily_insight.py --force
+        run: python jobs/generate_daily_insight.py --force --run-type ${{ steps.run_type.outputs.value }}
 
       - name: Commit updated insight artifact
         run: |
