@@ -1,21 +1,68 @@
 {
+    "schema_version": 1,
     "as_of_date": "2026-05-05",
-    "generated_at": "2026-05-05T18:36:53.399220+00:00",
-    "source": "openai",
+    "generated_at": "2026-05-05T19:29:55.713983+00:00",
+    "period": "YTD",
+    "benchmark": "SPY",
     "model": "gpt-4o-mini",
-    "headline": "Portfolio Outperforms Benchmark YTD",
-    "summary": "As of today, the portfolio has an average return of 13.16%, significantly outperforming the SPY benchmark return of 6.90%. The top performer, OpenAI 10, has delivered a strong return of 15.69%, while the bottom performer, Random A, has returned 7.65%. Overall, the portfolio shows robust performance with a positive alpha of 6.26%.",
-    "bullets": [
-        "OpenAI 10 leads with a dollar change of $156.93 and a current value of $1,156.93.",
-        "Random A, while the lowest performer, still shows a positive return of 7.65%.",
-        "The most volatile holding, Random B, has a return of 13.35% with a volatility of 2.05%."
+    "prompt_version": "daily_portfolio_insight_v2",
+    "status": "success",
+    "source": "openai",
+    "payload": {
+        "as_of_date": "2026-05-05",
+        "period": "YTD",
+        "benchmark": "SPY",
+        "benchmark_return": 0.0695744220521366,
+        "portfolio_count": 8,
+        "avg_portfolio_return": 0.13133238786103685,
+        "avg_alpha": 0.06175796580890025,
+        "top_portfolio": {
+            "name": "OpenAI 10",
+            "return": 0.15492908242275027,
+            "dollar_change": 154.9290824227503,
+            "current_value": 1154.9290824227503,
+            "max_drawdown": -0.12322362527354647
+        },
+        "bottom_portfolio": {
+            "name": "Random A",
+            "return": 0.08306855642537903,
+            "dollar_change": 83.06855642537903,
+            "current_value": 1083.068556425379,
+            "max_drawdown": -0.06958000344643778
+        },
+        "most_volatile": {
+            "name": "Random B",
+            "return": 0.13248695685720469,
+            "dollar_change": 132.48695685720463,
+            "current_value": 1132.4869568572046,
+            "max_drawdown": -0.13267678787573045,
+            "volatility": 0.020519622698502108
+        },
+        "top_holding": {
+            "ticker": "SOXX",
+            "portfolio": "OpenAI 10",
+            "return": 0.45830194295778015,
+            "dollar_change": 39.21689725889725,
+            "current_value": 124.78689725889724
+        },
+        "bottom_holding": {
+            "ticker": "SMCI",
+            "portfolio": "Random A",
+            "return": -0.10340358167300756,
+            "dollar_change": -4.654195211102071,
+            "current_value": 40.35580478889793
+        },
+        "generated_from": "build_ytd_metrics_snapshot_v1"
+    },
+    "headline": "Portfolio Outperformance Against SPY",
+    "summary": "As of May 5, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 13.13% compared to SPY's 6.96%. This 6.18% alpha indicates that the portfolios are not only gaining in absolute terms but are also exceeding the benchmark's performance. The top portfolio, OpenAI 10, has delivered a return of 15.49%, contributing significantly to the overall outperformance. In contrast, the weakest portfolio, Random A, returned 8.31%, still above the benchmark but less impactful. This relative strength during the current market conditions highlights the portfolio's resilience and effectiveness in navigating potential uncertainties. Note: Updated 30 minutes before and after market close.",
+    "insight_text": "As of May 5, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 13.13% compared to SPY's 6.96%. This 6.18% alpha indicates that the portfolios are not only gaining in absolute terms but are also exceeding the benchmark's performance. The top portfolio, OpenAI 10, has delivered a return of 15.49%, contributing significantly to the overall outperformance. In contrast, the weakest portfolio, Random A, returned 8.31%, still above the benchmark but less impactful. This relative strength during the current market conditions highlights the portfolio's resilience and effectiveness in navigating potential uncertainties. Note: Updated 30 minutes before and after market close.",
+    "takeaways": [
+        "Average portfolio return is 13.13%, outperforming SPY's 6.96%.",
+        "Current average alpha stands at 6.18%, indicating strong relative performance.",
+        "OpenAI 10 is the top portfolio with a return of 15.49%.",
+        "Random A, while the weakest, still outperformed SPY with an 8.31% return.",
+        "The portfolio's performance signals resilience amid broader market conditions."
     ],
-    "risks": [
-        "Random A has a max drawdown of -6.96%, indicating potential risk.",
-        "The volatility of Random B could lead to larger fluctuations in value."
-    ],
-    "actions": [
-        "Consider reviewing the performance of Random A and its holdings.",
-        "Compare the portfolio's performance against the SPY benchmark for further insights."
-    ]
+    "update_note": "Updated 30 minutes before and after market close."
 }
