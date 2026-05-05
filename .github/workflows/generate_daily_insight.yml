@@ -3,52 +3,41 @@ name: Generate Daily Insight
 on:
   workflow_dispatch:
     inputs:
-      run_type:
-        description: "Type of insight to generate"
-        required: true
-        default: "manual"
+      force:
+        description: "Regenerate even if today's OpenAI insight already exists"
+        required: false
+        default: "true"
         type: choice
         options:
-          - manual
-          - premarket
-          - postclose
-
+          - "true"
+          - "false"
+      allow_placeholder:
+        description: "Write placeholder JSON if OpenAI fails"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
   schedule:
-    # 9:00 AM Eastern during daylight saving time
-    # 30 minutes before market open
-    - cron: "0 13 * * 1-5"
-
-    # 4:30 PM Eastern during daylight saving time
-    # 30 minutes after market close
-    - cron: "30 20 * * 1-5"
+    - cron: "30 22 * * 1-5"
 
 permissions:
   contents: write
 
 jobs:
-  generate-insight:
+  generate-daily-insight:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Determine run type
-        id: run_type
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "value=${{ github.event.inputs.run_type }}" >> "$GITHUB_OUTPUT"
-          else
-            current_hour="$(date -u +%H)"
-            if [ "$current_hour" = "13" ]; then
-              echo "value=premarket" >> "$GITHUB_OUTPUT"
-            else
-              echo "value=postclose" >> "$GITHUB_OUTPUT"
-            fi
-          fi
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
 
+    steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: milestone-3-llm-insights
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -56,18 +45,51 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Verify OpenAI API key
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY is not set. Add it in GitHub repo Settings > Secrets and variables > Actions > Repository secrets."
+            exit 1
+          fi
 
       - name: Generate daily insight
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-4.1-mini
-        run: python jobs/generate_daily_insight.py --force --run-type ${{ steps.run_type.outputs.value }}
+        run: |
+          FORCE_FLAG=""
+          PLACEHOLDER_FLAG=""
 
-      - name: Commit updated insight artifact
+          if [ "${{ github.event.inputs.force || 'true' }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+
+          if [ "${{ github.event.inputs.allow_placeholder || 'false' }}" = "true" ]; then
+            PLACEHOLDER_FLAG="--allow-placeholder"
+          fi
+
+          python jobs/generate_daily_insight.py $FORCE_FLAG $PLACEHOLDER_FLAG
+
+      - name: Validate generated JSON
+        run: |
+          python -m json.tool data/daily_insight.json > /tmp/daily_insight_validated.json
+          cp /tmp/daily_insight_validated.json data/daily_insight.json
+          cat data/daily_insight.json
+
+      - name: Commit generated insight
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add data/daily_insight.json
-          git diff --cached --quiet || git commit -m "Update daily insight artifact"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "No daily insight changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update daily AI insight"
+          git push origin HEAD:milestone-3-llm-insights
