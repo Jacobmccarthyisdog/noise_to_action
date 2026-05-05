@@ -127,9 +127,9 @@ def _build_outperformance_context(metrics_payload: dict[str, Any]) -> str:
 
     if avg_portfolio_return == benchmark_return:
         return (
-            f"The portfolio set is tracking closely with {benchmark}. In this kind of "
-            f"setup, the dashboard is useful for monitoring whether the portfolio starts "
-            f"to separate from the benchmark during market stress, macro uncertainty, "
+            f"The portfolio set is tracking closely with {benchmark}. In this setup, "
+            f"the dashboard is useful for monitoring whether the portfolio starts to "
+            f"separate from the benchmark during market stress, macro uncertainty, "
             f"or global conflict headlines."
         )
 
@@ -172,7 +172,7 @@ def generate_placeholder_insight(metrics_payload: dict[str, Any]) -> dict[str, A
         else:
             headline = "Portfolio tracks benchmark YTD"
 
-    insight_text = (
+    summary = (
         f"As of {as_of_date}, the portfolio group has an average return of "
         f"{_format_percent(avg_portfolio_return)} versus {benchmark} at "
         f"{_format_percent(benchmark_return)}, producing average alpha of "
@@ -231,7 +231,8 @@ def generate_placeholder_insight(metrics_payload: dict[str, Any]) -> dict[str, A
         "source": "fallback",
         "payload": metrics_payload,
         "headline": headline,
-        "insight_text": insight_text,
+        "summary": summary,
+        "insight_text": summary,
         "takeaways": takeaways,
         "update_note": UPDATE_NOTE,
     }
@@ -263,19 +264,19 @@ Do not claim the portfolio is hedged or protected.
 Do not overstate the result.
 Focus on what the dashboard can show: relative performance, alpha, strongest portfolio, weakest portfolio, most volatile portfolio, strongest holding, and weakest holding.
 
-Include this exact sentence at the end of insight_text:
+Include this exact sentence at the end of summary:
 Note: {UPDATE_NOTE}
 
 Return valid JSON only with this exact shape:
 {{
   "headline": "string",
-  "insight_text": "string",
+  "summary": "string",
   "takeaways": ["string", "string", "string"]
 }}
 
 Writing rules:
 - headline should be short and specific.
-- insight_text should be 4 to 7 sentences.
+- summary should be 4 to 7 sentences.
 - takeaways should contain 3 to 5 bullets.
 - Use the benchmark name from the payload.
 - Mention SPY when the benchmark is SPY.
@@ -338,14 +339,14 @@ def _normalize_llm_payload(
     placeholder = generate_placeholder_insight(metrics_payload)
 
     headline = llm_payload.get("headline") or placeholder["headline"]
-    insight_text = (
-        llm_payload.get("insight_text")
-        or llm_payload.get("summary")
-        or placeholder["insight_text"]
+    summary = (
+        llm_payload.get("summary")
+        or llm_payload.get("insight_text")
+        or placeholder["summary"]
     )
 
-    if UPDATE_NOTE not in insight_text:
-        insight_text = f"{insight_text.rstrip()} Note: {UPDATE_NOTE}"
+    if UPDATE_NOTE not in summary:
+        summary = f"{summary.rstrip()} Note: {UPDATE_NOTE}"
 
     takeaways = _normalize_list(
         llm_payload.get("takeaways") or llm_payload.get("bullets"),
@@ -364,7 +365,8 @@ def _normalize_llm_payload(
         "source": "openai",
         "payload": metrics_payload,
         "headline": str(headline),
-        "insight_text": str(insight_text),
+        "summary": str(summary),
+        "insight_text": str(summary),
         "takeaways": takeaways,
         "update_note": UPDATE_NOTE,
     }
