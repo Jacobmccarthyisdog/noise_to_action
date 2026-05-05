@@ -329,15 +329,12 @@ def render_daily_ai_summary() -> None:
             return
 
         st.markdown(f"### {headline}")
-        st.markdown(
-            f'<div class="ai-summary-meta">Source: <code>{DAILY_INSIGHT_PATH.as_posix()}</code></div>',
-            unsafe_allow_html=True,
-        )
 
-        st.markdown(
-            f'<div class="ai-summary-meta">{update_note}</div>',
-            unsafe_allow_html=True,
-        )
+        if update_note:
+            st.markdown(
+                f'<div class="ai-summary-meta">{update_note}</div>',
+                unsafe_allow_html=True,
+            )
 
         if summary:
             st.markdown(summary)
