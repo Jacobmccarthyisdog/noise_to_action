@@ -336,10 +336,17 @@ def format_generated_at(value: str) -> str:
     raw_value = str(value).strip()
 
     try:
+        from zoneinfo import ZoneInfo
+
         cleaned_value = raw_value.replace("Z", "+00:00")
         parsed_value = datetime.fromisoformat(cleaned_value)
-        return parsed_value.strftime("%I:%M %p %B %d, %Y").lstrip("0")
-    except ValueError:
+
+        if parsed_value.tzinfo is None:
+            parsed_value = parsed_value.replace(tzinfo=ZoneInfo("UTC"))
+
+        central_time = parsed_value.astimezone(ZoneInfo("America/Chicago"))
+        return central_time.strftime("%I:%M %p %B %d, %Y CT").lstrip("0")
+    except Exception:
         return raw_value
 
 
