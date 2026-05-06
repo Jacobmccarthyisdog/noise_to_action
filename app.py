@@ -414,51 +414,62 @@ def render_about_why() -> None:
             """
             <div class="about-card">
                 <div class="about-kicker">From Noise to Action</div>
-                <h3 class="about-headline">This project tests whether AI-generated market narratives can become a measurable portfolio signal.</h3>
+                <h3 class="about-headline">This project uses LLMs to cut through market noise and test whether repeated AI-generated narratives can help identify winners.</h3>
                 <div class="about-body">
                     <p>
-                        The core question behind this dashboard is simple: can a portfolio constructed with help from
-                        large language models perform differently from buying broad market benchmarks or selecting
-                        stocks at random?
+                        The idea behind this dashboard is straightforward: ask large language models to build portfolios
+                        with the goal of beating standard benchmarks, then track whether those portfolios actually behave
+                        differently from passive indexes or randomly selected stocks.
                     </p>
                     <p>
-                        Yes, one goal is to see whether narrative-derived portfolios can beat standard benchmarks like
-                        the S&amp;P 500, Dow. But the bigger goal is to demystify investing.
-                        Markets do not move only because of hard financial data. They also move because of attention,
-                        belief, momentum, and the stories investors tell about companies.
+                        This is not based on one lucky prompt or one cherry-picked answer. The project repeatedly sampled
+                        model outputs across different depths and different systems, then consolidated those outputs into
+                        portfolio choices. The point was to give the models many chances to be inconsistent, noisy, or wrong,
+                        and then see whether the average trendlines still followed a meaningful pattern.
                     </p>
                     <p>
-                        Tools like ChatGPT,Claude, Gemini, and other AI systems can be valuable research
-                        tools because they help compress information into clearer themes. They are not magic,
-                        and they should not be treated as prediction machines. But they can help you ask better
-                        questions, compare narratives, identify recurring themes, and understand why certain things
-                        keep showing up in different ways.
+                        What makes this interesting is that the LLM portfolios have tended to move in close formation with
+                        each other while being tested against benchmarks like the S&amp;P 500, Dow, and SPY, plus random
+                        portfolios built from the same market universe. That suggests the models are not just producing
+                        random lists of tickers. They are surfacing recurring market narratives around companies that keep
+                        showing up across repeated runs.
                     </p>
                     <p>
-                        This dashboard turns that idea into a trackable experiment. It compares narrative-derived
-                        portfolios against passive benchmarks and random portfolios using the same starting conditions,
-                        the same performance lens, and the same ongoing measurement framework.
+                        Yes, the core challenge is to beat the benchmark. But the bigger purpose is to demystify investing.
+                        Markets are not driven only by earnings, margins, and cash flow. They are also driven by attention,
+                        belief, momentum, and the stories investors tell about which companies matter and why.
+                    </p>
+                    <p>
+                        Tools like ChatGPT, Claude, Gemini, OpenAI models, and other AI systems can be valuable research
+                        tools because they help compress overwhelming information into clearer themes. They are not magic,
+                        and they should not be treated as prediction machines. But they can help investors ask better
+                        questions, compare narratives, identify recurring themes, and understand why certain companies keep
+                        appearing across different forms of market discussion.
+                    </p>
+                    <p>
+                        This dashboard turns that idea into a live, measurable experiment: narrative-derived portfolios
+                        versus passive benchmarks and random portfolios, all tracked from the same starting point and judged
+                        through the same performance lens.
                     </p>
                 </div>
                 <div class="about-section-title">What this is testing</div>
                 <ul class="about-list">
-                    <li>Whether repeated LLM outputs reveal a useful narrative consensus.</li>
-                    <li>Whether that narrative consensus can be translated into portfolio construction.</li>
-                    <li>Whether those portfolios behave differently from passive market exposure or random selection.</li>
+                    <li>Whether repeated LLM outputs can cut through market noise and surface consistent portfolio themes.</li>
+                    <li>Whether those themes can translate into portfolios that compete with or outperform standard benchmarks.</li>
+                    <li>Whether model-generated portfolios behave more like each other than like random portfolios.</li>
                     <li>Whether AI can make investing research more understandable, structured, and accessible.</li>
                 </ul>
                 <div class="about-section-title">What this is not</div>
                 <ul class="about-list">
                     <li>It is not financial advice.</li>
-                    <li>It is not a claim that AI can predict the market.</li>
+                    <li>It is not a claim that AI can predict the market with certainty.</li>
                     <li>It is not a claim that any security is fundamentally undervalued.</li>
-                    <li>It is a live research project about narratives, benchmarks, and disciplined measurement.</li>
+                    <li>It is a live research project about narrative signals, benchmarks, and disciplined measurement.</li>
                 </ul>
             </div>
             """,
             unsafe_allow_html=True,
         )
-
 
 def render_daily_ai_summary() -> None:
     payload, error_message = read_daily_insight_payload()
