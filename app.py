@@ -114,6 +114,7 @@ st.markdown(
             font-weight: 800;
         }
 
+        .about-card,
         .ai-summary-card {
             position: relative;
             overflow: hidden;
@@ -129,6 +130,7 @@ st.markdown(
             margin-bottom: 0.4rem;
         }
 
+        .about-kicker,
         .ai-summary-kicker {
             display: inline-flex;
             padding: 6px 10px;
@@ -144,6 +146,7 @@ st.markdown(
             margin-bottom: 12px;
         }
 
+        .about-headline,
         .ai-summary-headline {
             font-size: 1.45rem;
             line-height: 1.18;
@@ -153,6 +156,7 @@ st.markdown(
             letter-spacing: -0.02em;
         }
 
+        .about-body,
         .ai-summary-status,
         .ai-summary-body {
             color: rgba(235, 244, 255, 0.86);
@@ -161,13 +165,7 @@ st.markdown(
             margin-top: 0.85rem;
         }
 
-        .ai-summary-meta {
-            color: rgba(208, 224, 240, 0.72);
-            font-size: 0.82rem;
-            margin-top: 0.25rem;
-            margin-bottom: 0.9rem;
-        }
-
+        .about-section-title,
         .ai-summary-section-title {
             color: #F6FBFF;
             font-weight: 850;
@@ -175,6 +173,7 @@ st.markdown(
             margin-bottom: 0.4rem;
         }
 
+        .about-list,
         .ai-summary-list {
             margin-top: 0.25rem;
             margin-bottom: 0;
@@ -183,8 +182,16 @@ st.markdown(
             line-height: 1.55;
         }
 
+        .about-list li,
         .ai-summary-list li {
             margin-bottom: 0.42rem;
+        }
+
+        .ai-summary-meta {
+            color: rgba(208, 224, 240, 0.72);
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.9rem;
         }
     </style>
     """,
@@ -399,6 +406,58 @@ def manually_refresh_daily_insight(
 
     except Exception as exc:
         return False, f"Could not refresh daily AI insight: {exc}"
+
+
+def render_about_why() -> None:
+    with st.expander("About / Why this exists", expanded=False):
+        st.markdown(
+            """
+            <div class="about-card">
+                <div class="about-kicker">From Noise to Action</div>
+                <h3 class="about-headline">This project tests whether AI-generated market narratives can become a measurable portfolio signal.</h3>
+                <div class="about-body">
+                    <p>
+                        The core question behind this dashboard is simple: can a portfolio constructed with help from
+                        large language models perform differently from buying broad market benchmarks or selecting
+                        stocks at random?
+                    </p>
+                    <p>
+                        Yes, one goal is to see whether narrative-derived portfolios can beat standard benchmarks like
+                        the S&amp;P 500, Dow Jones Industrial Average, and SPY. But the bigger goal is to demystify investing.
+                        Markets do not move only because of hard financial data. They also move because of attention,
+                        belief, momentum, and the stories investors tell about companies.
+                    </p>
+                    <p>
+                        Tools like ChatGPT, OpenAI models, Claude, Gemini, and other AI systems can be valuable research
+                        tools because they help compress noisy market information into clearer themes. They are not magic,
+                        and they should not be treated as prediction machines. But they can help investors ask better
+                        questions, compare narratives, identify recurring themes, and understand why certain companies
+                        keep showing up in market conversations.
+                    </p>
+                    <p>
+                        This dashboard turns that idea into a trackable experiment. It compares narrative-derived
+                        portfolios against passive benchmarks and random portfolios using the same starting conditions,
+                        the same performance lens, and the same ongoing measurement framework.
+                    </p>
+                </div>
+                <div class="about-section-title">What this is testing</div>
+                <ul class="about-list">
+                    <li>Whether repeated LLM outputs reveal a useful narrative consensus.</li>
+                    <li>Whether that narrative consensus can be translated into portfolio construction.</li>
+                    <li>Whether those portfolios behave differently from passive market exposure or random selection.</li>
+                    <li>Whether AI can make investing research more understandable, structured, and accessible.</li>
+                </ul>
+                <div class="about-section-title">What this is not</div>
+                <ul class="about-list">
+                    <li>It is not financial advice.</li>
+                    <li>It is not a claim that AI can predict the market.</li>
+                    <li>It is not a claim that any security is fundamentally undervalued.</li>
+                    <li>It is a live research project about narratives, benchmarks, and disciplined measurement.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_daily_ai_summary() -> None:
@@ -837,6 +896,8 @@ render_hero_banner(
     latest_date=latest_available_date,
     benchmark_choice=initial_benchmark,
 )
+
+render_about_why()
 
 render_daily_ai_summary()
 
