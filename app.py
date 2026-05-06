@@ -423,16 +423,16 @@ def render_about_why() -> None:
                     </p>
                     <p>
                         Yes, one goal is to see whether narrative-derived portfolios can beat standard benchmarks like
-                        the S&amp;P 500, Dow Jones Industrial Average, and SPY. But the bigger goal is to demystify investing.
+                        the S&amp;P 500, Dow. But the bigger goal is to demystify investing.
                         Markets do not move only because of hard financial data. They also move because of attention,
                         belief, momentum, and the stories investors tell about companies.
                     </p>
                     <p>
-                        Tools like ChatGPT, OpenAI models, Claude, Gemini, and other AI systems can be valuable research
-                        tools because they help compress noisy market information into clearer themes. They are not magic,
-                        and they should not be treated as prediction machines. But they can help investors ask better
-                        questions, compare narratives, identify recurring themes, and understand why certain companies
-                        keep showing up in market conversations.
+                        Tools like ChatGPT,Claude, Gemini, and other AI systems can be valuable research
+                        tools because they help compress information into clearer themes. They are not magic,
+                        and they should not be treated as prediction machines. But they can help you ask better
+                        questions, compare narratives, identify recurring themes, and understand why certain things
+                        keep showing up in different ways.
                     </p>
                     <p>
                         This dashboard turns that idea into a trackable experiment. It compares narrative-derived
