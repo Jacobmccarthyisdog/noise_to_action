@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,7 @@ from calculations import (
     build_datasets,
     build_summary,
     summarize_benchmark,
+    build_ytd_metrics_snapshot,
     format_summary_table,
     format_holdings_table,
 )
@@ -30,6 +32,7 @@ from charts import (
     render_chart,
     metric_card,
 )
+from insights import generate_llm_insight, save_daily_insight
 
 DAILY_INSIGHT_PATH = Path("data/daily_insight.json")
 
@@ -350,6 +353,54 @@ def format_generated_at(value: str) -> str:
         return raw_value
 
 
+def get_ai_refresh_password() -> str:
+    try:
+        secret_value = st.secrets.get("AI_REFRESH_PASSWORD", "")
+        if secret_value:
+            return str(secret_value)
+    except Exception:
+        pass
+
+    return os.getenv("AI_REFRESH_PASSWORD", "")
+
+
+def manually_refresh_daily_insight(
+    portfolios_df: pd.DataFrame,
+    prices_df: pd.DataFrame,
+    benchmark_choice: str,
+) -> tuple[bool, str]:
+    try:
+        (
+            portfolio_history_df,
+            _merged_positions_df,
+            holdings_snapshot_df,
+            benchmark_history_df,
+            _portfolio_cumret_df,
+            _benchmark_cumret_df,
+        ) = build_datasets(portfolios_df, prices_df)
+
+        metrics_payload = build_ytd_metrics_snapshot(
+            portfolio_history=portfolio_history_df,
+            holdings_snapshot=holdings_snapshot_df,
+            benchmark_history=benchmark_history_df,
+            benchmark_choice=benchmark_choice,
+        )
+
+        record = generate_llm_insight(metrics_payload)
+        output_path = save_daily_insight(record)
+
+        status = record.get("status", "unknown")
+        source = record.get("source", "unknown")
+
+        return (
+            True,
+            f"Daily AI insight refreshed. Status: `{status}`. Source: `{source}`. Saved to `{output_path.as_posix()}`.",
+        )
+
+    except Exception as exc:
+        return False, f"Could not refresh daily AI insight: {exc}"
+
+
 def render_daily_ai_summary() -> None:
     payload, error_message = read_daily_insight_payload()
     record = get_latest_daily_insight(payload) if payload is not None else {}
@@ -398,7 +449,7 @@ def render_daily_ai_summary() -> None:
     update_note = first_present(
         record,
         ["update_note"],
-        "Updated 30 minutes before and after market close.",
+        "Updated 30 minutes before market open and 30 minutes after market close.",
     )
 
     bullets = as_list(
@@ -671,6 +722,36 @@ with st.sidebar:
         st.session_state.benchmark_choice = default_benchmark
         st.session_state.date_range = default_dates
         st.rerun()
+
+    st.markdown("### AI Insight Refresh")
+
+    ai_refresh_password = st.text_input(
+        "Refresh password",
+        type="password",
+        key="ai_refresh_password",
+        help="Required to manually regenerate the daily AI portfolio summary.",
+    )
+
+    if st.button("Refresh AI Summary", key="refresh_ai_summary_button", use_container_width=True):
+        expected_password = get_ai_refresh_password()
+
+        if not expected_password:
+            st.error("AI refresh password is not configured.")
+        elif ai_refresh_password != expected_password:
+            st.error("Incorrect password.")
+        else:
+            with st.spinner("Refreshing daily AI summary..."):
+                success, message = manually_refresh_daily_insight(
+                    portfolios_df=portfolios,
+                    prices_df=prices,
+                    benchmark_choice=st.session_state.benchmark_choice,
+                )
+
+            if success:
+                st.success(message)
+                st.rerun()
+            else:
+                st.error(message)
 
     st.multiselect(
         "Select portfolios",
