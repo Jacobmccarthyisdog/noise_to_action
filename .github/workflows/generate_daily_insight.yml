@@ -1,0 +1,56 @@
+name: Generate Daily Insight
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Runs 30 minutes before US market open during Eastern Daylight Time.
+    # 9:00 AM ET = 8:00 AM CT = 13:00 UTC.
+    - cron: "0 13 * * 1-5"
+
+    # Runs 30 minutes after US market close during Eastern Daylight Time.
+    # 4:30 PM ET = 3:30 PM CT = 20:30 UTC.
+    - cron: "30 20 * * 1-5"
+
+permissions:
+  contents: write
+
+jobs:
+  generate-daily-insight:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate daily AI insight
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4o-mini
+        run: |
+          python jobs/generate_daily_insight.py --force
+
+      - name: Commit updated daily insight
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet data/daily_insight.json; then
+            echo "No changes to commit."
+          else
+            git add data/daily_insight.json
+            git commit -m "Update daily AI portfolio insight"
+            git push
+          fi

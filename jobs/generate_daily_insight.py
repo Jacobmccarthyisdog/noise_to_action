@@ -17,7 +17,7 @@ from insights import (
 )
 
 
-def main(force=False):
+def main(force: bool = False) -> None:
     portfolios, prices = load_data()
 
     (
@@ -48,10 +48,13 @@ def main(force=False):
     output_path = save_daily_insight(record)
 
     print(f"Saved daily insight for {as_of_date} to {output_path}")
+    print(f"Generation status: {record.get('status')}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate the daily portfolio insight artifact.")
+    parser = argparse.ArgumentParser(
+        description="Generate the daily portfolio insight artifact."
+    )
     parser.add_argument(
         "--force",
         action="store_true",

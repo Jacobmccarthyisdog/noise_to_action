@@ -1,3 +1,8 @@
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -25,6 +30,8 @@ from charts import (
     render_chart,
     metric_card,
 )
+
+DAILY_INSIGHT_PATH = Path("data/daily_insight.json")
 
 st.set_page_config(
     page_title="Portfolio Dashboard",
@@ -81,6 +88,100 @@ st.markdown(
             border: 1px solid rgba(255,255,255,0.08);
             color: rgba(240, 247, 255, 0.90);
             font-size: 0.85rem;
+        }
+
+        div[data-testid="stExpander"] {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.10), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.08), transparent 26%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        div[data-testid="stExpander"] details {
+            border: none;
+        }
+
+        div[data-testid="stExpander"] summary {
+            color: #F6FBFF;
+            font-weight: 800;
+        }
+
+        .ai-summary-card {
+            position: relative;
+            overflow: hidden;
+            padding: 24px 26px 22px 26px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.12), transparent 24%),
+                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+            margin-top: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .ai-summary-kicker {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 212, 170, 0.10);
+            border: 1px solid rgba(0, 212, 170, 0.22);
+            color: rgba(180, 255, 235, 0.92);
+            font-size: 0.74rem;
+            line-height: 1;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+
+        .ai-summary-headline {
+            font-size: 1.45rem;
+            line-height: 1.18;
+            font-weight: 850;
+            color: #F6FBFF;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .ai-summary-status,
+        .ai-summary-body {
+            color: rgba(235, 244, 255, 0.86);
+            font-size: 0.98rem;
+            line-height: 1.62;
+            margin-top: 0.85rem;
+        }
+
+        .ai-summary-meta {
+            color: rgba(208, 224, 240, 0.72);
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .ai-summary-section-title {
+            color: #F6FBFF;
+            font-weight: 850;
+            margin-top: 1.15rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .ai-summary-list {
+            margin-top: 0.25rem;
+            margin-bottom: 0;
+            padding-left: 1.2rem;
+            color: rgba(235, 244, 255, 0.84);
+            line-height: 1.55;
+        }
+
+        .ai-summary-list li {
+            margin-bottom: 0.42rem;
         }
     </style>
     """,
@@ -146,6 +247,229 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
     )
 
     return banner_df.sort_values("Overall Return", ascending=False).reset_index(drop=True)
+
+
+def read_daily_insight_payload(path: Path = DAILY_INSIGHT_PATH) -> tuple[Any | None, str | None]:
+    if not path.exists():
+        return None, f"Could not find `{path.as_posix()}`. The daily insight job has not written the file into this app deployment yet."
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+    except json.JSONDecodeError as exc:
+        return None, f"`{path.as_posix()}` exists, but it is not valid JSON: {exc}"
+    except OSError as exc:
+        return None, f"`{path.as_posix()}` exists, but Streamlit could not read it: {exc}"
+
+    return payload, None
+
+
+def get_latest_daily_insight(payload: Any) -> dict[str, Any]:
+    if isinstance(payload, list):
+        if not payload:
+            return {}
+
+        dict_records = [item for item in payload if isinstance(item, dict)]
+        if not dict_records:
+            return {}
+
+        return sorted(
+            dict_records,
+            key=lambda item: str(
+                item.get("date")
+                or item.get("as_of_date")
+                or item.get("generated_for")
+                or item.get("generated_at")
+                or ""
+            ),
+            reverse=True,
+        )[0]
+
+    if isinstance(payload, dict):
+        for collection_key in ["insights", "records", "daily_insights", "items"]:
+            records = payload.get(collection_key)
+            if isinstance(records, list) and records:
+                dict_records = [item for item in records if isinstance(item, dict)]
+                if dict_records:
+                    return sorted(
+                        dict_records,
+                        key=lambda item: str(
+                            item.get("date")
+                            or item.get("as_of_date")
+                            or item.get("generated_for")
+                            or item.get("generated_at")
+                            or ""
+                        ),
+                        reverse=True,
+                    )[0]
+
+        return payload
+
+    return {}
+
+
+def first_present(record: dict[str, Any], keys: list[str], default: str = "") -> str:
+    for key in keys:
+        value = record.get(key)
+        if value is not None and value != "":
+            return str(value)
+    return default
+
+
+def as_list(value: Any) -> list[Any]:
+    if value is None or value == "":
+        return []
+
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, tuple):
+        return list(value)
+
+    return [value]
+
+
+def format_generated_at(value: str) -> str:
+    if not value:
+        return ""
+
+    raw_value = str(value).strip()
+
+    try:
+        from zoneinfo import ZoneInfo
+
+        cleaned_value = raw_value.replace("Z", "+00:00")
+        parsed_value = datetime.fromisoformat(cleaned_value)
+
+        if parsed_value.tzinfo is None:
+            parsed_value = parsed_value.replace(tzinfo=ZoneInfo("UTC"))
+
+        central_time = parsed_value.astimezone(ZoneInfo("America/Chicago"))
+        return central_time.strftime("%I:%M %p %B %d, %Y CT").lstrip("0")
+    except Exception:
+        return raw_value
+
+
+def render_daily_ai_summary() -> None:
+    payload, error_message = read_daily_insight_payload()
+    record = get_latest_daily_insight(payload) if payload is not None else {}
+
+    as_of_date = first_present(
+        record,
+        ["date", "as_of_date", "generated_for", "generated_at"],
+        "not generated yet",
+    )
+
+    generated_at = first_present(
+        record,
+        ["generated_at"],
+        "",
+    )
+
+    formatted_generated_at = format_generated_at(generated_at)
+
+    if formatted_generated_at:
+        expander_label = f"AI Summary of Portfolio Performance • Updated {formatted_generated_at}"
+    else:
+        expander_label = f"AI Summary of Portfolio Performance • Updated {as_of_date}"
+
+    headline = first_present(
+        record,
+        ["headline", "title", "summary_title"],
+        "AI generated summary",
+    )
+
+    summary = first_present(
+        record,
+        [
+            "summary",
+            "insight_text",
+            "insight",
+            "narrative",
+            "text",
+            "analysis",
+            "ai_summary",
+            "daily_summary",
+            "portfolio_summary",
+        ],
+        "",
+    )
+
+    update_note = first_present(
+        record,
+        ["update_note"],
+        "Updated 30 minutes before and after market close.",
+    )
+
+    bullets = as_list(
+        record.get("takeaways")
+        or record.get("bullets")
+        or record.get("key_points")
+        or record.get("highlights")
+    )
+
+    with st.expander(expander_label, expanded=False):
+        if error_message:
+            st.warning(error_message)
+            st.markdown(
+                f"""
+                <div class="ai-summary-card">
+                    <h3 class="ai-summary-headline">Daily insight unavailable</h3>
+                    <div class="ai-summary-status">
+                        This dropdown is rendering correctly. The missing piece is the generated JSON artifact.
+                        Once the GitHub Action writes <code>{DAILY_INSIGHT_PATH.as_posix()}</code>, the summary will appear here.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            return
+
+        if not record:
+            st.warning("The daily insight file loaded, but no usable insight record was found.")
+            st.markdown(
+                """
+                <div class="ai-summary-card">
+                    <div class="ai-summary-kicker">Daily AI readout</div>
+                    <h3 class="ai-summary-headline">Daily insight unavailable</h3>
+                    <div class="ai-summary-status">
+                        This dropdown is rendering correctly, but the JSON structure does not contain a readable insight record.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            return
+
+        st.markdown(
+            f"""
+            <div class="ai-summary-card">
+                <div class="ai-summary-kicker">Daily AI readout</div>
+                <h3 class="ai-summary-headline">{headline}</h3>
+                <div class="ai-summary-meta">{update_note}</div>
+                <div class="ai-summary-body">{summary}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if bullets:
+            st.markdown(
+                '<div class="ai-summary-section-title">Key takeaways</div>',
+                unsafe_allow_html=True,
+            )
+
+            for bullet in bullets:
+                if isinstance(bullet, dict):
+                    bullet_text = " | ".join(
+                        f"{key}: {value}"
+                        for key, value in bullet.items()
+                        if value not in (None, "", [], {})
+                    )
+                    if bullet_text:
+                        st.markdown(f"- {bullet_text}")
+                else:
+                    st.markdown(f"- {bullet}")
 
 
 def render_hero_banner(latest_date, benchmark_choice: str):
@@ -432,6 +756,8 @@ render_hero_banner(
     latest_date=latest_available_date,
     benchmark_choice=initial_benchmark,
 )
+
+render_daily_ai_summary()
 
 render_portfolio_ticker(banner_df)
 
