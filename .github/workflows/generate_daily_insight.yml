@@ -2,36 +2,15 @@ name: Generate Daily Insight
 
 on:
   workflow_dispatch:
-    inputs:
-      target_branch:
-        description: "Branch to update"
-        required: true
-        default: "milestone-3-llm-insights"
-        type: string
-      force:
-        description: "Regenerate even if an OpenAI insight already exists"
-        required: true
-        default: "true"
-        type: choice
-        options:
-          - "true"
-          - "false"
-
-  push:
-    branches:
-      - milestone-3-llm-insights
-    paths:
-      - ".github/workflows/generate_daily_insight.yml"
-      - "jobs/generate_daily_insight.py"
-      - "insights.py"
-      - "requirements.txt"
-      - "data/daily_insight.json"
-      - "data/**"
-      - "calculations.py"
-      - "data_loader.py"
 
   schedule:
-    - cron: "30 22 * * 1-5"
+    # Runs 30 minutes before US market open during Eastern Daylight Time.
+    # 9:00 AM ET = 8:00 AM CT = 13:00 UTC.
+    - cron: "0 13 * * 1-5"
+
+    # Runs 30 minutes after US market close during Eastern Daylight Time.
+    # 4:30 PM ET = 3:30 PM CT = 20:30 UTC.
+    - cron: "30 20 * * 1-5"
 
 permissions:
   contents: write
@@ -40,43 +19,11 @@ jobs:
   generate-daily-insight:
     runs-on: ubuntu-latest
 
-    env:
-      DEFAULT_TARGET_BRANCH: milestone-3-llm-insights
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
-
     steps:
-      - name: Resolve target branch
-        id: branch
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "target_branch=${{ github.event.inputs.target_branch }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            echo "target_branch=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "target_branch=$DEFAULT_TARGET_BRANCH" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Check out repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.branch.outputs.target_branch }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Show checked out branch and files
-        shell: bash
-        run: |
-          echo "Event: ${{ github.event_name }}"
-          echo "Target branch: ${{ steps.branch.outputs.target_branch }}"
-          git branch --show-current
-          git log -1 --oneline
-          echo ""
-          echo "Relevant files:"
-          ls -la
-          ls -la data || true
-          ls -la jobs || true
-          ls -la .github/workflows || true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -84,98 +31,26 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        shell: bash
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
+          pip install -r requirements.txt
 
-      - name: Verify OpenAI API key
-        shell: bash
+      - name: Generate daily AI insight
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4o-mini
         run: |
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "OPENAI_API_KEY is not set."
-            echo "Add it here:"
-            echo "Repo > Settings > Secrets and variables > Actions > Repository secrets > New repository secret"
-            echo "Secret name must be exactly: OPENAI_API_KEY"
-            exit 1
-          fi
+          python jobs/generate_daily_insight.py --force
 
-          echo "OPENAI_API_KEY is present."
-          echo "OPENAI_MODEL=$OPENAI_MODEL"
-
-      - name: Generate OpenAI daily insight
-        shell: bash
-        run: |
-          FORCE_FLAG=""
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ "${{ github.event.inputs.force }}" = "true" ]; then
-              FORCE_FLAG="--force"
-            fi
-          else
-            FORCE_FLAG="--force"
-          fi
-
-          echo "Running: python jobs/generate_daily_insight.py $FORCE_FLAG"
-          python jobs/generate_daily_insight.py $FORCE_FLAG
-
-      - name: Validate generated JSON
-        shell: bash
-        run: |
-          if [ ! -f data/daily_insight.json ]; then
-            echo "data/daily_insight.json was not created."
-            exit 1
-          fi
-
-          echo "Generated daily_insight.json:"
-          cat data/daily_insight.json
-
-          python -m json.tool data/daily_insight.json > /tmp/daily_insight_validated.json
-          cp /tmp/daily_insight_validated.json data/daily_insight.json
-
-      - name: Require OpenAI source
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          path = Path("data/daily_insight.json")
-          payload = json.loads(path.read_text(encoding="utf-8"))
-
-          source = payload.get("source")
-          headline = payload.get("headline")
-          summary = payload.get("summary")
-
-          print(f"source={source}")
-          print(f"headline={headline}")
-
-          if source != "openai":
-              raise SystemExit(
-                  "data/daily_insight.json was generated, but source is not 'openai'. "
-                  "The app would still show placeholder or non-OpenAI content."
-              )
-
-          if not headline or not summary:
-              raise SystemExit(
-                  "data/daily_insight.json source is openai, but headline or summary is missing."
-              )
-          PY
-
-      - name: Commit generated insight
-        shell: bash
+      - name: Commit updated daily insight
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/daily_insight.json
-
-          if git diff --cached --quiet; then
-            echo "No daily insight changes to commit."
-            exit 0
+          if git diff --quiet data/daily_insight.json; then
+            echo "No changes to commit."
+          else
+            git add data/daily_insight.json
+            git commit -m "Update daily AI portfolio insight"
+            git push
           fi
-
-          git commit -m "Update daily AI insight"
-          git push origin HEAD:${{ steps.branch.outputs.target_branch }}
