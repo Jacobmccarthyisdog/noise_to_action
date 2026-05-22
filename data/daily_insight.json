@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "as_of_date": "2026-05-22",
-  "generated_at": "2026-05-22T15:51:54.559776+00:00",
+  "generated_at": "2026-05-22T21:42:02.546729+00:00",
   "period": "YTD",
   "benchmark": "SPY",
   "model": "gpt-4o-mini",
@@ -12,57 +12,57 @@
     "as_of_date": "2026-05-22",
     "period": "YTD",
     "benchmark": "SPY",
-    "benchmark_return": 0.10328057887291142,
+    "benchmark_return": 0.10038077391663536,
     "portfolio_count": 8,
-    "avg_portfolio_return": 0.19703375168379672,
-    "avg_alpha": 0.0937531728108853,
+    "avg_portfolio_return": 0.19127292134229984,
+    "avg_alpha": 0.09089214742566448,
     "top_portfolio": {
       "name": "Random A",
-      "return": 0.28442843491392544,
-      "dollar_change": 284.42843491392546,
-      "current_value": 1284.4284349139255,
+      "return": 0.28290910283290094,
+      "dollar_change": 282.909102832901,
+      "current_value": 1282.909102832901,
       "max_drawdown": -0.06958000344643778
     },
     "bottom_portfolio": {
       "name": "Random B",
-      "return": 0.13914861056988648,
-      "dollar_change": 139.1486105698864,
-      "current_value": 1139.1486105698864,
+      "return": 0.13843944022809374,
+      "dollar_change": 138.43944022809364,
+      "current_value": 1138.4394402280936,
       "max_drawdown": -0.13267678787573045
     },
     "most_volatile": {
       "name": "Random B",
-      "return": 0.13914861056988648,
-      "dollar_change": 139.1486105698864,
-      "current_value": 1139.1486105698864,
+      "return": 0.13843944022809374,
+      "dollar_change": 138.43944022809364,
+      "current_value": 1138.4394402280936,
       "max_drawdown": -0.13267678787573045,
-      "volatility": 0.020632828010153554
+      "volatility": 0.020622988809844343
     },
     "top_holding": {
       "ticker": "PANW",
       "portfolio": "Random A",
-      "return": 0.676875309264797,
-      "dollar_change": 139.49046373328937,
-      "current_value": 345.5704637332894
+      "return": 0.6836594907210456,
+      "dollar_change": 140.8885478477931,
+      "current_value": 346.9685478477931
     },
     "bottom_holding": {
       "ticker": "NRG",
       "portfolio": "Random A",
-      "return": -0.03343950255756922,
-      "dollar_change": -0.33406063055011614,
-      "current_value": 9.655939369449884
+      "return": -0.04700919710712648,
+      "dollar_change": -0.4696218791001936,
+      "current_value": 9.520378120899807
     },
     "generated_from": "build_ytd_metrics_snapshot_v1"
   },
   "headline": "Portfolio outperforms benchmark YTD",
-  "summary": "As of 2026-05-22, the portfolio group has an average return of 19.70% versus SPY at 10.33%, producing average alpha of 9.38%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 9.38%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 28.44% and current value of $1,284.43. The weakest portfolio is Random B, with a return of 13.91%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
-  "insight_text": "As of 2026-05-22, the portfolio group has an average return of 19.70% versus SPY at 10.33%, producing average alpha of 9.38%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 9.38%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 28.44% and current value of $1,284.43. The weakest portfolio is Random B, with a return of 13.91%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
+  "summary": "As of 2026-05-22, the portfolio group has an average return of 19.13% versus SPY at 10.04%, producing average alpha of 9.09%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 9.09%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 28.29% and current value of $1,282.91. The weakest portfolio is Random B, with a return of 13.84%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
+  "insight_text": "As of 2026-05-22, the portfolio group has an average return of 19.13% versus SPY at 10.04%, producing average alpha of 9.09%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 9.09%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 28.29% and current value of $1,282.91. The weakest portfolio is Random B, with a return of 13.84%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
   "takeaways": [
-    "Random A is the strongest YTD performer, returning 28.44% with a dollar change of $284.43.",
-    "Random B is the lowest YTD performer, returning 13.91%, which still needs to be interpreted against the SPY benchmark return of 10.33%.",
-    "The portfolio group average return of 19.70% compares to SPY at 10.33%, giving the dashboard a clear benchmark-relative read rather than just an absolute return view.",
-    "Random A is the strongest holding, returning 67.69% with current value of $345.57.",
-    "Random A is the weakest holding, returning -3.34% with current value of $9.66."
+    "Random A is the strongest YTD performer, returning 28.29% with a dollar change of $282.91.",
+    "Random B is the lowest YTD performer, returning 13.84%, which still needs to be interpreted against the SPY benchmark return of 10.04%.",
+    "The portfolio group average return of 19.13% compares to SPY at 10.04%, giving the dashboard a clear benchmark-relative read rather than just an absolute return view.",
+    "Random A is the strongest holding, returning 68.37% with current value of $346.97.",
+    "Random A is the weakest holding, returning -4.70% with current value of $9.52."
   ],
   "update_note": "Updated 30 minutes before and after market close.",
   "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj ********************************************************************************************************************************************************eacA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}"
