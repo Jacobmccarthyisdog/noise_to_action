@@ -1,15 +1,16 @@
+import html
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
-from config import APP_CSS, BENCHMARK_MAP
+from config import BENCHMARK_MAP
 from data_loader import load_data, fetch_price_history
 from calculations import (
     money,
@@ -24,179 +25,481 @@ from calculations import (
     format_holdings_table,
 )
 from charts import (
-    build_return_bar_colors,
     build_portfolio_heatmap,
     build_line_style_map,
     apply_line_styles,
     chart_layout,
     render_chart,
-    metric_card,
 )
 from insights import generate_llm_insight, save_daily_insight
 
+
 DAILY_INSIGHT_PATH = Path("data/daily_insight.json")
+ACCENT_BLUE = "#2997FF"
+
 
 st.set_page_config(
-    page_title="Portfolio Dashboard",
+    page_title="From Noise to Action",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-st.markdown(APP_CSS, unsafe_allow_html=True)
-st.markdown(
-    """
-    <style>
-        .hero-banner {
-            position: relative;
-            overflow: hidden;
-            padding: 28px 30px 24px 30px;
-            border-radius: 22px;
-            background:
-                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
-                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.16), transparent 24%),
-                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
-            margin-top: 1.2rem;
-            margin-bottom: 0.9rem;
-        }
 
-        .hero-title {
-            font-size: 2.6rem;
-            line-height: 1.05;
-            font-weight: 800;
-            color: #F6FBFF;
-            margin: 0;
-            letter-spacing: -0.03em;
-        }
+# ---------------------------------------------------------------------
+# Global visual system
+# ---------------------------------------------------------------------
 
-        .hero-subtitle {
-            margin-top: 10px;
-            color: rgba(235, 244, 255, 0.78);
-            font-size: 1rem;
-            max-width: 920px;
-        }
+PREMIUM_CSS = f"""
+<style>
+    :root {{
+        --bg: #050505;
+        --bg-soft: #0B0B0D;
+        --surface: rgba(255,255,255,0.045);
+        --surface-strong: rgba(255,255,255,0.075);
+        --text: #F5F5F7;
+        --muted: #A1A1A6;
+        --muted-2: #6E6E73;
+        --border: rgba(255,255,255,0.105);
+        --border-strong: rgba(255,255,255,0.16);
+        --accent: {ACCENT_BLUE};
+        --good: #30D158;
+        --bad: #FF453A;
+    }}
 
-        .hero-meta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 16px;
-        }
+    .stApp {{
+        background:
+            radial-gradient(circle at 50% -10%, rgba(41,151,255,0.18), transparent 32%),
+            radial-gradient(circle at 8% 20%, rgba(41,151,255,0.08), transparent 24%),
+            linear-gradient(180deg, #050505 0%, #08080A 44%, #050505 100%);
+        color: var(--text);
+    }}
 
-        .hero-meta-pill {
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: rgba(240, 247, 255, 0.90);
-            font-size: 0.85rem;
-        }
+    .block-container {{
+        max-width: 1240px;
+        padding-top: 1.35rem;
+        padding-bottom: 4rem;
+    }}
 
-        div[data-testid="stExpander"] {
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 22px;
-            background:
-                radial-gradient(circle at top right, rgba(0, 212, 170, 0.10), transparent 30%),
-                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.08), transparent 26%),
-                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
-            box-shadow: 0 18px 50px rgba(0,0,0,0.22);
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
+    h1, h2, h3, h4, h5, h6 {{
+        color: var(--text);
+        letter-spacing: -0.035em;
+    }}
 
-        div[data-testid="stExpander"] details {
-            border: none;
-        }
+    p, label, span, div {{
+        color: inherit;
+    }}
 
-        div[data-testid="stExpander"] summary {
-            color: #F6FBFF;
-            font-weight: 800;
-        }
+    section[data-testid="stSidebar"] {{
+        background: rgba(10,10,12,0.96);
+        border-right: 1px solid var(--border);
+    }}
 
-        .about-card,
-        .ai-summary-card {
-            position: relative;
-            overflow: hidden;
-            padding: 24px 26px 22px 26px;
-            border-radius: 22px;
-            background:
-                radial-gradient(circle at top right, rgba(0, 212, 170, 0.18), transparent 28%),
-                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.12), transparent 24%),
-                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
-            margin-top: 0.4rem;
-            margin-bottom: 0.4rem;
-        }
+    div[data-testid="stExpander"] {{
+        border: 1px solid var(--border) !important;
+        border-radius: 26px !important;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.028)) !important;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.22);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }}
 
-        .about-kicker,
-        .ai-summary-kicker {
-            display: inline-flex;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 212, 170, 0.10);
-            border: 1px solid rgba(0, 212, 170, 0.22);
-            color: rgba(180, 255, 235, 0.92);
-            font-size: 0.74rem;
-            line-height: 1;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 12px;
-        }
+    div[data-testid="stExpander"] details {{
+        border: none !important;
+    }}
 
-        .about-headline,
-        .ai-summary-headline {
-            font-size: 1.45rem;
-            line-height: 1.18;
-            font-weight: 850;
-            color: #F6FBFF;
-            margin: 0 0 8px 0;
-            letter-spacing: -0.02em;
-        }
+    div[data-testid="stExpander"] summary {{
+        color: var(--text) !important;
+        font-weight: 750 !important;
+        letter-spacing: -0.01em;
+    }}
 
-        .about-body,
-        .ai-summary-status,
-        .ai-summary-body {
-            color: rgba(235, 244, 255, 0.86);
-            font-size: 0.98rem;
-            line-height: 1.62;
-            margin-top: 0.85rem;
-        }
+    .main-hero {{
+        position: relative;
+        overflow: hidden;
+        padding: 42px 44px 38px 44px;
+        border-radius: 34px;
+        background:
+            radial-gradient(circle at top right, rgba(41,151,255,0.22), transparent 32%),
+            linear-gradient(145deg, rgba(255,255,255,0.082), rgba(255,255,255,0.028));
+        border: 1px solid var(--border);
+        box-shadow:
+            0 32px 100px rgba(0,0,0,0.34),
+            inset 0 1px 0 rgba(255,255,255,0.08);
+        margin-bottom: 1rem;
+    }}
 
-        .about-section-title,
-        .ai-summary-section-title {
-            color: #F6FBFF;
-            font-weight: 850;
-            margin-top: 1.15rem;
-            margin-bottom: 0.4rem;
-        }
+    .hero-kicker {{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: rgba(41,151,255,0.12);
+        border: 1px solid rgba(41,151,255,0.28);
+        color: #B9DDFF;
+        font-size: 0.75rem;
+        font-weight: 760;
+        text-transform: uppercase;
+        letter-spacing: 0.115em;
+        margin-bottom: 18px;
+    }}
 
-        .about-list,
-        .ai-summary-list {
-            margin-top: 0.25rem;
-            margin-bottom: 0;
-            padding-left: 1.2rem;
-            color: rgba(235, 244, 255, 0.84);
-            line-height: 1.55;
-        }
+    .hero-title {{
+        font-size: clamp(2.4rem, 6vw, 5.2rem);
+        line-height: 0.94;
+        font-weight: 850;
+        letter-spacing: -0.07em;
+        color: var(--text);
+        margin: 0;
+        max-width: 980px;
+    }}
 
-        .about-list li,
-        .ai-summary-list li {
-            margin-bottom: 0.42rem;
-        }
+    .hero-subtitle {{
+        margin-top: 18px;
+        max-width: 780px;
+        color: rgba(245,245,247,0.76);
+        font-size: 1.14rem;
+        line-height: 1.55;
+        letter-spacing: -0.01em;
+    }}
 
-        .ai-summary-meta {
-            color: rgba(208, 224, 240, 0.72);
-            font-size: 0.82rem;
-            margin-top: 0.25rem;
-            margin-bottom: 0.9rem;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+    .hero-meta-row {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 26px;
+    }}
+
+    .hero-pill {{
+        padding: 9px 13px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.055);
+        border: 1px solid var(--border);
+        color: rgba(245,245,247,0.84);
+        font-size: 0.86rem;
+        font-weight: 620;
+    }}
+
+    .hero-pill b {{
+        color: var(--text);
+        font-weight: 760;
+    }}
+
+    .section-label {{
+        margin-top: 2rem;
+        margin-bottom: 0.65rem;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 780;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+    }}
+
+    .section-title {{
+        margin-top: 0;
+        margin-bottom: 0.7rem;
+        color: var(--text);
+        font-size: 1.55rem;
+        font-weight: 810;
+        letter-spacing: -0.04em;
+    }}
+
+    .small-note {{
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.45;
+        margin-top: -0.25rem;
+        margin-bottom: 0.9rem;
+    }}
+
+    .glass-divider {{
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+        margin: 1.35rem 0;
+    }}
+
+    .control-card {{
+        padding: 20px;
+        border-radius: 26px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.026));
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }}
+
+    .ai-card {{
+        position: relative;
+        overflow: hidden;
+        padding: 28px 30px 26px 30px;
+        border-radius: 30px;
+        background:
+            radial-gradient(circle at top right, rgba(41,151,255,0.22), transparent 34%),
+            linear-gradient(145deg, rgba(255,255,255,0.072), rgba(255,255,255,0.026));
+        border: 1px solid var(--border);
+        box-shadow:
+            0 28px 90px rgba(0,0,0,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.07);
+        margin-top: 0.9rem;
+        margin-bottom: 1.2rem;
+    }}
+
+    .ai-kicker {{
+        color: #B9DDFF;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 12px;
+    }}
+
+    .ai-headline {{
+        color: var(--text);
+        font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+        line-height: 1.08;
+        font-weight: 830;
+        letter-spacing: -0.045em;
+        margin-bottom: 12px;
+    }}
+
+    .ai-summary {{
+        color: rgba(245,245,247,0.82);
+        font-size: 1.02rem;
+        line-height: 1.62;
+        max-width: 980px;
+    }}
+
+    .ai-meta {{
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 0.86rem;
+    }}
+
+    .metric-grid {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 0.7rem;
+        margin-bottom: 1.2rem;
+    }}
+
+    .premium-metric {{
+        position: relative;
+        overflow: hidden;
+        min-height: 152px;
+        padding: 22px 22px 20px 22px;
+        border-radius: 28px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.027));
+        border: 1px solid var(--border);
+        box-shadow:
+            0 24px 75px rgba(0,0,0,0.24),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+    }}
+
+    .premium-metric::after {{
+        content: "";
+        position: absolute;
+        inset: -1px;
+        pointer-events: none;
+        background: radial-gradient(circle at top right, rgba(41,151,255,0.14), transparent 36%);
+    }}
+
+    .metric-label {{
+        position: relative;
+        z-index: 1;
+        color: var(--muted);
+        font-size: 0.77rem;
+        font-weight: 780;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 14px;
+    }}
+
+    .metric-value {{
+        position: relative;
+        z-index: 1;
+        color: var(--text);
+        font-size: clamp(1.5rem, 3vw, 2.15rem);
+        line-height: 1;
+        font-weight: 850;
+        letter-spacing: -0.055em;
+        margin-bottom: 12px;
+    }}
+
+    .metric-sub {{
+        position: relative;
+        z-index: 1;
+        color: rgba(245,245,247,0.66);
+        font-size: 0.93rem;
+        line-height: 1.45;
+    }}
+
+    .metric-positive {{
+        color: var(--accent);
+    }}
+
+    .metric-negative {{
+        color: var(--bad);
+    }}
+
+    .metric-neutral {{
+        color: var(--text);
+    }}
+
+    .ticker-shell {{
+        width: 100%;
+        overflow: hidden;
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        background:
+            radial-gradient(circle at top right, rgba(41,151,255,0.13), transparent 30%),
+            linear-gradient(180deg, rgba(255,255,255,0.058), rgba(255,255,255,0.025));
+        box-shadow:
+            0 24px 80px rgba(0,0,0,0.24),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+        padding: 12px 0;
+        margin: 0.8rem 0 1.35rem 0;
+    }}
+
+    .ticker-track {{
+        display: flex;
+        width: max-content;
+        animation: ticker-scroll 42s linear infinite;
+        will-change: transform;
+    }}
+
+    .ticker-shell:hover .ticker-track {{
+        animation-play-state: paused;
+    }}
+
+    .ticker-group {{
+        display: flex;
+        gap: 12px;
+        padding-right: 12px;
+    }}
+
+    .ticker-card {{
+        min-width: 238px;
+        padding: 15px 16px 14px 16px;
+        border-radius: 22px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.062), rgba(255,255,255,0.026));
+        border: 1px solid var(--border);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+    }}
+
+    .ticker-name {{
+        color: var(--muted);
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.11em;
+        margin-bottom: 9px;
+        white-space: nowrap;
+    }}
+
+    .ticker-price {{
+        color: var(--text);
+        font-size: 1.08rem;
+        font-weight: 820;
+        letter-spacing: -0.025em;
+        margin-bottom: 8px;
+        white-space: nowrap;
+    }}
+
+    .ticker-stats {{
+        display: flex;
+        gap: 12px;
+        flex-wrap: nowrap;
+        font-size: 0.82rem;
+        font-weight: 720;
+        white-space: nowrap;
+    }}
+
+    .ticker-up {{
+        color: var(--accent);
+    }}
+
+    .ticker-down {{
+        color: var(--bad);
+    }}
+
+    .ticker-flat {{
+        color: rgba(245,245,247,0.62);
+    }}
+
+    @keyframes ticker-scroll {{
+        from {{ transform: translateX(0); }}
+        to {{ transform: translateX(-50%); }}
+    }}
+
+    @media (prefers-reduced-motion: reduce) {{
+        .ticker-track {{
+            animation: none;
+        }}
+    }}
+
+    @media (max-width: 900px) {{
+        .main-hero {{
+            padding: 30px 24px 28px 24px;
+            border-radius: 28px;
+        }}
+
+        .metric-grid {{
+            grid-template-columns: 1fr;
+        }}
+
+        .ticker-card {{
+            min-width: 210px;
+        }}
+    }}
+
+    div[data-testid="stDataFrame"] {{
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }}
+
+    .stButton > button {{
+        border-radius: 999px;
+        border: 1px solid rgba(41,151,255,0.38);
+        background: rgba(41,151,255,0.13);
+        color: #D7ECFF;
+        font-weight: 760;
+    }}
+
+    .stButton > button:hover {{
+        border-color: rgba(41,151,255,0.72);
+        background: rgba(41,151,255,0.20);
+        color: #FFFFFF;
+    }}
+</style>
+"""
+
+st.markdown(PREMIUM_CSS, unsafe_allow_html=True)
+
+
+# ---------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------
+
+def h(value: Any) -> str:
+    return html.escape("" if value is None else str(value))
+
+
+def delta_class(value: Any) -> str:
+    if pd.isna(value):
+        return "metric-neutral"
+    return "metric-positive" if value >= 0 else "metric-negative"
+
+
+def render_html(markup: str) -> None:
+    if hasattr(st, "html"):
+        st.html(markup)
+    else:
+        st.markdown(markup, unsafe_allow_html=True)
 
 
 def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFrame) -> pd.DataFrame:
@@ -214,34 +517,34 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
         )
 
     history_sorted = portfolio_history_df.sort_values(["Portfolio", "Date"]).copy()
-
     records = []
+
     for portfolio_name, group in history_sorted.groupby("Portfolio"):
         group = group.sort_values("Date").copy()
         values = group["Portfolio Value"].dropna().tolist()
+
         if not values:
             continue
 
         latest_value = float(values[-1])
-
         daily_move = None
-        if len(values) >= 2 and values[-2] not in (0, None):
+
+        if len(values) >= 2:
             prior_value = float(values[-2])
             if prior_value != 0:
                 daily_move = (latest_value / prior_value) - 1
-
-        sparkline = values[-20:] if len(values) >= 2 else values
 
         records.append(
             {
                 "Portfolio": portfolio_name,
                 "Latest Value": latest_value,
                 "Daily Move": daily_move,
-                "Sparkline": sparkline,
+                "Sparkline": values[-20:] if len(values) >= 2 else values,
             }
         )
 
     banner_df = pd.DataFrame(records)
+
     if banner_df.empty:
         return banner_df
 
@@ -261,7 +564,7 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
 
 def read_daily_insight_payload(path: Path = DAILY_INSIGHT_PATH) -> tuple[Any | None, str | None]:
     if not path.exists():
-        return None, f"Could not find `{path.as_posix()}`. The daily insight job has not written the file into this app deployment yet."
+        return None, f"Could not find `{path.as_posix()}`. The daily insight job has not written the file yet."
 
     try:
         with path.open("r", encoding="utf-8") as file:
@@ -280,6 +583,7 @@ def get_latest_daily_insight(payload: Any) -> dict[str, Any]:
             return {}
 
         dict_records = [item for item in payload if isinstance(item, dict)]
+
         if not dict_records:
             return {}
 
@@ -298,8 +602,10 @@ def get_latest_daily_insight(payload: Any) -> dict[str, Any]:
     if isinstance(payload, dict):
         for collection_key in ["insights", "records", "daily_insights", "items"]:
             records = payload.get(collection_key)
+
             if isinstance(records, list) and records:
                 dict_records = [item for item in records if isinstance(item, dict)]
+
                 if dict_records:
                     return sorted(
                         dict_records,
@@ -323,6 +629,7 @@ def first_present(record: dict[str, Any], keys: list[str], default: str = "") ->
         value = record.get(key)
         if value is not None and value != "":
             return str(value)
+
     return default
 
 
@@ -408,96 +715,177 @@ def manually_refresh_daily_insight(
         return False, f"Could not refresh daily AI insight: {exc}"
 
 
-def render_about_why() -> None:
-    with st.expander("About / Why this exists", expanded=False):
+# ---------------------------------------------------------------------
+# Render components
+# ---------------------------------------------------------------------
+
+def render_hero_banner(
+    latest_date: pd.Timestamp,
+    benchmark_choice: str,
+    portfolio_count: int,
+) -> None:
+    latest_label = latest_date.strftime("%B %d, %Y") if pd.notna(latest_date) else "Unavailable"
+
+    st.markdown(
+        f"""
+        <div class="main-hero">
+            <div class="hero-kicker">Live research dashboard</div>
+            <h1 class="hero-title">From Noise to Action</h1>
+            <div class="hero-subtitle">
+                AI-generated market narratives, measured against reality. A calm view of whether repeated model-selected portfolios are separating from benchmarks and random baselines.
+            </div>
+            <div class="hero-meta-row">
+                <div class="hero-pill"><b>Data through</b> {h(latest_label)}</div>
+                <div class="hero-pill"><b>Benchmark</b> {h(benchmark_choice)}</div>
+                <div class="hero-pill"><b>Portfolios tracked</b> {portfolio_count}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_control_panel(
+    all_portfolios_source: list[str],
+    benchmark_options: list[str],
+    date_min,
+    date_max,
+    portfolios: pd.DataFrame,
+    prices: pd.DataFrame,
+) -> None:
+    with st.expander("Refine view", expanded=False):
         st.markdown(
             """
-            <div class="about-card">
-                <div class="about-kicker">From Noise to Action</div>
-                <h3 class="about-headline">This project uses LLMs to cut through market noise and test whether repeated AI-generated narratives can help identify winners.</h3>
-                <div class="about-body">
-                    <p>
-                        The idea behind this dashboard is straightforward: ask large language models to build portfolios
-                        with the goal of beating standard benchmarks, then track whether those portfolios actually behave
-                        differently from passive indexes or randomly selected stocks.
-                    </p>
-                    <p>
-                        This is not based on one lucky prompt or one cherry-picked answer. The project repeatedly sampled
-                        model outputs across different depths and different systems, then consolidated those outputs into
-                        portfolio choices. The point was to give the models many chances to be inconsistent, noisy, or wrong,
-                        and then see whether the average trendlines still followed a meaningful pattern.
-                    </p>
-                    <p>
-                        What makes this interesting is that the LLM portfolios have tended to move in close formation with
-                        each other while being tested against benchmarks like the S&amp;P 500, Dow, and SPY, plus random
-                        portfolios built from the same market universe. That suggests the models are not just producing
-                        random lists of tickers. They are surfacing recurring market narratives around companies that keep
-                        showing up across repeated runs.
-                    </p>
-                    <p>
-                        Yes, the core challenge is to beat the benchmark. But the bigger purpose is to demystify investing.
-                        Markets are not driven only by earnings, margins, and cash flow. They are also driven by attention,
-                        belief, momentum, and the stories investors tell about which companies matter and why.
-                    </p>
-                    <p>
-                        Tools like ChatGPT, Claude, Gemini, OpenAI models, and other AI systems can be valuable research
-                        tools because they help compress overwhelming information into clearer themes. They are not magic,
-                        and they should not be treated as prediction machines. But they can help investors ask better
-                        questions, compare narratives, identify recurring themes, and understand why certain companies keep
-                        appearing across different forms of market discussion.
-                    </p>
-                    <p>
-                        This dashboard turns that idea into a live, measurable experiment: narrative-derived portfolios
-                        versus passive benchmarks and random portfolios, all tracked from the same starting point and judged
-                        through the same performance lens.
-                    </p>
-                </div>
-                <div class="about-section-title">What this is testing</div>
-                <ul class="about-list">
-                    <li>Whether repeated LLM outputs can cut through market noise and surface consistent portfolio themes.</li>
-                    <li>Whether those themes can translate into portfolios that compete with or outperform standard benchmarks.</li>
-                    <li>Whether model-generated portfolios behave more like each other than like random portfolios.</li>
-                    <li>Whether AI can make investing research more understandable, structured, and accessible.</li>
-                </ul>
-                <div class="about-section-title">What this is not</div>
-                <ul class="about-list">
-                    <li>It is not financial advice.</li>
-                    <li>It is not a claim that AI can predict the market with certainty.</li>
-                    <li>It is not a claim that any security is fundamentally undervalued.</li>
-                    <li>It is a live research project about narrative signals, benchmarks, and disciplined measurement.</li>
-                </ul>
+            <div class="small-note">
+                Keep the default view for the clean readout, or adjust portfolio set, benchmark, and date range.
             </div>
             """,
             unsafe_allow_html=True,
         )
 
+        c1, c2, c3 = st.columns([1.45, 0.8, 1.0])
+
+        with c1:
+            st.multiselect(
+                "Portfolios",
+                options=all_portfolios_source,
+                default=st.session_state.selected_portfolios,
+                key="selected_portfolios",
+            )
+
+        with c2:
+            st.selectbox(
+                "Benchmark",
+                options=benchmark_options,
+                key="benchmark_choice",
+            )
+
+        with c3:
+            st.date_input(
+                "Date range",
+                value=st.session_state.date_range,
+                min_value=date_min,
+                max_value=date_max,
+                key="date_range",
+            )
+
+        b1, b2, b3 = st.columns([0.9, 0.9, 2.2])
+
+        with b1:
+            if st.button("Refresh data", key="refresh_prices_button", use_container_width=True):
+                fetch_price_history.clear()
+                st.rerun()
+
+        with b2:
+            if st.button("Reset view", key="reset_defaults_button", use_container_width=True):
+                st.session_state.selected_portfolios = all_portfolios_source
+                st.session_state.benchmark_choice = (
+                    "SPY" if "SPY" in benchmark_options else benchmark_options[0]
+                )
+                st.session_state.date_range = (date_min, date_max)
+                st.rerun()
+
+        with b3:
+            st.caption("Data is cached for performance. Refresh only when you need a new yfinance pull.")
+
+        st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
+
+        st.markdown("#### AI summary refresh")
+
+        p1, p2 = st.columns([1.2, 0.8])
+
+        with p1:
+            ai_refresh_password = st.text_input(
+                "Refresh password",
+                type="password",
+                key="ai_refresh_password",
+                help="Required to manually regenerate the daily AI portfolio summary.",
+            )
+
+        with p2:
+            st.write("")
+            st.write("")
+            if st.button("Refresh AI summary", key="refresh_ai_summary_button", use_container_width=True):
+                expected_password = get_ai_refresh_password()
+
+                if not expected_password:
+                    st.error("AI refresh password is not configured.")
+                elif ai_refresh_password != expected_password:
+                    st.error("Incorrect password.")
+                else:
+                    with st.spinner("Refreshing daily AI summary..."):
+                        success, message = manually_refresh_daily_insight(
+                            portfolios_df=portfolios,
+                            prices_df=prices,
+                            benchmark_choice=st.session_state.benchmark_choice,
+                        )
+
+                    if success:
+                        st.success(message)
+                        st.rerun()
+                    else:
+                        st.error(message)
+
+
 def render_daily_ai_summary() -> None:
     payload, error_message = read_daily_insight_payload()
     record = get_latest_daily_insight(payload) if payload is not None else {}
 
-    as_of_date = first_present(
-        record,
-        ["date", "as_of_date", "generated_for", "generated_at"],
-        "not generated yet",
-    )
+    if error_message:
+        st.markdown(
+            f"""
+            <div class="ai-card">
+                <div class="ai-kicker">AI readout</div>
+                <div class="ai-headline">Daily insight is not available yet.</div>
+                <div class="ai-summary">
+                    The dashboard is running. The missing piece is the generated JSON artifact at <code>{h(DAILY_INSIGHT_PATH.as_posix())}</code>.
+                </div>
+                <div class="ai-meta">{h(error_message)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
 
-    generated_at = first_present(
-        record,
-        ["generated_at"],
-        "",
-    )
-
-    formatted_generated_at = format_generated_at(generated_at)
-
-    if formatted_generated_at:
-        expander_label = f"AI Summary of Portfolio Performance • Updated {formatted_generated_at}"
-    else:
-        expander_label = f"AI Summary of Portfolio Performance • Updated {as_of_date}"
+    if not record:
+        st.markdown(
+            """
+            <div class="ai-card">
+                <div class="ai-kicker">AI readout</div>
+                <div class="ai-headline">Daily insight is waiting for usable data.</div>
+                <div class="ai-summary">
+                    The insight file loaded, but no readable insight record was found.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
 
     headline = first_present(
         record,
         ["headline", "title", "summary_title"],
-        "AI generated summary",
+        "Portfolio performance readout",
     )
 
     summary = first_present(
@@ -516,10 +904,20 @@ def render_daily_ai_summary() -> None:
         "",
     )
 
+    generated_at = first_present(record, ["generated_at"], "")
+    formatted_generated_at = format_generated_at(generated_at)
+    as_of_date = first_present(
+        record,
+        ["date", "as_of_date", "generated_for", "generated_at"],
+        "not generated yet",
+    )
+
+    updated_label = formatted_generated_at or as_of_date
+
     update_note = first_present(
         record,
         ["update_note"],
-        "Updated 30 minutes before market open and 30 minutes after market close.",
+        "Updated 30 minutes before and after market close.",
     )
 
     bullets = as_list(
@@ -529,57 +927,20 @@ def render_daily_ai_summary() -> None:
         or record.get("highlights")
     )
 
-    with st.expander(expander_label, expanded=False):
-        if error_message:
-            st.warning(error_message)
-            st.markdown(
-                f"""
-                <div class="ai-summary-card">
-                    <h3 class="ai-summary-headline">Daily insight unavailable</h3>
-                    <div class="ai-summary-status">
-                        This dropdown is rendering correctly. The missing piece is the generated JSON artifact.
-                        Once the GitHub Action writes <code>{DAILY_INSIGHT_PATH.as_posix()}</code>, the summary will appear here.
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            return
+    st.markdown(
+        f"""
+        <div class="ai-card">
+            <div class="ai-kicker">AI readout</div>
+            <div class="ai-headline">{h(headline)}</div>
+            <div class="ai-summary">{h(summary)}</div>
+            <div class="ai-meta">{h(update_note)} Updated {h(updated_label)}.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        if not record:
-            st.warning("The daily insight file loaded, but no usable insight record was found.")
-            st.markdown(
-                """
-                <div class="ai-summary-card">
-                    <div class="ai-summary-kicker">Daily AI readout</div>
-                    <h3 class="ai-summary-headline">Daily insight unavailable</h3>
-                    <div class="ai-summary-status">
-                        This dropdown is rendering correctly, but the JSON structure does not contain a readable insight record.
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            return
-
-        st.markdown(
-            f"""
-            <div class="ai-summary-card">
-                <div class="ai-summary-kicker">Daily AI readout</div>
-                <h3 class="ai-summary-headline">{headline}</h3>
-                <div class="ai-summary-meta">{update_note}</div>
-                <div class="ai-summary-body">{summary}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        if bullets:
-            st.markdown(
-                '<div class="ai-summary-section-title">Key takeaways</div>',
-                unsafe_allow_html=True,
-            )
-
+    if bullets:
+        with st.expander("View key takeaways", expanded=False):
             for bullet in bullets:
                 if isinstance(bullet, dict):
                     bullet_text = " | ".join(
@@ -593,50 +954,32 @@ def render_daily_ai_summary() -> None:
                     st.markdown(f"- {bullet}")
 
 
-def render_hero_banner(latest_date, benchmark_choice: str):
-    st.markdown(
-        f"""
-        <div class="hero-banner">
-            <h1 class="hero-title">Portfolio Dashboard</h1>
-            <div class="hero-subtitle">
-                <b>Access portfolio settings in the top left ">>"</b>
-            </div>
-            <div class="hero-meta-row">
-                <div class="hero-meta-pill"><b>Data through:</b> {latest_date.strftime("%B %d, %Y")}</div>
-                <div class="hero-meta-pill"><b>Benchmark:</b> {benchmark_choice}</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def render_portfolio_ticker(banner_df: pd.DataFrame):
+def render_portfolio_ticker(banner_df: pd.DataFrame) -> None:
     if banner_df.empty:
         return
 
     items = []
+
     for _, row in banner_df.iterrows():
-        daily_text = row["Daily Move Display"]
-        overall_text = row["Overall Return Display"]
-        latest_value = money(row["Latest Value"])
+        daily_move = row["Daily Move"]
+        overall_return = row["Overall Return"]
 
         daily_class = "ticker-flat"
-        if pd.notna(row["Daily Move"]):
-            daily_class = "ticker-up" if row["Daily Move"] >= 0 else "ticker-down"
+        if pd.notna(daily_move):
+            daily_class = "ticker-up" if daily_move >= 0 else "ticker-down"
 
         overall_class = "ticker-flat"
-        if pd.notna(row["Overall Return"]):
-            overall_class = "ticker-up" if row["Overall Return"] >= 0 else "ticker-down"
+        if pd.notna(overall_return):
+            overall_class = "ticker-up" if overall_return >= 0 else "ticker-down"
 
         items.append(
             f"""
             <div class="ticker-card">
-                <div class="ticker-name">{row["Portfolio"]}</div>
-                <div class="ticker-price">{latest_value}</div>
+                <div class="ticker-name">{h(row["Portfolio"])}</div>
+                <div class="ticker-price">{h(money(row["Latest Value"]))}</div>
                 <div class="ticker-stats">
-                    <span class="{daily_class}">Day {daily_text}</span>
-                    <span class="{overall_class}">Overall {overall_text}</span>
+                    <span class="{daily_class}">Day {h(row["Daily Move Display"])}</span>
+                    <span class="{overall_class}">Total {h(row["Overall Return Display"])}</span>
                 </div>
             </div>
             """
@@ -644,114 +987,104 @@ def render_portfolio_ticker(banner_df: pd.DataFrame):
 
     cards_html = "".join(items)
 
-    html = f"""
-    <style>
-        .ticker-wrap {{
-            width: 100%;
-            overflow: hidden;
-            border-radius: 22px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background:
-                radial-gradient(circle at top right, rgba(0, 212, 170, 0.12), transparent 30%),
-                radial-gradient(circle at bottom left, rgba(58, 123, 213, 0.10), transparent 26%),
-                linear-gradient(135deg, rgba(10,14,22,0.98), rgba(16,22,35,0.96));
-            box-shadow: 0 18px 50px rgba(0,0,0,0.28);
-            padding: 12px 0;
-            margin: 0.2rem 0 1rem 0;
-        }}
-
-        .ticker-track {{
-            display: flex;
-            width: max-content;
-            animation: ticker-scroll 38s linear infinite;
-            will-change: transform;
-        }}
-
-        .ticker-group {{
-            display: flex;
-            gap: 14px;
-            padding-right: 14px;
-        }}
-
-        .ticker-card {{
-            min-width: 240px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.025));
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.03),
-                0 10px 24px rgba(0,0,0,0.18);
-            backdrop-filter: blur(4px);
-        }}
-
-        .ticker-name {{
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: rgba(208,224,240,0.72);
-            margin-bottom: 8px;
-            font-weight: 700;
-            white-space: nowrap;
-        }}
-
-        .ticker-price {{
-            font-size: 1.08rem;
-            font-weight: 800;
-            color: #F7FBFF;
-            margin-bottom: 8px;
-            white-space: nowrap;
-        }}
-
-        .ticker-stats {{
-            display: flex;
-            gap: 12px;
-            flex-wrap: nowrap;
-            font-size: 0.83rem;
-            white-space: nowrap;
-        }}
-
-        .ticker-up {{
-            color: #7CE3C3;
-            font-weight: 700;
-        }}
-
-        .ticker-down {{
-            color: #FF8D8D;
-            font-weight: 700;
-        }}
-
-        .ticker-flat {{
-            color: rgba(220, 232, 244, 0.72);
-            font-weight: 700;
-        }}
-
-        @keyframes ticker-scroll {{
-            from {{ transform: translateX(0); }}
-            to {{ transform: translateX(-50%); }}
-        }}
-
-        @media (prefers-reduced-motion: reduce) {{
-            .ticker-track {{
-                animation: none;
-            }}
-        }}
-    </style>
-
-    <div class="ticker-wrap">
-        <div class="ticker-track">
-            <div class="ticker-group">{cards_html}</div>
-            <div class="ticker-group">{cards_html}</div>
+    render_html(
+        f"""
+        <div class="ticker-shell">
+            <div class="ticker-track">
+                <div class="ticker-group">{cards_html}</div>
+                <div class="ticker-group">{cards_html}</div>
+            </div>
         </div>
-    </div>
-    """
+        """
+    )
 
-    if hasattr(st, "html"):
-        st.html(html)
-    else:
-        st.markdown(html, unsafe_allow_html=True)
 
+def render_metric_card(title: str, value: str, subtitle: str = "", value_class: str = "metric-neutral") -> None:
+    st.markdown(
+        f"""
+        <div class="premium-metric">
+            <div class="metric-label">{h(title)}</div>
+            <div class="metric-value {h(value_class)}">{h(value)}</div>
+            <div class="metric-sub">{h(subtitle)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_metric_grid(
+    summary_f: pd.DataFrame,
+    benchmark_choice: str,
+    benchmark_summary: dict[str, Any] | None,
+) -> None:
+    if summary_f.empty:
+        st.info("No summary metrics are available for the selected filters.")
+        return
+
+    best_row = summary_f.sort_values("Return", ascending=False).iloc[0]
+    riskiest_row = summary_f.sort_values("Volatility", ascending=False).iloc[0]
+    alpha_summary_f = exclude_benchmark_portfolios(summary_f, portfolio_col="Portfolio")
+
+    avg_return = alpha_summary_f["Return"].mean() if not alpha_summary_f.empty else None
+    relative_vs_benchmark = None
+
+    if (
+        not alpha_summary_f.empty
+        and benchmark_summary is not None
+        and benchmark_summary.get("Return") is not None
+        and avg_return is not None
+    ):
+        relative_vs_benchmark = avg_return - benchmark_summary["Return"]
+
+    st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        render_metric_card(
+            title=f"Avg Alpha vs {benchmark_choice}",
+            value=pct(relative_vs_benchmark) if relative_vs_benchmark is not None else "-",
+            subtitle="Average selected portfolio return minus benchmark return.",
+            value_class=delta_class(relative_vs_benchmark),
+        )
+
+    with c2:
+        render_metric_card(
+            title="Best Portfolio",
+            value=str(best_row["Portfolio"]),
+            subtitle=f"{pct(best_row['Return'])} total return",
+            value_class=delta_class(best_row["Return"]),
+        )
+
+    with c3:
+        render_metric_card(
+            title="Most Volatile",
+            value=str(riskiest_row["Portfolio"]),
+            subtitle=f"{pct(riskiest_row['Volatility'])} daily volatility",
+            value_class="metric-neutral",
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_about_why() -> None:
+    with st.expander("Methodology", expanded=False):
+        st.markdown(
+            """
+            ### What this is testing
+
+            This project asks whether repeated LLM-generated market narratives can produce portfolios that behave differently from passive benchmarks and random stock selections.
+
+            The goal is not to claim that AI predicts the market. The goal is to measure whether recurring AI-generated themes show up in portfolio performance when tracked from the same start date and evaluated with the same benchmark lens.
+
+            **This is not financial advice.** It is a live research dashboard about narrative signals, benchmark-relative performance, and disciplined measurement.
+            """
+        )
+
+
+# ---------------------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------------------
 
 try:
     portfolios, prices = load_data()
@@ -764,92 +1097,50 @@ if prices.empty:
     st.stop()
 
 latest_available_date = prices["Date"].max()
-
 all_portfolios_source = sorted(portfolios["Portfolio"].dropna().astype(str).unique().tolist())
 date_min = prices["Date"].min().date()
 date_max = prices["Date"].max().date()
 
 default_portfolios = all_portfolios_source
-default_benchmark = "SPY" if "SPY" in BENCHMARK_MAP else next(iter(BENCHMARK_MAP))
+benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
+
+if not benchmark_options:
+    benchmark_options = list(BENCHMARK_MAP.keys())
+
+default_benchmark = "SPY" if "SPY" in benchmark_options else benchmark_options[0]
 default_dates = (date_min, date_max)
 
 if "selected_portfolios" not in st.session_state:
     st.session_state.selected_portfolios = default_portfolios
+
 if "benchmark_choice" not in st.session_state:
     st.session_state.benchmark_choice = default_benchmark
+
 if "date_range" not in st.session_state:
     st.session_state.date_range = default_dates
 
-with st.sidebar:
-    st.markdown("### Controls")
+if st.session_state.benchmark_choice not in benchmark_options:
+    st.session_state.benchmark_choice = default_benchmark
 
-    if st.button("↻ Refresh Data", key="refresh_prices_button", use_container_width=True):
-        fetch_price_history.clear()
-        st.rerun()
 
-    if st.button("Reset to Defaults", key="reset_defaults_button", use_container_width=True):
-        st.session_state.selected_portfolios = default_portfolios
-        st.session_state.benchmark_choice = default_benchmark
-        st.session_state.date_range = default_dates
-        st.rerun()
+# ---------------------------------------------------------------------
+# App shell
+# ---------------------------------------------------------------------
 
-    st.markdown("### AI Insight Refresh")
+render_hero_banner(
+    latest_date=latest_available_date,
+    benchmark_choice=st.session_state.benchmark_choice,
+    portfolio_count=len(default_portfolios),
+)
 
-    ai_refresh_password = st.text_input(
-        "Refresh password",
-        type="password",
-        key="ai_refresh_password",
-        help="Required to manually regenerate the daily AI portfolio summary.",
-    )
-
-    if st.button("Refresh AI Summary", key="refresh_ai_summary_button", use_container_width=True):
-        expected_password = get_ai_refresh_password()
-
-        if not expected_password:
-            st.error("AI refresh password is not configured.")
-        elif ai_refresh_password != expected_password:
-            st.error("Incorrect password.")
-        else:
-            with st.spinner("Refreshing daily AI summary..."):
-                success, message = manually_refresh_daily_insight(
-                    portfolios_df=portfolios,
-                    prices_df=prices,
-                    benchmark_choice=st.session_state.benchmark_choice,
-                )
-
-            if success:
-                st.success(message)
-                st.rerun()
-            else:
-                st.error(message)
-
-    st.multiselect(
-        "Select portfolios",
-        options=all_portfolios_source,
-        default=st.session_state.selected_portfolios,
-        key="selected_portfolios",
-    )
-
-    benchmark_options = [key for key, value in BENCHMARK_MAP.items() if value in prices.columns]
-    if not benchmark_options:
-        benchmark_options = list(BENCHMARK_MAP.keys())
-
-    if st.session_state.benchmark_choice not in benchmark_options:
-        st.session_state.benchmark_choice = benchmark_options[0]
-
-    st.selectbox(
-        "Benchmark comparison",
-        options=benchmark_options,
-        key="benchmark_choice",
-    )
-
-    st.date_input(
-        "Date range",
-        value=st.session_state.date_range,
-        min_value=date_min,
-        max_value=date_max,
-        key="date_range",
-    )
+render_control_panel(
+    all_portfolios_source=all_portfolios_source,
+    benchmark_options=benchmark_options,
+    date_min=date_min,
+    date_max=date_max,
+    portfolios=portfolios,
+    prices=prices,
+)
 
 try:
     (
@@ -874,55 +1165,18 @@ if portfolio_history.empty:
 
 all_portfolios = sorted(portfolio_history["Portfolio"].dropna().unique().tolist())
 
-initial_start_date, initial_end_date = normalize_date_range(
-    st.session_state.date_range,
-    date_min,
-    date_max,
-)
-
-initial_selected = [
-    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
-] or default_portfolios
-
-initial_benchmark = (
-    st.session_state.benchmark_choice
-    if st.session_state.benchmark_choice in BENCHMARK_MAP
-    else default_benchmark
-)
-
-portfolio_history_initial = portfolio_history[
-    (portfolio_history["Portfolio"].isin(initial_selected))
-    & (portfolio_history["Date"] >= initial_start_date)
-    & (portfolio_history["Date"] <= initial_end_date)
-].copy()
-
-summary_initial = build_summary(portfolio_history_initial)
-
-banner_df = build_banner_stats(
-    portfolio_history_df=portfolio_history_initial,
-    summary_df=summary_initial,
-)
-
-render_hero_banner(
-    latest_date=latest_available_date,
-    benchmark_choice=initial_benchmark,
-)
-
-render_about_why()
-
-render_daily_ai_summary()
-
-render_portfolio_ticker(banner_df)
-
 selected_portfolios = [
-    portfolio for portfolio in st.session_state.selected_portfolios if portfolio in all_portfolios
+    portfolio
+    for portfolio in st.session_state.selected_portfolios
+    if portfolio in all_portfolios
 ]
-benchmark_choice = st.session_state.benchmark_choice
-date_range = st.session_state.date_range
 
 if not selected_portfolios:
     st.warning("Select at least one portfolio.")
     st.stop()
+
+benchmark_choice = st.session_state.benchmark_choice
+date_range = st.session_state.date_range
 
 start_date, end_date = normalize_date_range(date_range, date_min, date_max)
 
@@ -960,105 +1214,48 @@ benchmark_summary = summarize_benchmark(
     end_date=end_date,
 )
 
-if not summary_f.empty:
-    best_row = summary_f.sort_values("Return", ascending=False).iloc[0]
-    riskiest_row = summary_f.sort_values("Volatility", ascending=False).iloc[0]
+banner_df = build_banner_stats(
+    portfolio_history_df=portfolio_history_f,
+    summary_df=summary_f,
+)
 
-    alpha_summary_f = exclude_benchmark_portfolios(summary_f, portfolio_col="Portfolio")
-    avg_return = alpha_summary_f["Return"].mean() if not alpha_summary_f.empty else None
 
-    relative_vs_benchmark = None
-    avg_dollar_alpha = None
+# ---------------------------------------------------------------------
+# Main content
+# ---------------------------------------------------------------------
 
-    if (
-        not alpha_summary_f.empty
-        and benchmark_summary is not None
-        and benchmark_summary["Return"] is not None
-        and avg_return is not None
-    ):
-        relative_vs_benchmark = avg_return - benchmark_summary["Return"]
-        display_alpha_pct = round(relative_vs_benchmark * 100, 2)
-        avg_dollar_alpha = display_alpha_pct * 10
+render_daily_ai_summary()
 
-    c1, c2, c3 = st.columns(3)
+render_portfolio_ticker(banner_df)
 
-    with c1:
-        metric_card(
-            f"Avg Alpha vs {benchmark_choice}",
-            pct(relative_vs_benchmark) if relative_vs_benchmark is not None else "-",
-            f"{money(avg_dollar_alpha)} higher than the {benchmark_choice}",
-        )
+st.markdown('<div class="section-label">Performance</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">The benchmark-relative readout</div>', unsafe_allow_html=True)
 
-    with c2:
-        metric_card(
-            "Optimal Portfolio",
-            best_row["Portfolio"],
-            f"{pct(best_row['Return'])} | {money(best_row['Dollar Change'])}",
-        )
-
-    with c3:
-        metric_card(
-            "Most Volatile",
-            riskiest_row["Portfolio"],
-            f"{pct(riskiest_row['Volatility'])} daily vol",
-        )
-else:
-    st.info("No summary metrics are available for the selected filters.")
+render_metric_grid(
+    summary_f=summary_f,
+    benchmark_choice=benchmark_choice,
+    benchmark_summary=benchmark_summary,
+)
 
 st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
 
-st.markdown("### Total Return by Portfolio")
-if not summary_f.empty:
-    bar_df = summary_f.sort_values("Return", ascending=False).copy()
-    bar_colors = build_return_bar_colors(bar_df["Return"])
-
-    fig_bar = go.Figure(
-        data=[
-            go.Bar(
-                x=bar_df["Portfolio"],
-                y=bar_df["Return"],
-                text=bar_df["Return"].map(lambda x: "-" if x is None else f"{x:.1%}"),
-                textposition="outside",
-                marker=dict(
-                    color=bar_colors,
-                    line=dict(color="rgba(255,255,255,0.06)", width=1),
-                ),
-                hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>",
-            )
-        ]
-    )
-
-    chart_layout(fig_bar, height=380, yaxis_title="Return")
-    fig_bar.update_yaxes(tickformat=".0%")
-    render_chart(fig_bar, key="fig_bar")
-else:
-    st.info("No return data available.")
-
-st.markdown("### Portfolio Heatmap")
+st.markdown('<div class="section-label">Primary chart</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Cumulative return comparison</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="small-note">Brighter cells = stronger relative performance, while lower volatility is rewarded.</div>',
-    unsafe_allow_html=True,
-)
-if not summary_f.empty:
-    heatmap_fig = build_portfolio_heatmap(summary_f, money, pct)
-    render_chart(heatmap_fig, key="heatmap_fig")
-else:
-    st.info("No heatmap data available.")
-
-st.markdown("### Cumulative Return Comparison")
-st.markdown(
-    '<div class="small-note">Shows percent return since the start of the selected time range.</div>',
+    '<div class="small-note">Percent return since the start of the selected date range.</div>',
     unsafe_allow_html=True,
 )
 
 cumret_plot_df = portfolio_cumret_f[["Date", "Portfolio", "Cumulative Return"]].copy()
 
 benchmark_already_present = benchmark_choice in {
-    str(name).strip() for name in cumret_plot_df["Portfolio"].dropna().unique()
+    str(name).strip()
+    for name in cumret_plot_df["Portfolio"].dropna().unique()
 }
 
 if not benchmark_cumret_f.empty and not benchmark_already_present:
     benchmark_line = benchmark_cumret_f[benchmark_cumret_f["Portfolio"] == benchmark_choice].copy()
+
     if not benchmark_line.empty:
         cumret_plot_df = pd.concat(
             [cumret_plot_df, benchmark_line[["Date", "Portfolio", "Cumulative Return"]]],
@@ -1068,14 +1265,20 @@ if not benchmark_cumret_f.empty and not benchmark_already_present:
 if not cumret_plot_df.empty:
     cumret_line_styles = build_line_style_map(cumret_plot_df["Portfolio"].unique().tolist())
 
+    if benchmark_choice in cumret_line_styles:
+        cumret_line_styles[benchmark_choice]["color"] = ACCENT_BLUE
+        cumret_line_styles[benchmark_choice]["width"] = 4
+        cumret_line_styles[benchmark_choice]["dash"] = "dot"
+
     fig_cumret = px.line(
         cumret_plot_df,
         x="Date",
         y="Cumulative Return",
         color="Portfolio",
     )
+
     apply_line_styles(fig_cumret, cumret_line_styles)
-    chart_layout(fig_cumret, height=450, yaxis_title="Cumulative Return (%)")
+    chart_layout(fig_cumret, height=470, yaxis_title="Cumulative Return")
     fig_cumret.update_yaxes(tickformat=".0%")
     fig_cumret.update_layout(
         legend=dict(
@@ -1086,23 +1289,86 @@ if not cumret_plot_df.empty:
             x=0.5,
             title=None,
         ),
-        margin=dict(b=110),
+        margin=dict(b=112),
     )
+
     render_chart(fig_cumret, key="fig_cumret")
 else:
     st.info("No cumulative return data available.")
 
-st.markdown("### Portfolio Drilldown")
+st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="section-label">Portfolio ranking</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Total return by portfolio</div>', unsafe_allow_html=True)
+
+if not summary_f.empty:
+    bar_df = summary_f.sort_values("Return", ascending=False).copy()
+    bar_colors = [
+        ACCENT_BLUE if pd.notna(value) and value >= 0 else "#FF453A"
+        for value in bar_df["Return"]
+    ]
+
+    fig_bar = go.Figure(
+        data=[
+            go.Bar(
+                x=bar_df["Portfolio"],
+                y=bar_df["Return"],
+                text=bar_df["Return"].map(lambda x: "-" if pd.isna(x) else f"{x:.1%}"),
+                textposition="outside",
+                marker=dict(
+                    color=bar_colors,
+                    line=dict(color="rgba(255,255,255,0.10)", width=1),
+                ),
+                hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>",
+            )
+        ]
+    )
+
+    chart_layout(fig_bar, height=390, yaxis_title="Return")
+    fig_bar.update_yaxes(tickformat=".0%")
+    render_chart(fig_bar, key="fig_bar")
+else:
+    st.info("No return data available.")
+
+st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="section-label">Signal map</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Portfolio heatmap</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="small-note">Brighter cells indicate stronger relative performance. Lower volatility is rewarded.</div>',
+    unsafe_allow_html=True,
+)
+
+if not summary_f.empty:
+    heatmap_fig = build_portfolio_heatmap(summary_f, money, pct)
+
+    if heatmap_fig is not None:
+        render_chart(heatmap_fig, key="heatmap_fig")
+    else:
+        st.info("No heatmap data available.")
+else:
+    st.info("No heatmap data available.")
+
+st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="section-label">Drilldown</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Portfolio detail</div>', unsafe_allow_html=True)
 
 chosen_portfolio = st.selectbox("Choose a portfolio", selected_portfolios)
 
-detail_holdings = holdings_snapshot_f[holdings_snapshot_f["Portfolio"] == chosen_portfolio].copy()
-detail_history = portfolio_history_f[portfolio_history_f["Portfolio"] == chosen_portfolio].copy()
+detail_holdings = holdings_snapshot_f[
+    holdings_snapshot_f["Portfolio"] == chosen_portfolio
+].copy()
 
-d1, d2 = st.columns([1.1, 1.4])
+detail_history = portfolio_history_f[
+    portfolio_history_f["Portfolio"] == chosen_portfolio
+].copy()
+
+d1, d2 = st.columns([1.05, 1.55])
 
 with d1:
-    st.markdown("#### Holdings Snapshot")
+    st.markdown("#### Holdings")
+
     if not detail_holdings.empty:
         detail_display = format_holdings_table(detail_holdings)
         st.dataframe(
@@ -1123,25 +1389,40 @@ with d1:
         st.info("No holdings available for this portfolio.")
 
 with d2:
-    st.markdown("#### Portfolio Value Trend")
+    st.markdown("#### Value trend")
+
     if not detail_history.empty:
         fig_single = px.area(
             detail_history,
             x="Date",
             y="Portfolio Value",
         )
-        chart_layout(fig_single, height=380, yaxis_title="Value ($)")
-        fig_single.update_yaxes(range=[900, detail_history["Portfolio Value"].max() * 1.03])
+
+        chart_layout(fig_single, height=380, yaxis_title="Value")
+        max_value = detail_history["Portfolio Value"].max()
+
+        if pd.notna(max_value) and max_value > 0:
+            fig_single.update_yaxes(range=[max(0, max_value * 0.88), max_value * 1.04])
+
         render_chart(fig_single, key="fig_single")
     else:
         st.info("No history available for this portfolio.")
 
-with st.expander("See portfolio summary table"):
-    st.dataframe(
-        format_summary_table(summary_f),
-        use_container_width=True,
-        hide_index=True,
-    )
+st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
 
-with st.expander("See price table preview"):
+render_about_why()
+
+with st.expander("Technical details", expanded=False):
+    st.markdown("#### Portfolio summary table")
+
+    if not summary_f.empty:
+        st.dataframe(
+            format_summary_table(summary_f),
+            use_container_width=True,
+            hide_index=True,
+        )
+    else:
+        st.info("No summary table available.")
+
+    st.markdown("#### Price table preview")
     st.dataframe(prices.head(20), use_container_width=True, hide_index=True)
