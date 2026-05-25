@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,7 @@ from calculations import (
     build_datasets,
     build_summary,
     summarize_benchmark,
+    build_ytd_metrics_snapshot,
     format_summary_table,
     format_holdings_table,
 )
@@ -30,6 +32,7 @@ from charts import (
     render_chart,
     metric_card,
 )
+from insights import generate_llm_insight, save_daily_insight
 
 DAILY_INSIGHT_PATH = Path("data/daily_insight.json")
 
@@ -111,6 +114,7 @@ st.markdown(
             font-weight: 800;
         }
 
+        .about-card,
         .ai-summary-card {
             position: relative;
             overflow: hidden;
@@ -126,6 +130,7 @@ st.markdown(
             margin-bottom: 0.4rem;
         }
 
+        .about-kicker,
         .ai-summary-kicker {
             display: inline-flex;
             padding: 6px 10px;
@@ -141,6 +146,7 @@ st.markdown(
             margin-bottom: 12px;
         }
 
+        .about-headline,
         .ai-summary-headline {
             font-size: 1.45rem;
             line-height: 1.18;
@@ -150,6 +156,7 @@ st.markdown(
             letter-spacing: -0.02em;
         }
 
+        .about-body,
         .ai-summary-status,
         .ai-summary-body {
             color: rgba(235, 244, 255, 0.86);
@@ -158,13 +165,7 @@ st.markdown(
             margin-top: 0.85rem;
         }
 
-        .ai-summary-meta {
-            color: rgba(208, 224, 240, 0.72);
-            font-size: 0.82rem;
-            margin-top: 0.25rem;
-            margin-bottom: 0.9rem;
-        }
-
+        .about-section-title,
         .ai-summary-section-title {
             color: #F6FBFF;
             font-weight: 850;
@@ -172,6 +173,7 @@ st.markdown(
             margin-bottom: 0.4rem;
         }
 
+        .about-list,
         .ai-summary-list {
             margin-top: 0.25rem;
             margin-bottom: 0;
@@ -180,8 +182,16 @@ st.markdown(
             line-height: 1.55;
         }
 
+        .about-list li,
         .ai-summary-list li {
             margin-bottom: 0.42rem;
+        }
+
+        .ai-summary-meta {
+            color: rgba(208, 224, 240, 0.72);
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.9rem;
         }
     </style>
     """,
@@ -350,6 +360,117 @@ def format_generated_at(value: str) -> str:
         return raw_value
 
 
+def get_ai_refresh_password() -> str:
+    try:
+        secret_value = st.secrets.get("AI_REFRESH_PASSWORD", "")
+        if secret_value:
+            return str(secret_value)
+    except Exception:
+        pass
+
+    return os.getenv("AI_REFRESH_PASSWORD", "")
+
+
+def manually_refresh_daily_insight(
+    portfolios_df: pd.DataFrame,
+    prices_df: pd.DataFrame,
+    benchmark_choice: str,
+) -> tuple[bool, str]:
+    try:
+        (
+            portfolio_history_df,
+            _merged_positions_df,
+            holdings_snapshot_df,
+            benchmark_history_df,
+            _portfolio_cumret_df,
+            _benchmark_cumret_df,
+        ) = build_datasets(portfolios_df, prices_df)
+
+        metrics_payload = build_ytd_metrics_snapshot(
+            portfolio_history=portfolio_history_df,
+            holdings_snapshot=holdings_snapshot_df,
+            benchmark_history=benchmark_history_df,
+            benchmark_choice=benchmark_choice,
+        )
+
+        record = generate_llm_insight(metrics_payload)
+        output_path = save_daily_insight(record)
+
+        status = record.get("status", "unknown")
+        source = record.get("source", "unknown")
+
+        return (
+            True,
+            f"Daily AI insight refreshed. Status: `{status}`. Source: `{source}`. Saved to `{output_path.as_posix()}`.",
+        )
+
+    except Exception as exc:
+        return False, f"Could not refresh daily AI insight: {exc}"
+
+
+def render_about_why() -> None:
+    with st.expander("About / Why this exists", expanded=False):
+        st.markdown(
+            """
+            <div class="about-card">
+                <div class="about-kicker">From Noise to Action</div>
+                <h3 class="about-headline">This project uses LLMs to cut through market noise and test whether repeated AI-generated narratives can help identify winners.</h3>
+                <div class="about-body">
+                    <p>
+                        The idea behind this dashboard is straightforward: ask large language models to build portfolios
+                        with the goal of beating standard benchmarks, then track whether those portfolios actually behave
+                        differently from passive indexes or randomly selected stocks.
+                    </p>
+                    <p>
+                        This is not based on one lucky prompt or one cherry-picked answer. The project repeatedly sampled
+                        model outputs across different depths and different systems, then consolidated those outputs into
+                        portfolio choices. The point was to give the models many chances to be inconsistent, noisy, or wrong,
+                        and then see whether the average trendlines still followed a meaningful pattern.
+                    </p>
+                    <p>
+                        What makes this interesting is that the LLM portfolios have tended to move in close formation with
+                        each other while being tested against benchmarks like the S&amp;P 500, Dow, and SPY, plus random
+                        portfolios built from the same market universe. That suggests the models are not just producing
+                        random lists of tickers. They are surfacing recurring market narratives around companies that keep
+                        showing up across repeated runs.
+                    </p>
+                    <p>
+                        Yes, the core challenge is to beat the benchmark. But the bigger purpose is to demystify investing.
+                        Markets are not driven only by earnings, margins, and cash flow. They are also driven by attention,
+                        belief, momentum, and the stories investors tell about which companies matter and why.
+                    </p>
+                    <p>
+                        Tools like ChatGPT, Claude, Gemini, OpenAI models, and other AI systems can be valuable research
+                        tools because they help compress overwhelming information into clearer themes. They are not magic,
+                        and they should not be treated as prediction machines. But they can help investors ask better
+                        questions, compare narratives, identify recurring themes, and understand why certain companies keep
+                        appearing across different forms of market discussion.
+                    </p>
+                    <p>
+                        This dashboard turns that idea into a live, measurable experiment: narrative-derived portfolios
+                        versus passive benchmarks and random portfolios, all tracked from the same starting point and judged
+                        through the same performance lens.
+                    </p>
+                </div>
+                <div class="about-section-title">What this is testing</div>
+                <ul class="about-list">
+                    <li>Whether repeated LLM outputs can cut through market noise and surface consistent portfolio themes.</li>
+                    <li>Whether those themes can translate into portfolios that compete with or outperform standard benchmarks.</li>
+                    <li>Whether model-generated portfolios behave more like each other than like random portfolios.</li>
+                    <li>Whether AI can make investing research more understandable, structured, and accessible.</li>
+                </ul>
+                <div class="about-section-title">What this is not</div>
+                <ul class="about-list">
+                    <li>It is not financial advice.</li>
+                    <li>It is not a claim that AI can predict the market with certainty.</li>
+                    <li>It is not a claim that any security is fundamentally undervalued.</li>
+                    <li>It is a live research project about narrative signals, benchmarks, and disciplined measurement.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
 def render_daily_ai_summary() -> None:
     payload, error_message = read_daily_insight_payload()
     record = get_latest_daily_insight(payload) if payload is not None else {}
@@ -398,7 +519,7 @@ def render_daily_ai_summary() -> None:
     update_note = first_present(
         record,
         ["update_note"],
-        "Updated 30 minutes before and after market close.",
+        "Updated 30 minutes before market open and 30 minutes after market close.",
     )
 
     bullets = as_list(
@@ -672,6 +793,36 @@ with st.sidebar:
         st.session_state.date_range = default_dates
         st.rerun()
 
+    st.markdown("### AI Insight Refresh")
+
+    ai_refresh_password = st.text_input(
+        "Refresh password",
+        type="password",
+        key="ai_refresh_password",
+        help="Required to manually regenerate the daily AI portfolio summary.",
+    )
+
+    if st.button("Refresh AI Summary", key="refresh_ai_summary_button", use_container_width=True):
+        expected_password = get_ai_refresh_password()
+
+        if not expected_password:
+            st.error("AI refresh password is not configured.")
+        elif ai_refresh_password != expected_password:
+            st.error("Incorrect password.")
+        else:
+            with st.spinner("Refreshing daily AI summary..."):
+                success, message = manually_refresh_daily_insight(
+                    portfolios_df=portfolios,
+                    prices_df=prices,
+                    benchmark_choice=st.session_state.benchmark_choice,
+                )
+
+            if success:
+                st.success(message)
+                st.rerun()
+            else:
+                st.error(message)
+
     st.multiselect(
         "Select portfolios",
         options=all_portfolios_source,
@@ -756,6 +907,8 @@ render_hero_banner(
     latest_date=latest_available_date,
     benchmark_choice=initial_benchmark,
 )
+
+render_about_why()
 
 render_daily_ai_summary()
 
