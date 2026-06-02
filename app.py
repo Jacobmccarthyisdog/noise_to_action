@@ -1051,7 +1051,7 @@ def render_control_panel(
     portfolios: pd.DataFrame,
     prices: pd.DataFrame,
 ) -> None:
-    with st.expander("Refine view", expanded=False):
+    with st.expander("Dashboard Settings", expanded=False):
         st.markdown(
             """
             <div class="small-note">
@@ -1425,12 +1425,6 @@ if st.session_state.benchmark_choice not in benchmark_options:
 # App shell
 # ---------------------------------------------------------------------
 
-render_hero_banner(
-    latest_date=latest_available_date,
-    benchmark_choice=st.session_state.benchmark_choice,
-    portfolio_count=len(default_portfolios),
-)
-
 render_control_panel(
     all_portfolios_source=all_portfolios_source,
     benchmark_options=benchmark_options,
@@ -1438,6 +1432,12 @@ render_control_panel(
     date_max=date_max,
     portfolios=portfolios,
     prices=prices,
+)
+
+render_hero_banner(
+    latest_date=latest_available_date,
+    benchmark_choice=st.session_state.benchmark_choice,
+    portfolio_count=len(default_portfolios),
 )
 
 try:
@@ -1537,7 +1537,62 @@ render_metric_grid(
 
 st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
 
-st.markdown('<div class="section-label">Primary chart</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Portfolio ranking</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Total return by portfolio</div>', unsafe_allow_html=True)
+
+if not summary_f.empty:
+    bar_df = summary_f.sort_values("Return", ascending=False).copy()
+    bar_colors = [
+        SAGE if pd.notna(value) and value >= 0 else BRICK
+        for value in bar_df["Return"]
+    ]
+
+    fig_bar = go.Figure(
+        data=[
+            go.Bar(
+                x=bar_df["Portfolio"],
+                y=bar_df["Return"],
+                text=bar_df["Return"].map(lambda x: "-" if pd.isna(x) else f"{x:.1%}"),
+                textposition="outside",
+                marker=dict(
+                    color=bar_colors,
+                    line=dict(color=SEDONA_LINE_STRONG, width=1),
+                ),
+                hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>",
+            )
+        ]
+    )
+
+    chart_layout(fig_bar, height=390, yaxis_title="Return")
+    apply_sedona_chart_theme(fig_bar, height=390, yaxis_title="Return")
+    fig_bar.update_yaxes(tickformat=".0%")
+    render_chart(fig_bar, key="fig_bar")
+else:
+    st.info("No return data available.")
+
+st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="section-label">Signal map</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Portfolio heatmap</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="small-note">Warmer cells indicate softer relative performance. Cooler green cells indicate stronger relative performance. Lower volatility is rewarded.</div>',
+    unsafe_allow_html=True,
+)
+
+if not summary_f.empty:
+    heatmap_fig = build_portfolio_heatmap(summary_f, money, pct)
+
+    if heatmap_fig is not None:
+        apply_sedona_heatmap_theme(heatmap_fig)
+        render_chart(heatmap_fig, key="heatmap_fig")
+    else:
+        st.info("No heatmap data available.")
+else:
+    st.info("No heatmap data available.")
+
+st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="section-label">Trend</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Cumulative return comparison</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="small-note">Percent return since the start of the selected date range.</div>',
@@ -1596,61 +1651,6 @@ if not cumret_plot_df.empty:
     render_chart(fig_cumret, key="fig_cumret")
 else:
     st.info("No cumulative return data available.")
-
-st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
-
-st.markdown('<div class="section-label">Portfolio ranking</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-title">Total return by portfolio</div>', unsafe_allow_html=True)
-
-if not summary_f.empty:
-    bar_df = summary_f.sort_values("Return", ascending=False).copy()
-    bar_colors = [
-        SAGE if pd.notna(value) and value >= 0 else BRICK
-        for value in bar_df["Return"]
-    ]
-
-    fig_bar = go.Figure(
-        data=[
-            go.Bar(
-                x=bar_df["Portfolio"],
-                y=bar_df["Return"],
-                text=bar_df["Return"].map(lambda x: "-" if pd.isna(x) else f"{x:.1%}"),
-                textposition="outside",
-                marker=dict(
-                    color=bar_colors,
-                    line=dict(color=SEDONA_LINE_STRONG, width=1),
-                ),
-                hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>",
-            )
-        ]
-    )
-
-    chart_layout(fig_bar, height=390, yaxis_title="Return")
-    apply_sedona_chart_theme(fig_bar, height=390, yaxis_title="Return")
-    fig_bar.update_yaxes(tickformat=".0%")
-    render_chart(fig_bar, key="fig_bar")
-else:
-    st.info("No return data available.")
-
-st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
-
-st.markdown('<div class="section-label">Signal map</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-title">Portfolio heatmap</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="small-note">Warmer cells indicate softer relative performance. Cooler green cells indicate stronger relative performance. Lower volatility is rewarded.</div>',
-    unsafe_allow_html=True,
-)
-
-if not summary_f.empty:
-    heatmap_fig = build_portfolio_heatmap(summary_f, money, pct)
-
-    if heatmap_fig is not None:
-        apply_sedona_heatmap_theme(heatmap_fig)
-        render_chart(heatmap_fig, key="heatmap_fig")
-    else:
-        st.info("No heatmap data available.")
-else:
-    st.info("No heatmap data available.")
 
 st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
 
