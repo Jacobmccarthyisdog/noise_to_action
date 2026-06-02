@@ -59,6 +59,11 @@ BRICK = "#A32D2D"
 BRICK_BG = "#FCEBEB"
 BRICK_INK = "#791F1F"
 
+BENCHMARK_SPY_BLUE = "#173B73"
+BENCHMARK_DIA_BLUE = "#2F80C2"
+RANDOM_A_PURPLE = "#5B4B7A"
+RANDOM_B_TEAL = "#2F6F73"
+
 
 st.set_page_config(
     page_title="From Noise to Action",
@@ -341,7 +346,7 @@ PREMIUM_CSS = f"""
         display: flex;
         flex-direction: column;
         justify-content: center;
-}}
+    }}
 
     .premium-metric:hover {{
         transform: translateY(-6px);
@@ -609,7 +614,7 @@ def apply_sedona_chart_theme(fig: go.Figure, height: int = 420, yaxis_title: str
         height=height,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor=SEDONA_SURFACE,
-        margin=dict(l=12, r=12, t=24, b=18),
+        margin=dict(l=82, r=18, t=24, b=18),
         font=dict(
             family="Spline Sans, sans-serif",
             color=SEDONA_INK,
@@ -638,6 +643,7 @@ def apply_sedona_chart_theme(fig: go.Figure, height: int = 420, yaxis_title: str
         tickfont=dict(color=SEDONA_INK_SOFT),
         title_font=dict(color=SEDONA_INK_SOFT),
         fixedrange=True,
+        automargin=True,
     )
 
     fig.update_yaxes(
@@ -646,51 +652,88 @@ def apply_sedona_chart_theme(fig: go.Figure, height: int = 420, yaxis_title: str
         linecolor=SEDONA_LINE_STRONG,
         tickfont=dict(color=SEDONA_INK_SOFT),
         title_font=dict(color=SEDONA_INK_SOFT),
+        title_standoff=28,
         fixedrange=True,
+        automargin=True,
     )
 
     return fig
 
 
 def build_sedona_line_style_map(portfolio_names: list[str]) -> dict[str, dict[str, Any]]:
-    base_styles = build_line_style_map(portfolio_names)
-
-    sedona_palette = [
-        CORAL,
-        SAGE,
-        AMBER,
-        BRICK,
-        "#8A6F3D",
-        "#4E7F71",
-        "#B76E4C",
-        "#6F6A5F",
-    ]
-
     cleaned_names = [str(name).strip() for name in portfolio_names if pd.notna(name)]
     unique_names = list(dict.fromkeys(cleaned_names))
 
+    google_palette = [
+        "#6E5A33",
+        "#826A3D",
+        "#9A7E4A",
+        "#B49359",
+        "#C9A66A",
+    ]
+
+    openai_palette = [
+        "#993C1D",
+        "#B94322",
+        "#C94A24",
+        "#D85A30",
+        "#E06A3D",
+    ]
+
+    random_palette = {
+        "RANDOM A": RANDOM_A_PURPLE,
+        "RANDOM B": RANDOM_B_TEAL,
+    }
+
+    benchmark_palette = {
+        "SPY": BENCHMARK_SPY_BLUE,
+        "US:SPY": BENCHMARK_SPY_BLUE,
+        "DIA": BENCHMARK_DIA_BLUE,
+        "US:DIA": BENCHMARK_DIA_BLUE,
+    }
+
     style_map = {}
-    for index, name in enumerate(unique_names):
+    google_index = 0
+    openai_index = 0
+
+    for name in unique_names:
         upper_name = name.upper()
 
-        if upper_name in {"SPY", "US:SPY"}:
-            style_map[name] = {"color": CORAL, "dash": "dot", "width": 3.5}
-        elif upper_name in {"DIA", "US:DIA"}:
-            style_map[name] = {"color": AMBER, "dash": "dot", "width": 3.5}
-        elif "GOOGLE" in upper_name:
-            style_map[name] = {"color": "#8A6F3D", "dash": "solid", "width": 2.8}
-        elif "OPENAI" in upper_name:
-            style_map[name] = {"color": CORAL, "dash": "solid", "width": 2.8}
-        elif upper_name == "RANDOM A":
-            style_map[name] = {"color": "#6F6A5F", "dash": "solid", "width": 2.4}
-        elif upper_name == "RANDOM B":
-            style_map[name] = {"color": "#9A9386", "dash": "solid", "width": 2.4}
-        else:
-            fallback = base_styles.get(name, {})
+        if upper_name in benchmark_palette:
             style_map[name] = {
-                "color": sedona_palette[index % len(sedona_palette)],
-                "dash": fallback.get("dash", "solid"),
-                "width": fallback.get("width", 2.5),
+                "color": benchmark_palette[upper_name],
+                "dash": "dot",
+                "width": 4,
+            }
+
+        elif upper_name in random_palette:
+            style_map[name] = {
+                "color": random_palette[upper_name],
+                "dash": "solid",
+                "width": 3.2,
+            }
+
+        elif "GOOGLE" in upper_name:
+            style_map[name] = {
+                "color": google_palette[google_index % len(google_palette)],
+                "dash": "solid",
+                "width": 3,
+            }
+            google_index += 1
+
+        elif "OPENAI" in upper_name:
+            style_map[name] = {
+                "color": openai_palette[openai_index % len(openai_palette)],
+                "dash": "solid",
+                "width": 3,
+            }
+            openai_index += 1
+
+        else:
+            style_map[name] = {
+                "color": SEDONA_INK_FAINT,
+                "dash": "solid",
+                "width": 2.5,
             }
 
     return style_map
@@ -728,7 +771,7 @@ def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
         height=420,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor=SEDONA_SURFACE,
-        margin=dict(l=10, r=10, t=24, b=52),
+        margin=dict(l=82, r=18, t=24, b=52),
         font=dict(
             family="Spline Sans, sans-serif",
             color=SEDONA_INK,
@@ -742,6 +785,7 @@ def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
         tickfont=dict(size=12, color=SEDONA_INK_SOFT),
         showline=False,
         fixedrange=True,
+        automargin=True,
     )
 
     fig.update_yaxes(
@@ -750,6 +794,7 @@ def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
         tickfont=dict(size=13, color=SEDONA_INK),
         showline=False,
         fixedrange=True,
+        automargin=True,
     )
 
     return fig
@@ -1519,8 +1564,9 @@ if not cumret_plot_df.empty:
     cumret_line_styles = build_sedona_line_style_map(cumret_plot_df["Portfolio"].unique().tolist())
 
     if benchmark_choice in cumret_line_styles:
-        cumret_line_styles[benchmark_choice]["color"] = CORAL
-        cumret_line_styles[benchmark_choice]["width"] = 3.8
+        benchmark_color = BENCHMARK_SPY_BLUE if benchmark_choice == "SPY" else BENCHMARK_DIA_BLUE
+        cumret_line_styles[benchmark_choice]["color"] = benchmark_color
+        cumret_line_styles[benchmark_choice]["width"] = 4
         cumret_line_styles[benchmark_choice]["dash"] = "dot"
 
     fig_cumret = px.line(
@@ -1544,7 +1590,7 @@ if not cumret_plot_df.empty:
             title=None,
             font=dict(color=SEDONA_INK_SOFT, size=12),
         ),
-        margin=dict(b=112),
+        margin=dict(l=82, r=18, t=24, b=112),
     )
 
     render_chart(fig_cumret, key="fig_cumret")
