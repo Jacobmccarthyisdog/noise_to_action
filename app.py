@@ -330,14 +330,18 @@ PREMIUM_CSS = f"""
     .premium-metric {{
         position: relative;
         overflow: hidden;
-        min-height: 146px;
-        padding: 20px 22px;
+        height: 220px;
+        min-height: 220px;
+        padding: 28px 32px;
         border-radius: var(--radius-md);
         background: var(--surface);
         border: 1px solid var(--line);
         box-shadow: none;
         transition: transform 0.18s ease, border-color 0.18s ease;
-    }}
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+}}
 
     .premium-metric:hover {{
         transform: translateY(-3px);
