@@ -1522,9 +1522,9 @@ banner_df = build_banner_stats(
 # Main content
 # ---------------------------------------------------------------------
 
-render_daily_ai_summary()
-
 render_portfolio_ticker(banner_df)
+
+render_daily_ai_summary()
 
 st.markdown('<div class="section-label">Performance</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Benchmark-relative readout</div>', unsafe_allow_html=True)
