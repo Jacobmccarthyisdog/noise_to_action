@@ -681,8 +681,8 @@ def build_sedona_line_style_map(portfolio_names: list[str]) -> dict[str, dict[st
     ]
 
     random_palette = {
-        "RANDOM A": RANDOM_A_PURPLE,
-        "RANDOM B": RANDOM_B_TEAL,
+        "RANDOM A": RANDOM_A_YELLOW,
+        "RANDOM B": RANDOM_B_TAN,
     }
 
     benchmark_palette = {
