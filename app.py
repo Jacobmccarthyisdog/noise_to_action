@@ -330,8 +330,8 @@ PREMIUM_CSS = f"""
     .premium-metric {{
         position: relative;
         overflow: hidden;
-        height: 100px;
-        min-height: 100px;
+        height: 150px;
+        min-height: 150px;
         padding: 28px 32px;
         border-radius: var(--radius-md);
         background: var(--surface);
