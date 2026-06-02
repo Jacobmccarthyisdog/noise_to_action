@@ -479,6 +479,18 @@ PREMIUM_CSS = f"""
         color: var(--ink-faint);
     }}
 
+    .chart-scroll-wrap {{
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }}
+
+    .chart-scroll-inner {{
+        min-width: 760px;
+    }}
+
     @keyframes ticker-scroll {{
         from {{ transform: translateX(0); }}
         to {{ transform: translateX(-50%); }}
@@ -516,6 +528,22 @@ PREMIUM_CSS = f"""
 
         .ticker-card {{
             min-width: 210px;
+        }}
+
+        .chart-scroll-inner {{
+            min-width: 860px;
+        }}
+
+        .section-title {{
+            font-size: 24px;
+        }}
+
+        .small-note {{
+            font-size: 13.5px;
+        }}
+
+        .ticker-shell {{
+            margin-bottom: 1rem;
         }}
     }}
 
@@ -606,6 +634,26 @@ def render_html(markup: str) -> None:
         st.html(markup)
     else:
         st.markdown(markup, unsafe_allow_html=True)
+
+
+def begin_chart_scroll(min_width: int = 760) -> None:
+    st.markdown(
+        f"""
+        <div class="chart-scroll-wrap">
+            <div class="chart-scroll-inner" style="min-width: {min_width}px;">
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def end_chart_scroll() -> None:
+    st.markdown(
+        """
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def apply_sedona_chart_theme(fig: go.Figure, height: int = 420, yaxis_title: str = "", xaxis_title: str = "") -> go.Figure:
@@ -739,7 +787,10 @@ def build_sedona_line_style_map(portfolio_names: list[str]) -> dict[str, dict[st
     return style_map
 
 
-def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
+def apply_sedona_heatmap_theme(fig: go.Figure, portfolio_count: int = 0) -> go.Figure:
+    chart_width = max(860, portfolio_count * 92)
+    chart_height = 430 if portfolio_count <= 10 else 460
+
     fig.update_traces(
         colorscale=[
             [0.00, BRICK_BG],
@@ -753,25 +804,26 @@ def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
         colorbar=dict(
             title=dict(text="Strength", font=dict(color=SEDONA_INK_SOFT)),
             thickness=12,
-            len=0.78,
+            len=0.72,
             orientation="h",
             x=0.5,
             xanchor="center",
-            y=-0.14,
+            y=-0.18,
             yanchor="top",
             tickvals=[0, 0.5, 1],
             ticktext=["Soft", "Neutral", "Strong"],
             outlinewidth=0,
-            tickfont=dict(color=SEDONA_INK_SOFT),
+            tickfont=dict(color=SEDONA_INK_SOFT, size=11),
         ),
-        textfont={"size": 12, "color": SEDONA_INK},
+        textfont={"size": 11, "color": SEDONA_INK},
     )
 
     fig.update_layout(
-        height=420,
+        width=chart_width,
+        height=chart_height,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor=SEDONA_SURFACE,
-        margin=dict(l=82, r=18, t=24, b=52),
+        margin=dict(l=92, r=24, t=34, b=86),
         font=dict(
             family="Spline Sans, sans-serif",
             color=SEDONA_INK,
@@ -782,16 +834,17 @@ def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
         side="top",
         showgrid=False,
         zeroline=False,
-        tickfont=dict(size=12, color=SEDONA_INK_SOFT),
+        tickfont=dict(size=11, color=SEDONA_INK_SOFT),
         showline=False,
         fixedrange=True,
         automargin=True,
+        tickangle=0,
     )
 
     fig.update_yaxes(
         showgrid=False,
         zeroline=False,
-        tickfont=dict(size=13, color=SEDONA_INK),
+        tickfont=dict(size=12, color=SEDONA_INK),
         showline=False,
         fixedrange=True,
         automargin=True,
@@ -1583,8 +1636,17 @@ if not summary_f.empty:
     heatmap_fig = build_portfolio_heatmap(summary_f, money, pct)
 
     if heatmap_fig is not None:
-        apply_sedona_heatmap_theme(heatmap_fig)
+        heatmap_portfolio_count = summary_f["Portfolio"].nunique()
+        heatmap_min_width = max(860, heatmap_portfolio_count * 92)
+
+        apply_sedona_heatmap_theme(
+            heatmap_fig,
+            portfolio_count=heatmap_portfolio_count,
+        )
+
+        begin_chart_scroll(min_width=heatmap_min_width)
         render_chart(heatmap_fig, key="heatmap_fig")
+        end_chart_scroll()
     else:
         st.info("No heatmap data available.")
 else:
@@ -1648,7 +1710,9 @@ if not cumret_plot_df.empty:
         margin=dict(l=82, r=18, t=24, b=112),
     )
 
+    begin_chart_scroll(min_width=900)
     render_chart(fig_cumret, key="fig_cumret")
+    end_chart_scroll()
 else:
     st.info("No cumulative return data available.")
 
