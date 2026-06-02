@@ -564,7 +564,7 @@ def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFr
 
 def read_daily_insight_payload(path: Path = DAILY_INSIGHT_PATH) -> tuple[Any | None, str | None]:
     if not path.exists():
-        return None, f"Could not find `{path.as_posix()}`. The daily insight job has not written the file yet."
+        return None, f"Could not find `{path.as_posix()}`. The daily commentary job has not written the file yet."
 
     try:
         with path.open("r", encoding="utf-8") as file:
@@ -708,11 +708,11 @@ def manually_refresh_daily_insight(
 
         return (
             True,
-            f"Daily AI insight refreshed. Status: `{status}`. Source: `{source}`. Saved to `{output_path.as_posix()}`.",
+            f"Daily commentary refreshed. Status: `{status}`. Source: `{source}`. Saved to `{output_path.as_posix()}`.",
         )
 
     except Exception as exc:
-        return False, f"Could not refresh daily AI insight: {exc}"
+        return False, f"Could not refresh daily commentary: {exc}"
 
 
 # ---------------------------------------------------------------------
@@ -732,7 +732,7 @@ def render_hero_banner(
             <div class="hero-kicker">Live research dashboard</div>
             <h1 class="hero-title">From Noise to Action</h1>
             <div class="hero-subtitle">
-                AI-generated market narratives, measured against reality. A calm view of whether repeated model-selected portfolios are separating from benchmarks and random baselines.
+                Market narratives, measured against reality. A calm view of whether repeated model-selected portfolios are separating from benchmarks and random baselines.
             </div>
             <div class="hero-meta-row">
                 <div class="hero-pill"><b>Data through</b> {h(latest_label)}</div>
@@ -810,30 +810,30 @@ def render_control_panel(
 
         st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
 
-        st.markdown("#### AI summary refresh")
+        st.markdown("#### Commentary refresh")
 
         p1, p2 = st.columns([1.2, 0.8])
 
         with p1:
-            ai_refresh_password = st.text_input(
+            commentary_refresh_password = st.text_input(
                 "Refresh password",
                 type="password",
                 key="ai_refresh_password",
-                help="Required to manually regenerate the daily AI portfolio summary.",
+                help="Required to manually regenerate the daily portfolio commentary.",
             )
 
         with p2:
             st.write("")
             st.write("")
-            if st.button("Refresh AI summary", key="refresh_ai_summary_button", use_container_width=True):
+            if st.button("Refresh commentary", key="refresh_ai_summary_button", use_container_width=True):
                 expected_password = get_ai_refresh_password()
 
                 if not expected_password:
-                    st.error("AI refresh password is not configured.")
-                elif ai_refresh_password != expected_password:
+                    st.error("Commentary refresh password is not configured.")
+                elif commentary_refresh_password != expected_password:
                     st.error("Incorrect password.")
                 else:
-                    with st.spinner("Refreshing daily AI summary..."):
+                    with st.spinner("Refreshing daily commentary..."):
                         success, message = manually_refresh_daily_insight(
                             portfolios_df=portfolios,
                             prices_df=prices,
@@ -855,10 +855,10 @@ def render_daily_ai_summary() -> None:
         st.markdown(
             f"""
             <div class="ai-card">
-                <div class="ai-kicker">AI readout</div>
-                <div class="ai-headline">Daily insight is not available yet.</div>
+                <div class="ai-kicker">Market readout</div>
+                <div class="ai-headline">Daily commentary is not available yet.</div>
                 <div class="ai-summary">
-                    The dashboard is running. The missing piece is the generated JSON artifact at <code>{h(DAILY_INSIGHT_PATH.as_posix())}</code>.
+                    The dashboard is running. The missing piece is the generated commentary artifact at <code>{h(DAILY_INSIGHT_PATH.as_posix())}</code>.
                 </div>
                 <div class="ai-meta">{h(error_message)}</div>
             </div>
@@ -871,10 +871,10 @@ def render_daily_ai_summary() -> None:
         st.markdown(
             """
             <div class="ai-card">
-                <div class="ai-kicker">AI readout</div>
-                <div class="ai-headline">Daily insight is waiting for usable data.</div>
+                <div class="ai-kicker">Market readout</div>
+                <div class="ai-headline">Daily commentary is waiting for usable data.</div>
                 <div class="ai-summary">
-                    The insight file loaded, but no readable insight record was found.
+                    The commentary file loaded, but no readable commentary record was found.
                 </div>
             </div>
             """,
@@ -930,7 +930,7 @@ def render_daily_ai_summary() -> None:
     st.markdown(
         f"""
         <div class="ai-card">
-            <div class="ai-kicker">AI readout</div>
+            <div class="ai-kicker">Market readout</div>
             <div class="ai-headline">{h(headline)}</div>
             <div class="ai-summary">{h(summary)}</div>
             <div class="ai-meta">{h(update_note)} Updated {h(updated_label)}.</div>
@@ -1073,9 +1073,9 @@ def render_about_why() -> None:
             """
             ### What this is testing
 
-            This project asks whether repeated LLM-generated market narratives can produce portfolios that behave differently from passive benchmarks and random stock selections.
+            This project asks whether repeated market narratives can produce portfolios that behave differently from passive benchmarks and random stock selections.
 
-            The goal is not to claim that AI predicts the market. The goal is to measure whether recurring AI-generated themes show up in portfolio performance when tracked from the same start date and evaluated with the same benchmark lens.
+            The goal is not to claim that models predict the market. The goal is to measure whether recurring themes show up in portfolio performance when tracked from the same start date and evaluated with the same benchmark lens.
 
             **This is not financial advice.** It is a live research dashboard about narrative signals, benchmark-relative performance, and disciplined measurement.
             """
