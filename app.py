@@ -1695,6 +1695,14 @@ with d2:
     st.markdown("#### Value trend")
 
     if not detail_history.empty:
+        detail_history = detail_history.sort_values("Date").copy()
+
+        latest_value = detail_history["Portfolio Value"].dropna().iloc[-1]
+        is_positive = latest_value >= 1000
+
+        line_color = SAGE if is_positive else CORAL
+        fill_color = "rgba(93, 202, 165, 0.18)" if is_positive else "rgba(216, 90, 48, 0.16)"
+
         fig_single = px.area(
             detail_history,
             x="Date",
@@ -1703,15 +1711,46 @@ with d2:
 
         chart_layout(fig_single, height=380, yaxis_title="Value")
         apply_sedona_chart_theme(fig_single, height=380, yaxis_title="Value")
+
         fig_single.update_traces(
-            line=dict(color=CORAL, width=2.5),
-            fillcolor="rgba(216, 90, 48, 0.16)",
+            line=dict(color=line_color, width=2.5),
+            fillcolor=fill_color,
         )
 
+        min_value = detail_history["Portfolio Value"].min()
         max_value = detail_history["Portfolio Value"].max()
 
-        if pd.notna(max_value) and max_value > 0:
-            fig_single.update_yaxes(range=[max(0, max_value * 0.88), max_value * 1.04])
+        if pd.notna(min_value) and pd.notna(max_value):
+            y_floor = min(1000, min_value)
+            y_ceiling = max(1000, max_value)
+            y_span = y_ceiling - y_floor
+
+            if y_span == 0:
+                y_floor = y_floor * 0.96
+                y_ceiling = y_ceiling * 1.04
+            else:
+                y_floor = y_floor - (y_span * 0.08)
+                y_ceiling = y_ceiling + (y_span * 0.08)
+
+            fig_single.update_yaxes(
+                range=[y_floor, y_ceiling],
+                tickprefix="$",
+                separatethousands=True,
+            )
+
+        fig_single.add_hline(
+            y=1000,
+            line_width=1.4,
+            line_dash="dot",
+            line_color=SEDONA_LINE_STRONG,
+            annotation_text="$1,000 start",
+            annotation_position="top left",
+            annotation_font=dict(
+                size=12,
+                color=SEDONA_INK_FAINT,
+                family="Spline Sans, sans-serif",
+            ),
+        )
 
         render_chart(fig_single, key="fig_single")
     else:
