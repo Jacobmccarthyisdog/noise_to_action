@@ -112,9 +112,9 @@ PREMIUM_CSS = f"""
         font-family: 'Spline Sans', sans-serif;
     }}
 
-    .block-container {{
+    .block-container {
         max-width: 1180px;
-        padding-top: 2rem;
+        padding-top: 3.25rem;
         padding-bottom: 4.5rem;
     }}
 
