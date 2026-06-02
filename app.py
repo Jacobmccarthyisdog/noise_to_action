@@ -116,7 +116,7 @@ PREMIUM_CSS = f"""
         max-width: 1180px;
         padding-top: 3.25rem;
         padding-bottom: 4.5rem;
-    }}
+    }
 
     h1, h2, h3, h4, h5, h6 {{
         color: var(--ink);
