@@ -35,7 +35,29 @@ from insights import generate_llm_insight, save_daily_insight
 
 
 DAILY_INSIGHT_PATH = Path("data/daily_insight.json")
-ACCENT_BLUE = "#2997FF"
+
+SEDONA_BG = "#F5F1E8"
+SEDONA_SURFACE = "#FBF8F1"
+SEDONA_SIDEBAR = "#EDE8DA"
+SEDONA_INK = "#2B2925"
+SEDONA_INK_SOFT = "#6B665C"
+SEDONA_INK_FAINT = "#9A9386"
+SEDONA_LINE = "#E2DCCE"
+SEDONA_LINE_STRONG = "#D4CBB8"
+
+ACCENT_BLUE = "#D85A30"
+CORAL = "#D85A30"
+CORAL_BG = "#FAECE7"
+CORAL_INK = "#993C1D"
+SAGE = "#5DCAA5"
+SAGE_BG = "#E1F5EE"
+SAGE_INK = "#0F6E56"
+AMBER = "#EF9F27"
+AMBER_BG = "#FAEEDA"
+AMBER_INK = "#854F0B"
+BRICK = "#A32D2D"
+BRICK_BG = "#FCEBEB"
+BRICK_INK = "#791F1F"
 
 
 st.set_page_config(
@@ -51,38 +73,56 @@ st.set_page_config(
 
 PREMIUM_CSS = f"""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Spline+Sans:wght@400;500;600&display=swap');
+
     :root {{
-        --bg: #050505;
-        --bg-soft: #0B0B0D;
-        --surface: rgba(255,255,255,0.045);
-        --surface-strong: rgba(255,255,255,0.075);
-        --text: #F5F5F7;
-        --muted: #A1A1A6;
-        --muted-2: #6E6E73;
-        --border: rgba(255,255,255,0.105);
-        --border-strong: rgba(255,255,255,0.16);
-        --accent: {ACCENT_BLUE};
-        --good: #30D158;
-        --bad: #FF453A;
+        --bg: {SEDONA_BG};
+        --surface: {SEDONA_SURFACE};
+        --sidebar: {SEDONA_SIDEBAR};
+        --ink: {SEDONA_INK};
+        --ink-soft: {SEDONA_INK_SOFT};
+        --ink-faint: {SEDONA_INK_FAINT};
+        --line: {SEDONA_LINE};
+        --line-strong: {SEDONA_LINE_STRONG};
+
+        --coral: {CORAL};
+        --coral-bg: {CORAL_BG};
+        --coral-ink: {CORAL_INK};
+
+        --sage: {SAGE};
+        --sage-bg: {SAGE_BG};
+        --sage-ink: {SAGE_INK};
+
+        --amber: {AMBER};
+        --amber-bg: {AMBER_BG};
+        --amber-ink: {AMBER_INK};
+
+        --brick: {BRICK};
+        --brick-bg: {BRICK_BG};
+        --brick-ink: {BRICK_INK};
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 18px;
     }}
 
     .stApp {{
-        background:
-            radial-gradient(circle at 50% -10%, rgba(41,151,255,0.18), transparent 32%),
-            radial-gradient(circle at 8% 20%, rgba(41,151,255,0.08), transparent 24%),
-            linear-gradient(180deg, #050505 0%, #08080A 44%, #050505 100%);
-        color: var(--text);
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'Spline Sans', sans-serif;
     }}
 
     .block-container {{
-        max-width: 1240px;
-        padding-top: 1.35rem;
-        padding-bottom: 4rem;
+        max-width: 1180px;
+        padding-top: 2rem;
+        padding-bottom: 4.5rem;
     }}
 
     h1, h2, h3, h4, h5, h6 {{
-        color: var(--text);
-        letter-spacing: -0.035em;
+        color: var(--ink);
+        font-family: 'Fraunces', serif;
+        font-weight: 500;
+        letter-spacing: -0.01em;
     }}
 
     p, label, span, div {{
@@ -90,16 +130,15 @@ PREMIUM_CSS = f"""
     }}
 
     section[data-testid="stSidebar"] {{
-        background: rgba(10,10,12,0.96);
-        border-right: 1px solid var(--border);
+        background: var(--sidebar);
+        border-right: 1px solid var(--line-strong);
     }}
 
     div[data-testid="stExpander"] {{
-        border: 1px solid var(--border) !important;
-        border-radius: 26px !important;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.028)) !important;
-        box-shadow: 0 24px 70px rgba(0,0,0,0.22);
+        border: 1px solid var(--line) !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--surface) !important;
+        box-shadow: none !important;
         overflow: hidden;
         margin-bottom: 1rem;
     }}
@@ -109,59 +148,56 @@ PREMIUM_CSS = f"""
     }}
 
     div[data-testid="stExpander"] summary {{
-        color: var(--text) !important;
-        font-weight: 750 !important;
-        letter-spacing: -0.01em;
+        color: var(--ink) !important;
+        font-family: 'Spline Sans', sans-serif !important;
+        font-weight: 500 !important;
+        letter-spacing: 0;
     }}
 
     .main-hero {{
         position: relative;
         overflow: hidden;
-        padding: 42px 44px 38px 44px;
-        border-radius: 34px;
-        background:
-            radial-gradient(circle at top right, rgba(41,151,255,0.22), transparent 32%),
-            linear-gradient(145deg, rgba(255,255,255,0.082), rgba(255,255,255,0.028));
-        border: 1px solid var(--border);
-        box-shadow:
-            0 32px 100px rgba(0,0,0,0.34),
-            inset 0 1px 0 rgba(255,255,255,0.08);
-        margin-bottom: 1rem;
+        padding: 38px 40px 34px 40px;
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: none;
+        margin-bottom: 1.25rem;
+        animation: rise 0.55s ease forwards;
     }}
 
     .hero-kicker {{
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 11px;
-        border-radius: 999px;
-        background: rgba(41,151,255,0.12);
-        border: 1px solid rgba(41,151,255,0.28);
-        color: #B9DDFF;
-        font-size: 0.75rem;
-        font-weight: 760;
+        display: inline-block;
+        padding: 4px 11px;
+        border-radius: 20px;
+        background: var(--coral-bg);
+        color: var(--coral-ink);
+        font-family: 'Spline Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.115em;
+        letter-spacing: 0.12em;
         margin-bottom: 18px;
     }}
 
     .hero-title {{
-        font-size: clamp(2.4rem, 6vw, 5.2rem);
-        line-height: 0.94;
-        font-weight: 850;
-        letter-spacing: -0.07em;
-        color: var(--text);
+        font-family: 'Fraunces', serif;
+        font-size: clamp(34px, 6vw, 52px);
+        line-height: 1.04;
+        font-weight: 500;
+        letter-spacing: -0.015em;
+        color: var(--ink);
         margin: 0;
-        max-width: 980px;
+        max-width: 940px;
     }}
 
     .hero-subtitle {{
         margin-top: 18px;
-        max-width: 780px;
-        color: rgba(245,245,247,0.76);
-        font-size: 1.14rem;
-        line-height: 1.55;
-        letter-spacing: -0.01em;
+        max-width: 760px;
+        color: var(--ink-soft);
+        font-size: 16px;
+        line-height: 1.65;
+        letter-spacing: 0;
     }}
 
     .hero-meta-row {{
@@ -172,201 +208,205 @@ PREMIUM_CSS = f"""
     }}
 
     .hero-pill {{
-        padding: 9px 13px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.055);
-        border: 1px solid var(--border);
-        color: rgba(245,245,247,0.84);
-        font-size: 0.86rem;
-        font-weight: 620;
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--ink-soft);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
     }}
 
     .hero-pill b {{
-        color: var(--text);
-        font-weight: 760;
+        color: var(--ink);
+        font-weight: 600;
     }}
 
     .section-label {{
-        margin-top: 2rem;
-        margin-bottom: 0.65rem;
-        color: var(--muted);
-        font-size: 0.78rem;
-        font-weight: 780;
-        letter-spacing: 0.13em;
+        margin-top: 2.2rem;
+        margin-bottom: 0.55rem;
+        color: var(--coral-ink);
+        font-family: 'Spline Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
     }}
 
     .section-title {{
         margin-top: 0;
-        margin-bottom: 0.7rem;
-        color: var(--text);
-        font-size: 1.55rem;
-        font-weight: 810;
-        letter-spacing: -0.04em;
+        margin-bottom: 0.75rem;
+        color: var(--ink);
+        font-family: 'Fraunces', serif;
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
     }}
 
     .small-note {{
-        color: var(--muted);
-        font-size: 0.92rem;
-        line-height: 1.45;
+        color: var(--ink-soft);
+        font-size: 14px;
+        line-height: 1.6;
         margin-top: -0.25rem;
-        margin-bottom: 0.9rem;
+        margin-bottom: 1rem;
     }}
 
     .glass-divider {{
         height: 1px;
         width: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
-        margin: 1.35rem 0;
+        background: var(--line);
+        margin: 1.6rem 0;
     }}
 
     .control-card {{
-        padding: 20px;
-        border-radius: 26px;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.026));
-        border: 1px solid var(--border);
+        padding: 22px;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        border: 1px solid var(--line);
         margin-bottom: 1rem;
+        box-shadow: none;
     }}
 
     .ai-card {{
         position: relative;
         overflow: hidden;
-        padding: 28px 30px 26px 30px;
-        border-radius: 30px;
-        background:
-            radial-gradient(circle at top right, rgba(41,151,255,0.22), transparent 34%),
-            linear-gradient(145deg, rgba(255,255,255,0.072), rgba(255,255,255,0.026));
-        border: 1px solid var(--border);
-        box-shadow:
-            0 28px 90px rgba(0,0,0,0.28),
-            inset 0 1px 0 rgba(255,255,255,0.07);
-        margin-top: 0.9rem;
-        margin-bottom: 1.2rem;
+        padding: 26px 28px 24px 28px;
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: none;
+        margin-top: 1rem;
+        margin-bottom: 1.25rem;
+        animation: rise 0.55s ease forwards;
     }}
 
     .ai-kicker {{
-        color: #B9DDFF;
-        font-size: 0.74rem;
-        font-weight: 800;
+        display: inline-block;
+        color: var(--coral-ink);
+        background: var(--coral-bg);
+        border-radius: 20px;
+        padding: 4px 11px;
+        font-family: 'Spline Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
     }}
 
     .ai-headline {{
-        color: var(--text);
-        font-size: clamp(1.4rem, 2.8vw, 2.2rem);
-        line-height: 1.08;
-        font-weight: 830;
-        letter-spacing: -0.045em;
+        color: var(--ink);
+        font-family: 'Fraunces', serif;
+        font-size: clamp(24px, 3vw, 34px);
+        line-height: 1.12;
+        font-weight: 500;
+        letter-spacing: -0.01em;
         margin-bottom: 12px;
     }}
 
     .ai-summary {{
-        color: rgba(245,245,247,0.82);
-        font-size: 1.02rem;
-        line-height: 1.62;
+        color: var(--ink-soft);
+        font-size: 15.5px;
+        line-height: 1.75;
         max-width: 980px;
     }}
 
     .ai-meta {{
-        margin-top: 16px;
-        color: var(--muted);
-        font-size: 0.86rem;
+        margin-top: 18px;
+        color: var(--ink-faint);
+        font-size: 13px;
     }}
 
     .metric-grid {{
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 14px;
-        margin-top: 0.7rem;
-        margin-bottom: 1.2rem;
+        margin-top: 0.8rem;
+        margin-bottom: 1.35rem;
     }}
 
     .premium-metric {{
         position: relative;
         overflow: hidden;
-        min-height: 152px;
-        padding: 22px 22px 20px 22px;
-        border-radius: 28px;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.027));
-        border: 1px solid var(--border);
-        box-shadow:
-            0 24px 75px rgba(0,0,0,0.24),
-            inset 0 1px 0 rgba(255,255,255,0.06);
+        min-height: 146px;
+        padding: 20px 22px;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: none;
+        transition: transform 0.18s ease, border-color 0.18s ease;
+    }}
+
+    .premium-metric:hover {{
+        transform: translateY(-3px);
+        border-color: var(--line-strong);
     }}
 
     .premium-metric::after {{
-        content: "";
-        position: absolute;
-        inset: -1px;
-        pointer-events: none;
-        background: radial-gradient(circle at top right, rgba(41,151,255,0.14), transparent 36%);
+        display: none;
     }}
 
     .metric-label {{
         position: relative;
         z-index: 1;
-        color: var(--muted);
-        font-size: 0.77rem;
-        font-weight: 780;
+        color: var(--ink-soft);
+        font-family: 'Spline Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin-bottom: 14px;
+        letter-spacing: 0.08em;
+        margin-bottom: 13px;
     }}
 
     .metric-value {{
         position: relative;
         z-index: 1;
-        color: var(--text);
-        font-size: clamp(1.5rem, 3vw, 2.15rem);
+        color: var(--coral);
+        font-family: 'Fraunces', serif;
+        font-size: clamp(27px, 3vw, 34px);
         line-height: 1;
-        font-weight: 850;
-        letter-spacing: -0.055em;
+        font-weight: 600;
+        letter-spacing: -0.01em;
         margin-bottom: 12px;
     }}
 
     .metric-sub {{
         position: relative;
         z-index: 1;
-        color: rgba(245,245,247,0.66);
-        font-size: 0.93rem;
-        line-height: 1.45;
+        color: var(--ink-soft);
+        font-size: 13.5px;
+        line-height: 1.5;
     }}
 
     .metric-positive {{
-        color: var(--accent);
+        color: var(--sage-ink);
     }}
 
     .metric-negative {{
-        color: var(--bad);
+        color: var(--brick-ink);
     }}
 
     .metric-neutral {{
-        color: var(--text);
+        color: var(--coral);
     }}
 
     .ticker-shell {{
         width: 100%;
         overflow: hidden;
-        border-radius: 30px;
-        border: 1px solid var(--border);
-        background:
-            radial-gradient(circle at top right, rgba(41,151,255,0.13), transparent 30%),
-            linear-gradient(180deg, rgba(255,255,255,0.058), rgba(255,255,255,0.025));
-        box-shadow:
-            0 24px 80px rgba(0,0,0,0.24),
-            inset 0 1px 0 rgba(255,255,255,0.06);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--line);
+        background: var(--surface);
+        box-shadow: none;
         padding: 12px 0;
-        margin: 0.8rem 0 1.35rem 0;
+        margin: 0.9rem 0 1.45rem 0;
     }}
 
     .ticker-track {{
         display: flex;
         width: max-content;
-        animation: ticker-scroll 42s linear infinite;
+        animation: ticker-scroll 46s linear infinite;
         will-change: transform;
     }}
 
@@ -381,30 +421,30 @@ PREMIUM_CSS = f"""
     }}
 
     .ticker-card {{
-        min-width: 238px;
-        padding: 15px 16px 14px 16px;
-        border-radius: 22px;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,0.062), rgba(255,255,255,0.026));
-        border: 1px solid var(--border);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+        min-width: 226px;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        box-shadow: none;
     }}
 
     .ticker-name {{
-        color: var(--muted);
-        font-size: 0.74rem;
-        font-weight: 800;
+        color: var(--ink-soft);
+        font-size: 11px;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.11em;
-        margin-bottom: 9px;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
         white-space: nowrap;
     }}
 
     .ticker-price {{
-        color: var(--text);
-        font-size: 1.08rem;
-        font-weight: 820;
-        letter-spacing: -0.025em;
+        color: var(--ink);
+        font-family: 'Fraunces', serif;
+        font-size: 21px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
         margin-bottom: 8px;
         white-space: nowrap;
     }}
@@ -413,21 +453,21 @@ PREMIUM_CSS = f"""
         display: flex;
         gap: 12px;
         flex-wrap: nowrap;
-        font-size: 0.82rem;
-        font-weight: 720;
+        font-size: 12px;
+        font-weight: 500;
         white-space: nowrap;
     }}
 
     .ticker-up {{
-        color: var(--accent);
+        color: var(--sage-ink);
     }}
 
     .ticker-down {{
-        color: var(--bad);
+        color: var(--brick-ink);
     }}
 
     .ticker-flat {{
-        color: rgba(245,245,247,0.62);
+        color: var(--ink-faint);
     }}
 
     @keyframes ticker-scroll {{
@@ -435,16 +475,30 @@ PREMIUM_CSS = f"""
         to {{ transform: translateX(-50%); }}
     }}
 
+    @keyframes rise {{
+        from {{ opacity: 0; transform: translateY(16px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
+
     @media (prefers-reduced-motion: reduce) {{
         .ticker-track {{
+            animation: none;
+        }}
+
+        .ai-card,
+        .main-hero {{
             animation: none;
         }}
     }}
 
     @media (max-width: 900px) {{
+        .block-container {{
+            padding-top: 1.25rem;
+        }}
+
         .main-hero {{
-            padding: 30px 24px 28px 24px;
-            border-radius: 28px;
+            padding: 28px 24px;
+            border-radius: var(--radius-lg);
         }}
 
         .metric-grid {{
@@ -457,23 +511,66 @@ PREMIUM_CSS = f"""
     }}
 
     div[data-testid="stDataFrame"] {{
-        border-radius: 20px;
+        border-radius: var(--radius-md);
         overflow: hidden;
-        border: 1px solid var(--border);
+        border: 1px solid var(--line);
+        background: var(--surface);
     }}
 
     .stButton > button {{
-        border-radius: 999px;
-        border: 1px solid rgba(41,151,255,0.38);
-        background: rgba(41,151,255,0.13);
-        color: #D7ECFF;
-        font-weight: 760;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: var(--coral);
+        color: var(--surface);
+        font-family: 'Spline Sans', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 10px 20px;
+        transition: opacity 0.18s ease, transform 0.18s ease;
     }}
 
     .stButton > button:hover {{
-        border-color: rgba(41,151,255,0.72);
-        background: rgba(41,151,255,0.20);
-        color: #FFFFFF;
+        opacity: 0.88;
+        transform: translateY(-1px);
+        border: none;
+        color: var(--surface);
+    }}
+
+    .stButton > button:focus {{
+        box-shadow: 0 0 0 3px rgba(216, 90, 48, 0.12);
+    }}
+
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div,
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="input"] > div {{
+        background: var(--surface) !important;
+        border-color: var(--line-strong) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--ink) !important;
+        font-family: 'Spline Sans', sans-serif !important;
+    }}
+
+    .stTextInput input:focus {{
+        border-color: var(--coral) !important;
+        box-shadow: 0 0 0 3px rgba(216, 90, 48, 0.12) !important;
+    }}
+
+    [data-testid="stCaptionContainer"] {{
+        color: var(--ink-faint);
+        font-size: 13px;
+    }}
+
+    hr {{
+        border-color: var(--line);
+    }}
+
+    code {{
+        color: var(--coral-ink);
+        background: var(--coral-bg);
+        border-radius: 6px;
+        padding: 2px 5px;
     }}
 </style>
 """
@@ -500,6 +597,158 @@ def render_html(markup: str) -> None:
         st.html(markup)
     else:
         st.markdown(markup, unsafe_allow_html=True)
+
+
+def apply_sedona_chart_theme(fig: go.Figure, height: int = 420, yaxis_title: str = "", xaxis_title: str = "") -> go.Figure:
+    fig.update_layout(
+        template=None,
+        height=height,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor=SEDONA_SURFACE,
+        margin=dict(l=12, r=12, t=24, b=18),
+        font=dict(
+            family="Spline Sans, sans-serif",
+            color=SEDONA_INK,
+            size=13,
+        ),
+        hoverlabel=dict(
+            bgcolor=SEDONA_SURFACE,
+            bordercolor=SEDONA_LINE_STRONG,
+            font_size=13,
+            font_color=SEDONA_INK,
+            font_family="Spline Sans, sans-serif",
+        ),
+        legend=dict(
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+            font=dict(color=SEDONA_INK_SOFT, size=12),
+        ),
+        yaxis_title=yaxis_title,
+        xaxis_title=xaxis_title,
+    )
+
+    fig.update_xaxes(
+        showgrid=False,
+        zeroline=False,
+        linecolor=SEDONA_LINE_STRONG,
+        tickfont=dict(color=SEDONA_INK_SOFT),
+        title_font=dict(color=SEDONA_INK_SOFT),
+        fixedrange=True,
+    )
+
+    fig.update_yaxes(
+        gridcolor=SEDONA_LINE,
+        zeroline=False,
+        linecolor=SEDONA_LINE_STRONG,
+        tickfont=dict(color=SEDONA_INK_SOFT),
+        title_font=dict(color=SEDONA_INK_SOFT),
+        fixedrange=True,
+    )
+
+    return fig
+
+
+def build_sedona_line_style_map(portfolio_names: list[str]) -> dict[str, dict[str, Any]]:
+    base_styles = build_line_style_map(portfolio_names)
+
+    sedona_palette = [
+        CORAL,
+        SAGE,
+        AMBER,
+        BRICK,
+        "#8A6F3D",
+        "#4E7F71",
+        "#B76E4C",
+        "#6F6A5F",
+    ]
+
+    cleaned_names = [str(name).strip() for name in portfolio_names if pd.notna(name)]
+    unique_names = list(dict.fromkeys(cleaned_names))
+
+    style_map = {}
+    for index, name in enumerate(unique_names):
+        upper_name = name.upper()
+
+        if upper_name in {"SPY", "US:SPY"}:
+            style_map[name] = {"color": CORAL, "dash": "dot", "width": 3.5}
+        elif upper_name in {"DIA", "US:DIA"}:
+            style_map[name] = {"color": AMBER, "dash": "dot", "width": 3.5}
+        elif "GOOGLE" in upper_name:
+            style_map[name] = {"color": "#8A6F3D", "dash": "solid", "width": 2.8}
+        elif "OPENAI" in upper_name:
+            style_map[name] = {"color": CORAL, "dash": "solid", "width": 2.8}
+        elif upper_name == "RANDOM A":
+            style_map[name] = {"color": "#6F6A5F", "dash": "solid", "width": 2.4}
+        elif upper_name == "RANDOM B":
+            style_map[name] = {"color": "#9A9386", "dash": "solid", "width": 2.4}
+        else:
+            fallback = base_styles.get(name, {})
+            style_map[name] = {
+                "color": sedona_palette[index % len(sedona_palette)],
+                "dash": fallback.get("dash", "solid"),
+                "width": fallback.get("width", 2.5),
+            }
+
+    return style_map
+
+
+def apply_sedona_heatmap_theme(fig: go.Figure) -> go.Figure:
+    fig.update_traces(
+        colorscale=[
+            [0.00, BRICK_BG],
+            [0.25, "#F5D3D0"],
+            [0.49, "#F8E5DF"],
+            [0.50, SEDONA_BG],
+            [0.51, "#EAF4EA"],
+            [0.76, SAGE_BG],
+            [1.00, SAGE],
+        ],
+        colorbar=dict(
+            title=dict(text="Strength", font=dict(color=SEDONA_INK_SOFT)),
+            thickness=12,
+            len=0.78,
+            orientation="h",
+            x=0.5,
+            xanchor="center",
+            y=-0.14,
+            yanchor="top",
+            tickvals=[0, 0.5, 1],
+            ticktext=["Soft", "Neutral", "Strong"],
+            outlinewidth=0,
+            tickfont=dict(color=SEDONA_INK_SOFT),
+        ),
+        textfont={"size": 12, "color": SEDONA_INK},
+    )
+
+    fig.update_layout(
+        height=420,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor=SEDONA_SURFACE,
+        margin=dict(l=10, r=10, t=24, b=52),
+        font=dict(
+            family="Spline Sans, sans-serif",
+            color=SEDONA_INK,
+        ),
+    )
+
+    fig.update_xaxes(
+        side="top",
+        showgrid=False,
+        zeroline=False,
+        tickfont=dict(size=12, color=SEDONA_INK_SOFT),
+        showline=False,
+        fixedrange=True,
+    )
+
+    fig.update_yaxes(
+        showgrid=False,
+        zeroline=False,
+        tickfont=dict(size=13, color=SEDONA_INK),
+        showline=False,
+        fixedrange=True,
+    )
+
+    return fig
 
 
 def build_banner_stats(portfolio_history_df: pd.DataFrame, summary_df: pd.DataFrame) -> pd.DataFrame:
@@ -732,7 +981,7 @@ def render_hero_banner(
             <div class="hero-kicker">Live research dashboard</div>
             <h1 class="hero-title">From Noise to Action</h1>
             <div class="hero-subtitle">
-                Market narratives, measured against reality. A calm view of whether repeated model-selected portfolios are separating from benchmarks and random baselines.
+                Market narratives, measured against reality. A calm read on whether recurring model-selected portfolios are separating from benchmarks and random baselines.
             </div>
             <div class="hero-meta-row">
                 <div class="hero-pill"><b>Data through</b> {h(latest_label)}</div>
@@ -815,7 +1064,7 @@ def render_control_panel(
         p1, p2 = st.columns([1.2, 0.8])
 
         with p1:
-            commentary_refresh_password = st.text_input(
+            ai_refresh_password = st.text_input(
                 "Refresh password",
                 type="password",
                 key="ai_refresh_password",
@@ -830,7 +1079,7 @@ def render_control_panel(
 
                 if not expected_password:
                     st.error("Commentary refresh password is not configured.")
-                elif commentary_refresh_password != expected_password:
+                elif ai_refresh_password != expected_password:
                     st.error("Incorrect password.")
                 else:
                     with st.spinner("Refreshing daily commentary..."):
@@ -1229,7 +1478,7 @@ render_daily_ai_summary()
 render_portfolio_ticker(banner_df)
 
 st.markdown('<div class="section-label">Performance</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-title">The benchmark-relative readout</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Benchmark-relative readout</div>', unsafe_allow_html=True)
 
 render_metric_grid(
     summary_f=summary_f,
@@ -1263,11 +1512,11 @@ if not benchmark_cumret_f.empty and not benchmark_already_present:
         )
 
 if not cumret_plot_df.empty:
-    cumret_line_styles = build_line_style_map(cumret_plot_df["Portfolio"].unique().tolist())
+    cumret_line_styles = build_sedona_line_style_map(cumret_plot_df["Portfolio"].unique().tolist())
 
     if benchmark_choice in cumret_line_styles:
-        cumret_line_styles[benchmark_choice]["color"] = ACCENT_BLUE
-        cumret_line_styles[benchmark_choice]["width"] = 4
+        cumret_line_styles[benchmark_choice]["color"] = CORAL
+        cumret_line_styles[benchmark_choice]["width"] = 3.8
         cumret_line_styles[benchmark_choice]["dash"] = "dot"
 
     fig_cumret = px.line(
@@ -1279,6 +1528,7 @@ if not cumret_plot_df.empty:
 
     apply_line_styles(fig_cumret, cumret_line_styles)
     chart_layout(fig_cumret, height=470, yaxis_title="Cumulative Return")
+    apply_sedona_chart_theme(fig_cumret, height=470, yaxis_title="Cumulative Return")
     fig_cumret.update_yaxes(tickformat=".0%")
     fig_cumret.update_layout(
         legend=dict(
@@ -1288,6 +1538,7 @@ if not cumret_plot_df.empty:
             xanchor="center",
             x=0.5,
             title=None,
+            font=dict(color=SEDONA_INK_SOFT, size=12),
         ),
         margin=dict(b=112),
     )
@@ -1304,7 +1555,7 @@ st.markdown('<div class="section-title">Total return by portfolio</div>', unsafe
 if not summary_f.empty:
     bar_df = summary_f.sort_values("Return", ascending=False).copy()
     bar_colors = [
-        ACCENT_BLUE if pd.notna(value) and value >= 0 else "#FF453A"
+        SAGE if pd.notna(value) and value >= 0 else BRICK
         for value in bar_df["Return"]
     ]
 
@@ -1317,7 +1568,7 @@ if not summary_f.empty:
                 textposition="outside",
                 marker=dict(
                     color=bar_colors,
-                    line=dict(color="rgba(255,255,255,0.10)", width=1),
+                    line=dict(color=SEDONA_LINE_STRONG, width=1),
                 ),
                 hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>",
             )
@@ -1325,6 +1576,7 @@ if not summary_f.empty:
     )
 
     chart_layout(fig_bar, height=390, yaxis_title="Return")
+    apply_sedona_chart_theme(fig_bar, height=390, yaxis_title="Return")
     fig_bar.update_yaxes(tickformat=".0%")
     render_chart(fig_bar, key="fig_bar")
 else:
@@ -1335,7 +1587,7 @@ st.markdown('<div class="glass-divider"></div>', unsafe_allow_html=True)
 st.markdown('<div class="section-label">Signal map</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Portfolio heatmap</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="small-note">Brighter cells indicate stronger relative performance. Lower volatility is rewarded.</div>',
+    '<div class="small-note">Warmer cells indicate softer relative performance. Cooler green cells indicate stronger relative performance. Lower volatility is rewarded.</div>',
     unsafe_allow_html=True,
 )
 
@@ -1343,6 +1595,7 @@ if not summary_f.empty:
     heatmap_fig = build_portfolio_heatmap(summary_f, money, pct)
 
     if heatmap_fig is not None:
+        apply_sedona_heatmap_theme(heatmap_fig)
         render_chart(heatmap_fig, key="heatmap_fig")
     else:
         st.info("No heatmap data available.")
@@ -1399,6 +1652,12 @@ with d2:
         )
 
         chart_layout(fig_single, height=380, yaxis_title="Value")
+        apply_sedona_chart_theme(fig_single, height=380, yaxis_title="Value")
+        fig_single.update_traces(
+            line=dict(color=CORAL, width=2.5),
+            fillcolor="rgba(216, 90, 48, 0.16)",
+        )
+
         max_value = detail_history["Portfolio Value"].max()
 
         if pd.notna(max_value) and max_value > 0:
