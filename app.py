@@ -344,7 +344,7 @@ PREMIUM_CSS = f"""
 }}
 
     .premium-metric:hover {{
-        transform: translateY(-3px);
+        transform: translateY(-6px);
         border-color: var(--line-strong);
     }}
 
