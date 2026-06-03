@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "as_of_date": "2026-06-03",
-  "generated_at": "2026-06-03T18:02:46.328553+00:00",
+  "generated_at": "2026-06-03T22:36:47.361652+00:00",
   "period": "YTD",
   "benchmark": "SPY",
   "model": "gpt-4o-mini",
@@ -12,57 +12,57 @@
     "as_of_date": "2026-06-03",
     "period": "YTD",
     "benchmark": "SPY",
-    "benchmark_return": 0.11499067836196408,
+    "benchmark_return": 0.11307221697898218,
     "portfolio_count": 8,
-    "avg_portfolio_return": 0.20322731768831698,
-    "avg_alpha": 0.0882366393263529,
+    "avg_portfolio_return": 0.19932990317493243,
+    "avg_alpha": 0.08625768619595026,
     "top_portfolio": {
       "name": "Random A",
-      "return": 0.3389991167426585,
-      "dollar_change": 338.99911674265854,
-      "current_value": 1338.9991167426585,
+      "return": 0.3317358554697758,
+      "dollar_change": 331.73585546977574,
+      "current_value": 1331.7358554697757,
       "max_drawdown": -0.06958000344643778
     },
     "bottom_portfolio": {
       "name": "Google 50",
-      "return": 0.14279319559790382,
-      "dollar_change": 142.79319559790383,
-      "current_value": 1142.7931955979038,
+      "return": 0.13887727430756258,
+      "dollar_change": 138.87727430756263,
+      "current_value": 1138.8772743075626,
       "max_drawdown": -0.10823923738482732
     },
     "most_volatile": {
       "name": "Random B",
-      "return": 0.21151391951497933,
-      "dollar_change": 211.5139195149793,
-      "current_value": 1211.5139195149793,
+      "return": 0.20487806347818216,
+      "dollar_change": 204.87806347818218,
+      "current_value": 1204.8780634781822,
       "max_drawdown": -0.13267678787573045,
-      "volatility": 0.02015366764968883
+      "volatility": 0.020167240010325126
     },
     "top_holding": {
       "ticker": "SOXX",
       "portfolio": "OpenAI 10",
-      "return": 0.8644016952140359,
-      "dollar_change": 73.96685305946505,
-      "current_value": 159.53685305946505
+      "return": 0.8610162852976262,
+      "dollar_change": 73.67716353291786,
+      "current_value": 159.24716353291785
     },
     "bottom_holding": {
       "ticker": "NRG",
       "portfolio": "Random A",
-      "return": -0.0705483402739483,
-      "dollar_change": -0.7047779193367436,
-      "current_value": 9.285222080663257
+      "return": -0.07394079032159251,
+      "dollar_change": -0.7386684953127087,
+      "current_value": 9.251331504687291
     },
     "generated_from": "build_ytd_metrics_snapshot_v1"
   },
   "headline": "Portfolio outperforms benchmark YTD",
-  "summary": "As of 2026-06-03, the portfolio group has an average return of 20.32% versus SPY at 11.50%, producing average alpha of 8.82%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 8.82%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 33.90% and current value of $1,339.00. The weakest portfolio is Google 50, with a return of 14.28%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
-  "insight_text": "As of 2026-06-03, the portfolio group has an average return of 20.32% versus SPY at 11.50%, producing average alpha of 8.82%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 8.82%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 33.90% and current value of $1,339.00. The weakest portfolio is Google 50, with a return of 14.28%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
+  "summary": "As of 2026-06-03, the portfolio group has an average return of 19.93% versus SPY at 11.31%, producing average alpha of 8.63%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 8.63%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 33.17% and current value of $1,331.74. The weakest portfolio is Google 50, with a return of 13.89%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
+  "insight_text": "As of 2026-06-03, the portfolio group has an average return of 19.93% versus SPY at 11.31%, producing average alpha of 8.63%. The portfolio set is outperforming SPY, which makes the current readout more useful than a simple return snapshot. Outperformance versus a broad benchmark like SPY can help show whether the portfolio is holding up during periods of market stress, macro uncertainty, rate volatility, or global conflict headlines. Current average alpha is 8.63%, meaning the portfolio group is not just rising in absolute terms, it is also ahead of the benchmark comparison. The strongest portfolio is Random A, with a return of 33.17% and current value of $1,331.74. The weakest portfolio is Google 50, with a return of 13.89%, while Random B is the portfolio showing the highest volatility. Note: Updated 30 minutes before and after market close.",
   "takeaways": [
-    "Random A is the strongest YTD performer, returning 33.90% with a dollar change of $339.00.",
-    "Google 50 is the lowest YTD performer, returning 14.28%, which still needs to be interpreted against the SPY benchmark return of 11.50%.",
-    "The portfolio group average return of 20.32% compares to SPY at 11.50%, giving the dashboard a clear benchmark-relative read rather than just an absolute return view.",
-    "OpenAI 10 is the strongest holding, returning 86.44% with current value of $159.54.",
-    "Random A is the weakest holding, returning -7.05% with current value of $9.29."
+    "Random A is the strongest YTD performer, returning 33.17% with a dollar change of $331.74.",
+    "Google 50 is the lowest YTD performer, returning 13.89%, which still needs to be interpreted against the SPY benchmark return of 11.31%.",
+    "The portfolio group average return of 19.93% compares to SPY at 11.31%, giving the dashboard a clear benchmark-relative read rather than just an absolute return view.",
+    "OpenAI 10 is the strongest holding, returning 86.10% with current value of $159.25.",
+    "Random A is the weakest holding, returning -7.39% with current value of $9.25."
   ],
   "update_note": "Updated 30 minutes before and after market close.",
   "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj ********************************************************************************************************************************************************eacA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}"
