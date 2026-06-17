@@ -25,6 +25,26 @@ The current inception date is controlled in `config.py`.
 
 ---
 
+## Web dashboard migration
+
+This repo now includes a Vercel-ready Next.js frontend in `web/`.
+
+The migration keeps the Python analytics layer as the source of truth and exports a static JSON contract for the frontend:
+
+```bash
+python jobs/export_dashboard_data.py
+```
+
+The generated file lives at:
+
+```text
+web/public/data/dashboard.json
+```
+
+For frontend setup and Vercel deployment instructions, see `web/README.md`.
+
+---
+
 ## Project structure
 
 ```text
@@ -34,4 +54,9 @@ The current inception date is controlled in `config.py`.
 ├── data_loader.py
 ├── calculations.py
 ├── charts.py
+├── jobs/
+│   ├── generate_daily_insight.py
+│   └── export_dashboard_data.py
+├── web/
+│   └── Next.js dashboard
 └── requirements.txt

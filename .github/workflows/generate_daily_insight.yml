@@ -1,22 +1,17 @@
-name: Generate Daily Insight
+name: Generate Dashboard Data
 
 on:
   workflow_dispatch:
 
   schedule:
-    # Runs 30 minutes before US market open during Eastern Daylight Time.
-    # 9:00 AM ET = 8:00 AM CT = 13:00 UTC.
-    - cron: "0 13 * * 1-5"
-
-    # Runs 30 minutes after US market close during Eastern Daylight Time.
-    # 4:30 PM ET = 3:30 PM CT = 20:30 UTC.
-    - cron: "30 20 * * 1-5"
+    # Refreshes the Vercel dashboard data artifact every 6 hours.
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: write
 
 jobs:
-  generate-daily-insight:
+  generate-dashboard-data:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,15 +37,19 @@ jobs:
         run: |
           python jobs/generate_daily_insight.py --force
 
-      - name: Commit updated daily insight
+      - name: Export web dashboard data
+        run: |
+          python jobs/export_dashboard_data.py
+
+      - name: Commit updated dashboard artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet data/daily_insight.json; then
+          if git diff --quiet data/daily_insight.json web/public/data/dashboard.json; then
             echo "No changes to commit."
           else
-            git add data/daily_insight.json
-            git commit -m "Update daily AI portfolio insight"
+            git add data/daily_insight.json web/public/data/dashboard.json
+            git commit -m "Update dashboard data"
             git push
           fi
