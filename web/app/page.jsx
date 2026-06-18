@@ -69,6 +69,23 @@ function compactPct(value) {
   return `${(number * 100).toFixed(1)}%`;
 }
 
+function formatGeneratedAt(value) {
+  if (!value) return "-";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return String(value);
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/Chicago",
+    timeZoneName: "short",
+  }).format(parsed);
+}
+
 function parseDate(value) {
   return value ? new Date(`${value}T00:00:00`) : null;
 }
@@ -483,12 +500,13 @@ export default function DashboardPage() {
           <span><b>As of</b> {data.as_of_date || "-"}</span>
           <span><b>Start</b> {data.start_date || "-"}</span>
           <span><b>Portfolios</b> {portfolioNames.length}</span>
+          <span><b>Updated</b> {formatGeneratedAt(data.generated_at)}</span>
           <span className={selectedDollarChange >= 0 ? "performance-pill positive" : "performance-pill negative"}>
-            <b>Portfolio to date</b> {selectedDollarChange >= 0 ? "+" : ""}
+            <b>Selected portfolios</b> {selectedDollarChange >= 0 ? "+" : ""}
             {money(selectedDollarChange)}
           </span>
           <span className={selectedReturn >= 0 ? "performance-pill positive" : "performance-pill negative"}>
-            <b>Total return</b> {pct(selectedReturn)}
+            <b>Selected return</b> {pct(selectedReturn)}
           </span>
         </div>
       </section>
@@ -681,6 +699,21 @@ export default function DashboardPage() {
           </table>
         </div>
       </section>
+
+      <footer className="site-footer">
+        <div>
+          <b>Data source</b>
+          Daily close prices are pulled from Yahoo Finance through the Python export job.
+        </div>
+        <div>
+          <b>Methodology</b>
+          Portfolios are fixed for the 2026 study and compared against SPY, DIA, and random controls.
+        </div>
+        <div>
+          <b>Note</b>
+          This is an experiment tracker, not investment advice.
+        </div>
+      </footer>
     </main>
   );
 }

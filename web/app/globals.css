@@ -719,6 +719,31 @@ td {
   color: var(--ink-soft);
 }
 
+.site-footer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.site-footer div {
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.site-footer b {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 @keyframes ticker-scroll {
   from {
     transform: translateX(0);
@@ -748,7 +773,8 @@ td {
   .metric-grid,
   .detail-grid,
   .detail-metrics,
-  .about-grid {
+  .about-grid,
+  .site-footer {
     grid-template-columns: 1fr;
   }
 

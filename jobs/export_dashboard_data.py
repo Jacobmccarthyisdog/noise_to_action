@@ -62,19 +62,26 @@ def latest_daily_insight() -> dict[str, Any] | None:
     payload = load_daily_insight()
 
     if isinstance(payload, dict):
-        return payload
+        return public_insight_record(payload)
 
     if isinstance(payload, list):
         items = [item for item in payload if isinstance(item, dict)]
         if not items:
             return None
-        return sorted(
+        latest = sorted(
             items,
             key=lambda item: str(item.get("as_of_date") or item.get("generated_at") or ""),
             reverse=True,
         )[0]
+        return public_insight_record(latest)
 
     return None
+
+
+def public_insight_record(record: dict[str, Any]) -> dict[str, Any]:
+    cleaned = dict(record)
+    cleaned.pop("error", None)
+    return cleaned
 
 
 def build_export_payload() -> dict[str, Any]:
