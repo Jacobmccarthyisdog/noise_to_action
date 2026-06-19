@@ -21,28 +21,30 @@ const FALLBACK_DATA = {
   portfolio_history: [],
   benchmark_history: [],
   daily_insight: {
-    headline: "Portfolio dashboard ready for exported data",
+    headline: "Signal ledger ready for exported data",
     summary:
-      "Run the Python export job to populate live portfolio history, holdings, benchmark comparisons, and daily commentary for this dashboard.",
+      "Run the Python export job to populate portfolio history, holdings, benchmark routes, and daily commentary for this field ledger.",
     takeaways: [
-      "The frontend is wired to /data/dashboard.json.",
-      "The existing Python analytics layer remains the source of truth.",
-      "Vercel can serve this as a polished web dashboard once the JSON artifact is generated.",
+      "The dashboard reads from /data/dashboard.json.",
+      "The Python analytics layer remains the source of truth.",
+      "Use the controls to compare fixed portfolios against the selected benchmark route.",
     ],
   },
 };
 
 const COLORS = {
-  clay: "#A9482B",
-  alpine: "#364536",
-  bark: "#6E3F2A",
-  river: "#385C7A",
-  ochre: "#D68A36",
-  stone: "#B7B0A2",
-  spy: "#385C7A",
-  dia: "#6E3F2A",
-  randomA: "#D68A36",
-  randomB: "#B7B0A2",
+  ink: "#11110E",
+  sky: "#67B7E8",
+  mustard: "#D9AA43",
+  flame: "#F15A2B",
+  teal: "#00866E",
+  pine: "#00866E",
+  slate: "#263241",
+  stone: "#BDB49F",
+  spy: "#263241",
+  dia: "#00866E",
+  randomA: "#D9AA43",
+  randomB: "#67B7E8",
 };
 
 function toNumber(value) {
@@ -72,23 +74,6 @@ function compactPct(value) {
   return `${(number * 100).toFixed(1)}%`;
 }
 
-function formatGeneratedAt(value) {
-  if (!value) return "-";
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return String(value);
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/Chicago",
-    timeZoneName: "short",
-  }).format(parsed);
-}
-
 function parseDate(value) {
   return value ? new Date(`${value}T00:00:00`) : null;
 }
@@ -110,17 +95,48 @@ function lineStyle(name) {
   if (upper === "RANDOM A") return COLORS.randomA;
   if (upper === "RANDOM B") return COLORS.randomB;
   if (upper.includes("GOOGLE")) {
-    const palette = ["#364536", "#4A5C42", "#657344", "#899052", "#D68A36"];
-    const index = Number(upper.match(/\d+/)?.[0] || 10) / 10 - 1;
-    return palette[Math.max(0, Math.min(palette.length - 1, index))];
+    const googlePalette = {
+      10: "#00715E",
+      50: "#2E9B7F",
+      100: "#72BCA9",
+    };
+    return googlePalette[Number(upper.match(/\d+/)?.[0])] || COLORS.teal;
   }
   if (upper.includes("OPENAI")) {
-    const palette = ["#385C7A", "#4E6D87", "#6E3F2A", "#A9482B", "#C26335"];
-    const index = Number(upper.match(/\d+/)?.[0] || 10) / 10 - 1;
-    return palette[Math.max(0, Math.min(palette.length - 1, index))];
+    const openAiPalette = {
+      10: "#A93C20",
+      50: "#F15A2B",
+      100: "#F28B68",
+    };
+    return openAiPalette[Number(upper.match(/\d+/)?.[0])] || COLORS.flame;
   }
 
   return COLORS.stone;
+}
+
+function compareLegendNames(left, right) {
+  const group = (name) => {
+    const upper = String(name).toUpperCase();
+    if (upper.includes("GOOGLE")) return 0;
+    if (upper.includes("OPENAI")) return 1;
+    if (upper.includes("RANDOM")) return 2;
+    return 3;
+  };
+
+  return group(left) - group(right) || left.localeCompare(right, undefined, { numeric: true });
+}
+
+function highestModelPortfolio(rows, portfolioNames, benchmarkNames) {
+  const benchmarks = new Set(benchmarkNames.map((name) => String(name).toUpperCase()));
+  const isEligible = (name) => {
+    const upper = String(name).toUpperCase();
+    return !upper.includes("RANDOM") && !benchmarks.has(upper);
+  };
+  const leader = [...(rows || [])]
+    .filter((row) => isEligible(row.Portfolio))
+    .sort((left, right) => Number(right.Return || 0) - Number(left.Return || 0))[0];
+
+  return leader?.Portfolio || portfolioNames.find(isEligible) || portfolioNames[0];
 }
 
 function buildSummary(history) {
@@ -222,13 +238,13 @@ function mix(a, b, t) {
 }
 
 function heatColor(score) {
-  const clay = [245, 226, 217];
-  const neutral = [244, 239, 227];
-  const alpine = [226, 235, 220];
-  const strongAlpine = [136, 153, 112];
+  const flame = [252, 222, 211];
+  const neutral = [246, 241, 231];
+  const alpine = [217, 238, 231];
+  const strongAlpine = [0, 134, 110];
   const rgb =
     score < 0.5
-      ? mix(clay, neutral, score / 0.5)
+      ? mix(flame, neutral, score / 0.5)
       : mix(alpine, strongAlpine, (score - 0.5) / 0.5);
 
   return `rgb(${rgb.join(", ")})`;
@@ -311,9 +327,9 @@ function Heatmap({ summary }) {
   if (!summary.length) return <div className="empty-state">No heatmap data available.</div>;
 
   const rows = [
-    { key: "Volatility", label: "Volatility", format: pct, invert: true },
     { key: "Dollar Change", label: "$ Return", format: money, signed: true },
     { key: "Return", label: "% Return", format: pct, signed: true },
+    { key: "Volatility", label: "Volatility", format: pct, invert: true },
   ];
   const positives = summary.map((row) => Number(row.Return)).filter((value) => value > 0);
   const negatives = summary.map((row) => Number(row.Return)).filter((value) => value < 0);
@@ -401,20 +417,35 @@ export default function DashboardPage() {
   const [startDate, setStartDate] = useState(FALLBACK_DATA.start_date);
   const [endDate, setEndDate] = useState(FALLBACK_DATA.as_of_date);
   const [chosenPortfolio, setChosenPortfolio] = useState(FALLBACK_DATA.portfolio_names[0]);
+  const [activeSection, setActiveSection] = useState("ranking");
 
   useEffect(() => {
     fetch("/data/dashboard.json", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : FALLBACK_DATA))
       .then((payload) => {
         const names = payload.portfolio_names?.length ? payload.portfolio_names : FALLBACK_DATA.portfolio_names;
+        const benchmarkNames = Object.keys(payload.benchmarks || { SPY: "SPY" });
         setData(payload);
         setSelected(names);
-        setBenchmark(Object.keys(payload.benchmarks || { SPY: "SPY" })[0] || "SPY");
+        setBenchmark(benchmarkNames[0] || "SPY");
         setStartDate(payload.start_date || FALLBACK_DATA.start_date);
         setEndDate(payload.as_of_date || FALLBACK_DATA.as_of_date);
-        setChosenPortfolio(names[0]);
+        setChosenPortfolio(highestModelPortfolio(payload.summary, names, benchmarkNames));
       })
       .catch(() => setData(FALLBACK_DATA));
+  }, []);
+
+  useEffect(() => {
+    const syncActiveSection = () => {
+      const section = globalThis.location.hash.slice(1);
+      if (["ranking", "trend", "holdings"].includes(section)) {
+        setActiveSection(section);
+      }
+    };
+
+    syncActiveSection();
+    globalThis.addEventListener("hashchange", syncActiveSection);
+    return () => globalThis.removeEventListener("hashchange", syncActiveSection);
   }, []);
 
   const portfolioNames = data.portfolio_names?.length ? data.portfolio_names : FALLBACK_DATA.portfolio_names;
@@ -474,12 +505,6 @@ export default function DashboardPage() {
   const averageAlpha =
     averageReturn !== null && benchmarkSummary ? averageReturn - benchmarkSummary.Return : null;
   const insight = data.daily_insight || FALLBACK_DATA.daily_insight;
-  const selectedStartValue = summary.reduce((sum, row) => sum + Number(row["Start Value"] || 0), 0);
-  const selectedCurrentValue = summary.reduce((sum, row) => sum + Number(row["Current Value"] || 0), 0);
-  const selectedDollarChange = selectedCurrentValue - selectedStartValue;
-  const selectedReturn =
-    selectedStartValue > 0 ? selectedCurrentValue / selectedStartValue - 1 : null;
-
   function togglePortfolio(name) {
     setSelected((current) => {
       const next = current.includes(name)
@@ -494,39 +519,23 @@ export default function DashboardPage() {
     <main>
       <section className="hero">
         <div className="hero-content">
-          <div className="hero-kicker">Earthline field ledger</div>
           <h1>From Noise to Action</h1>
           <p>
-            A field-tested readout for the 2026 AI portfolio experiment: fixed baskets,
-            benchmark routes, and the signal that remains after daily market weather.
+            A dashboard for Jacob&apos;s 2026 AI portfolio experiment: 8 fixed portfolios,
+            with the only goal to beat the market in 2026.
           </p>
-          <div className="hero-meta">
-            <span><b>As of</b> {data.as_of_date || "-"}</span>
-            <span><b>Start</b> {data.start_date || "-"}</span>
-            <span><b>Portfolios</b> {portfolioNames.length}</span>
-            <span><b>Updated</b> {formatGeneratedAt(data.generated_at)}</span>
-            <span className={selectedDollarChange >= 0 ? "performance-pill positive" : "performance-pill negative"}>
-              <b>Selected portfolios</b> {selectedDollarChange >= 0 ? "+" : ""}
-              {money(selectedDollarChange)}
-            </span>
-            <span className={selectedReturn >= 0 ? "performance-pill positive" : "performance-pill negative"}>
-              <b>Selected return</b> {pct(selectedReturn)}
-            </span>
-          </div>
         </div>
       </section>
 
       <nav className="utility-nav" aria-label="Dashboard sections">
-        <a href="#controls">Controls</a>
-        <a href="#readout">Readout</a>
-        <a href="#ranking">Ranking</a>
-        <a href="#trend">Trend</a>
-        <a href="#holdings">Holdings</a>
+        <a className={activeSection === "ranking" ? "active" : ""} href="#ranking" aria-current={activeSection === "ranking" ? "page" : undefined}>Portfolio Leaderboard</a>
+        <a className={activeSection === "trend" ? "active" : ""} href="#trend" aria-current={activeSection === "trend" ? "page" : undefined}>Trend Line</a>
+        <a className={activeSection === "holdings" ? "active" : ""} href="#holdings" aria-current={activeSection === "holdings" ? "page" : undefined}>Portfolio Composition</a>
       </nav>
 
       <details className="settings-panel" id="controls">
         <summary>
-          <span>Signal Controls</span>
+          <span>Dashboard Settings</span>
           <small>{selected.length} selected · {benchmark}</small>
         </summary>
         <section className="control-panel">
@@ -566,22 +575,22 @@ export default function DashboardPage() {
 
       <details className="settings-panel about-panel">
         <summary>
-          <span>Field Notes</span>
-          <small>Method · 2026 test</small>
+          <span>About</span>
+          <small>Method · 2026 route</small>
         </summary>
         <section className="about-content">
           <p>
-            This ledger tracks a simple 2026 experiment: give AI systems the same portfolio
-            challenge, hold the baskets steady, compare them against SPY and DIA, and inspect what
+            This ledger tracks a controlled 2026 test: give AI systems the same portfolio
+            brief, keep the portfolios fixed, compare them against SPY and DIA, and inspect what
             still holds up by December 31.
           </p>
           <div className="about-grid">
             <div>
-              <h3>AI portfolios</h3>
+              <h3>Model portfolios</h3>
               <p>
                 OpenAI and Google cohorts used the same system prompt: pick five stocks with
                 $1,000 and the only goal of beating the benchmarks in 2026. The 10, 50, and 100
-                portfolios reflect repeated prompt runs that were aggregated into final baskets.
+                portfolios reflect repeated prompt runs that were aggregated into final portfolios.
               </p>
             </div>
             <div>
@@ -593,7 +602,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <p className="about-note">
-            Track the route. Do not treat it as investment advice.
+            Track the route. Do not treat the ledger as investment advice.
           </p>
         </section>
       </details>
@@ -614,7 +623,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="ai-card">
-        <div className="ai-kicker">Field note</div>
+        <div className="ai-kicker">Daily dispatch</div>
         <h2>{cleanInsightHeadline(insight.headline, benchmark)}</h2>
         <p>{insight.summary || insight.insight_text}</p>
         <div className="takeaways">
@@ -625,8 +634,8 @@ export default function DashboardPage() {
       </section>
 
       <section className="section-block" id="readout">
-        <div className="section-label">Readout</div>
-        <h2>Benchmark-relative readout</h2>
+        <div className="section-label">Field readout</div>
+        <h2>Benchmark-relative field readout</h2>
         <div className="metric-grid">
           <MetricCard
             label="Best portfolio"
@@ -648,8 +657,8 @@ export default function DashboardPage() {
       </section>
 
       <section className="section-block" id="ranking">
-        <div className="section-label">Portfolio route order</div>
-        <h2>Total return by basket</h2>
+        <div className="section-label">Portfolio leaderboard</div>
+        <h2>Total return by portfolio</h2>
         <RankingBars summary={summary} />
       </section>
 
@@ -657,65 +666,67 @@ export default function DashboardPage() {
         <div className="section-label">Signal map</div>
         <h2>Portfolio heatmap</h2>
         <p className="small-note">
-          Clay cells indicate softer relative performance. Alpine cells indicate stronger relative performance.
-          Lower volatility is rewarded.
+          Flame cells indicate softer relative performance. Alpine teal cells indicate stronger relative
+          performance. Lower volatility is rewarded.
         </p>
         <Heatmap summary={summary} />
       </section>
 
       <section className="section-block" id="trend">
-        <div className="section-label">Route line</div>
-        <h2>Cumulative return comparison</h2>
+        <div className="section-label">Trend line</div>
+        <h2>Cumulative return trend</h2>
         <p className="small-note">Percent return since the start of the selected date range.</p>
         <TrendChart series={trendSeries} />
         <div className="legend">
-          {[...selected, benchmark].map((name) => (
+          {[...selected].sort(compareLegendNames).concat(benchmark).map((name) => (
             <span key={name}><i style={{ background: lineStyle(name) }} />{name}</span>
           ))}
         </div>
       </section>
 
-      <section className="section-block detail-grid" id="holdings">
-        <div>
-          <div className="section-label">Holdings check</div>
-          <h2>Portfolio detail</h2>
+      <section className="section-block" id="holdings">
+        <div className="detail-summary">
+          <div className="section-label">Portfolio composition</div>
+          <h2>Portfolio composition</h2>
           <select className="detail-select" value={chosenPortfolio} onChange={(event) => setChosenPortfolio(event.target.value)}>
             {selected.map((name) => (
               <option value={name} key={name}>{name}</option>
             ))}
           </select>
+        </div>
+        <div className="detail-grid">
           <div className="detail-metrics">
             <MetricCard label="Current value" value={money(chosenSummary?.["Current Value"])} sub="Latest portfolio value" />
             <MetricCard label="Return" value={pct(chosenSummary?.Return)} sub={`Dollar change ${money(chosenSummary?.["Dollar Change"])}`} tone={chosenSummary?.Return >= 0 ? "positive" : "negative"} />
           </div>
-        </div>
-        <div className="table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Ticker</th>
-                <th>Initial</th>
-                <th>Current</th>
-                <th>Return</th>
-              </tr>
-            </thead>
-            <tbody>
-              {chosenHoldings.map((row) => (
-                <tr key={`${row.Portfolio}-${row.Ticker}`}>
-                  <td>{row.Ticker}</td>
-                  <td>{money(row["Initial Investment"])}</td>
-                  <td>{money(row["Current Value"])}</td>
-                  <td className={row.Return >= 0 ? "positive-text" : "negative-text"}>{pct(row.Return)}</td>
+          <div className="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ticker</th>
+                  <th>Initial</th>
+                  <th>Current</th>
+                  <th>Return</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {chosenHoldings.map((row) => (
+                  <tr key={`${row.Portfolio}-${row.Ticker}`}>
+                    <td>{row.Ticker}</td>
+                    <td>{money(row["Initial Investment"])}</td>
+                    <td>{money(row["Current Value"])}</td>
+                    <td className={row.Return >= 0 ? "positive-text" : "negative-text"}>{pct(row.Return)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <footer className="site-footer">
         <div>
-          <b>Trail data</b>
+          <b>Field data</b>
           Daily close prices are pulled from Yahoo Finance through the Python export job.
         </div>
         <div>

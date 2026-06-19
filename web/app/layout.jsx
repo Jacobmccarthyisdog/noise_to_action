@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "From Noise to Action | Earthline Field Ledger",
-  description: "Earthline-styled benchmark-relative portfolio field ledger",
+  title: "From Noise to Action | Alpine Ops Signal Ledger",
+  description: "Alpine Ops-styled benchmark-relative portfolio field ledger",
 };
 
 export default function RootLayout({ children }) {
