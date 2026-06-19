@@ -48,6 +48,7 @@ const COLORS = {
 };
 
 function toNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
@@ -145,7 +146,10 @@ function buildSummary(history) {
   return Object.entries(groups)
     .map(([portfolio, rows]) => {
       const sorted = rows
-        .filter((row) => toNumber(row["Portfolio Value"]) !== null)
+        .filter((row) => {
+          const value = toNumber(row["Portfolio Value"]);
+          return value !== null && value > 0;
+        })
         .sort((a, b) => String(a.Date).localeCompare(String(b.Date)));
 
       if (sorted.length < 2) return null;
@@ -205,7 +209,10 @@ function buildBenchmarkSummary(history, benchmark) {
 function buildCumulativeSeries(history, valueKey, groupKey, outputKey) {
   return Object.entries(groupBy(history, groupKey)).flatMap(([name, rows]) => {
     const sorted = rows
-      .filter((row) => toNumber(row[valueKey]) !== null)
+      .filter((row) => {
+        const value = toNumber(row[valueKey]);
+        return value !== null && value > 0;
+      })
       .sort((a, b) => String(a.Date).localeCompare(String(b.Date)));
 
     if (!sorted.length) return [];
@@ -504,7 +511,17 @@ export default function DashboardPage() {
     : null;
   const averageAlpha =
     averageReturn !== null && benchmarkSummary ? averageReturn - benchmarkSummary.Return : null;
-  const insight = data.daily_insight || FALLBACK_DATA.daily_insight;
+  const hasInvalidZeroSummary =
+    (data.summary || []).length > 0 &&
+    (data.summary || []).every((row) => toNumber(row["Current Value"]) === 0);
+  const insight = hasInvalidZeroSummary
+    ? {
+        headline: "Latest complete portfolio close",
+        summary:
+          "The newest market-data row was incomplete, so portfolio values, returns, and rankings use the most recent complete close.",
+        takeaways: [],
+      }
+    : data.daily_insight || FALLBACK_DATA.daily_insight;
   function togglePortfolio(name) {
     setSelected((current) => {
       const next = current.includes(name)

@@ -133,7 +133,10 @@ def build_datasets(portfolios, prices):
 
     portfolio_history = (
         merged.groupby(["Date", "Portfolio"], as_index=False)["Position Value"]
-        .sum()
+        # Keep an all-missing market row missing. The default pandas sum turns
+        # it into 0, which incorrectly reports a total portfolio loss while
+        # the latest quotes are not available yet.
+        .sum(min_count=1)
         .rename(columns={"Position Value": "Portfolio Value"})
         .sort_values(["Portfolio", "Date"])
         .reset_index(drop=True)
