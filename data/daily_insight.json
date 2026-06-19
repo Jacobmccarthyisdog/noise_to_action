@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "as_of_date": "2026-06-18",
-  "generated_at": "2026-06-18T20:26:44.716064+00:00",
+  "generated_at": "2026-06-19T04:18:41.945217+00:00",
   "period": "YTD",
   "benchmark": "SPY",
   "model": "gpt-4o-mini",
@@ -54,15 +54,15 @@
     },
     "generated_from": "build_ytd_metrics_snapshot_v1"
   },
-  "headline": "Portfolio Outperformance vs. SPY YTD",
-  "summary": "As of June 18, 2026, the portfolio is outperforming the SPY benchmark with an average return of 16.37% compared to SPY's 10.20%. This results in an average alpha of 6.17%, indicating that the portfolio is not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A', has achieved a return of 29.76%, significantly contributing to the overall outperformance. In contrast, the weakest portfolio, 'Google 100', returned 9.24%, still above the benchmark but less impactful. This relative strength is particularly noteworthy during periods of market uncertainty, as it suggests resilience against broader market movements. Note: Updated 30 minutes before and after market close.",
-  "insight_text": "As of June 18, 2026, the portfolio is outperforming the SPY benchmark with an average return of 16.37% compared to SPY's 10.20%. This results in an average alpha of 6.17%, indicating that the portfolio is not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A', has achieved a return of 29.76%, significantly contributing to the overall outperformance. In contrast, the weakest portfolio, 'Google 100', returned 9.24%, still above the benchmark but less impactful. This relative strength is particularly noteworthy during periods of market uncertainty, as it suggests resilience against broader market movements. Note: Updated 30 minutes before and after market close.",
+  "headline": "Portfolio Outperforms SPY YTD",
+  "summary": "As of June 18, 2026, the portfolio set has delivered an average return of 16.37%, significantly outperforming the SPY benchmark return of 10.20%. This results in an average alpha of 6.17%, indicating that the portfolios are not only gaining in absolute terms but are also ahead of the benchmark. The top-performing portfolio, 'Random A', achieved a return of 29.76%, contributing a dollar change of $297.62. In contrast, the weakest portfolio, 'Google 100', returned 9.24%. The strong relative performance against SPY suggests resilience during potential market stress or uncertainty. Note: Updated 30 minutes before and after market close.",
+  "insight_text": "As of June 18, 2026, the portfolio set has delivered an average return of 16.37%, significantly outperforming the SPY benchmark return of 10.20%. This results in an average alpha of 6.17%, indicating that the portfolios are not only gaining in absolute terms but are also ahead of the benchmark. The top-performing portfolio, 'Random A', achieved a return of 29.76%, contributing a dollar change of $297.62. In contrast, the weakest portfolio, 'Google 100', returned 9.24%. The strong relative performance against SPY suggests resilience during potential market stress or uncertainty. Note: Updated 30 minutes before and after market close.",
   "takeaways": [
-    "Portfolio average return: 16.37%, outperforming SPY's 10.20%.",
-    "Average alpha of 6.17% indicates strong relative performance.",
-    "Top portfolio 'Random A' returned 29.76%, enhancing overall results.",
-    "Weakest portfolio 'Google 100' still outperformed SPY with 9.24%.",
-    "Current performance signals resilience amid potential market stress."
+    "Average portfolio return is 16.37%, exceeding SPY's 10.20%.",
+    "Top portfolio 'Random A' returned 29.76%, while 'Google 100' lagged at 9.24%.",
+    "Current average alpha stands at 6.17%, indicating strong relative performance.",
+    "Most volatile portfolio, 'Random B', returned 19.86%, highlighting risk dynamics.",
+    "Top holding 'SOXX' in 'OpenAI 10' achieved a remarkable return of 93.29%."
   ],
   "update_note": "Updated 30 minutes before and after market close."
 }
