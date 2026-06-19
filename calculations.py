@@ -133,8 +133,9 @@ def build_datasets(portfolios, prices):
 
     portfolio_history = (
         merged.groupby(["Date", "Portfolio"], as_index=False)["Position Value"]
-        .sum()
+        .sum(min_count=1)
         .rename(columns={"Position Value": "Portfolio Value"})
+        .dropna(subset=["Portfolio Value"])
         .sort_values(["Portfolio", "Date"])
         .reset_index(drop=True)
     )
