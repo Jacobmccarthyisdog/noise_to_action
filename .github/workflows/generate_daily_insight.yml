@@ -27,7 +27,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
         with:
-          token: $${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -146,7 +146,7 @@ jobs:
       - name: Generate daily AI insight
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || steps.market_window.outputs.should_run == 'true'
         env:
-          OPENAI_API_KEY: $${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: gpt-4o-mini
         run: |
           python jobs/generate_daily_insight.py --force
