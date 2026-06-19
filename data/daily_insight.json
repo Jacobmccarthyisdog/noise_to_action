@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "as_of_date": "2026-06-17",
-  "generated_at": "2026-06-18T01:13:54.550020+00:00",
+  "as_of_date": "2026-06-18",
+  "generated_at": "2026-06-18T20:26:44.716064+00:00",
   "period": "YTD",
   "benchmark": "SPY",
   "model": "gpt-4o-mini",
@@ -9,60 +9,60 @@
   "status": "success",
   "source": "openai",
   "payload": {
-    "as_of_date": "2026-06-17",
+    "as_of_date": "2026-06-18",
     "period": "YTD",
     "benchmark": "SPY",
-    "benchmark_return": 0.09347425889419747,
+    "benchmark_return": 0.10200406660850359,
     "portfolio_count": 8,
-    "avg_portfolio_return": 0.14670351257456773,
-    "avg_alpha": 0.053229253680370264,
+    "avg_portfolio_return": 0.1636907325868346,
+    "avg_alpha": 0.061686665978331,
     "top_portfolio": {
       "name": "Random A",
-      "return": 0.2862581130098889,
-      "dollar_change": 286.2581130098888,
-      "current_value": 1286.2581130098888,
+      "return": 0.29762433773102903,
+      "dollar_change": 297.6243377310291,
+      "current_value": 1297.624337731029,
       "max_drawdown": -0.06958000344643778
     },
     "bottom_portfolio": {
       "name": "Google 100",
-      "return": 0.07905339228474673,
-      "dollar_change": 79.05339228474668,
-      "current_value": 1079.0533922847467,
+      "return": 0.09243327918065747,
+      "dollar_change": 92.43327918065756,
+      "current_value": 1092.4332791806576,
       "max_drawdown": -0.11704801621359473
     },
     "most_volatile": {
       "name": "Random B",
-      "return": 0.1978542309415634,
-      "dollar_change": 197.8542309415634,
-      "current_value": 1197.8542309415634,
+      "return": 0.19863643217438365,
+      "dollar_change": 198.63643217438357,
+      "current_value": 1198.6364321743836,
       "max_drawdown": -0.13267678787573045,
-      "volatility": 0.020629089851371428
+      "volatility": 0.02051606112334049
     },
     "top_holding": {
-      "ticker": "PANW",
-      "portfolio": "Random A",
-      "return": 0.8228984757675906,
-      "dollar_change": 169.58291788618507,
-      "current_value": 375.6629178861851
+      "ticker": "SOXX",
+      "portfolio": "OpenAI 10",
+      "return": 0.932865937675065,
+      "dollar_change": 79.8253382868553,
+      "current_value": 165.3953382868553
     },
     "bottom_holding": {
-      "ticker": "SMCI",
+      "ticker": "NRG",
       "portfolio": "Random A",
-      "return": -0.09951376521435118,
-      "dollar_change": -4.479114572297945,
-      "current_value": 40.53088542770205
+      "return": -0.06494049241391853,
+      "dollar_change": -0.6487555192150456,
+      "current_value": 9.341244480784955
     },
     "generated_from": "build_ytd_metrics_snapshot_v1"
   },
-  "headline": "Portfolio Outperformance vs. SPY",
-  "summary": "As of June 17, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 14.67% compared to SPY's 9.35%. This results in an average alpha of 5.32%, indicating that the portfolios are not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A', achieved a notable return of 28.63%, significantly contributing to the overall outperformance. In contrast, the weakest portfolio, 'Google 100', returned 7.91%, still above the benchmark but less impactful. This relative strength can be particularly meaningful during periods of market stress or uncertainty, as it suggests resilience against broader market movements. Note: Updated 30 minutes before and after market close.",
-  "insight_text": "As of June 17, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 14.67% compared to SPY's 9.35%. This results in an average alpha of 5.32%, indicating that the portfolios are not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A', achieved a notable return of 28.63%, significantly contributing to the overall outperformance. In contrast, the weakest portfolio, 'Google 100', returned 7.91%, still above the benchmark but less impactful. This relative strength can be particularly meaningful during periods of market stress or uncertainty, as it suggests resilience against broader market movements. Note: Updated 30 minutes before and after market close.",
+  "headline": "Portfolio Outperformance vs. SPY YTD",
+  "summary": "As of June 18, 2026, the portfolio is outperforming the SPY benchmark with an average return of 16.37% compared to SPY's 10.20%. This results in an average alpha of 6.17%, indicating that the portfolio is not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A', has achieved a return of 29.76%, significantly contributing to the overall outperformance. In contrast, the weakest portfolio, 'Google 100', returned 9.24%, still above the benchmark but less impactful. This relative strength is particularly noteworthy during periods of market uncertainty, as it suggests resilience against broader market movements. Note: Updated 30 minutes before and after market close.",
+  "insight_text": "As of June 18, 2026, the portfolio is outperforming the SPY benchmark with an average return of 16.37% compared to SPY's 10.20%. This results in an average alpha of 6.17%, indicating that the portfolio is not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A', has achieved a return of 29.76%, significantly contributing to the overall outperformance. In contrast, the weakest portfolio, 'Google 100', returned 9.24%, still above the benchmark but less impactful. This relative strength is particularly noteworthy during periods of market uncertainty, as it suggests resilience against broader market movements. Note: Updated 30 minutes before and after market close.",
   "takeaways": [
-    "Average portfolio return is 14.67%, outperforming SPY's 9.35%.",
-    "Current average alpha stands at 5.32%, indicating strong relative performance.",
-    "'Random A' is the top portfolio with a return of 28.63%.",
-    "'Google 100' is the weakest portfolio with a return of 7.91%.",
-    "Outperformance against SPY signals potential resilience in uncertain market conditions."
+    "Portfolio average return: 16.37%, outperforming SPY's 10.20%.",
+    "Average alpha of 6.17% indicates strong relative performance.",
+    "Top portfolio 'Random A' returned 29.76%, enhancing overall results.",
+    "Weakest portfolio 'Google 100' still outperformed SPY with 9.24%.",
+    "Current performance signals resilience amid potential market stress."
   ],
   "update_note": "Updated 30 minutes before and after market close."
 }
