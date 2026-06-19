@@ -33,13 +33,16 @@ const FALLBACK_DATA = {
 };
 
 const COLORS = {
-  coral: "#D85A30",
-  sage: "#5DCAA5",
-  brick: "#A32D2D",
-  spy: "#173B73",
-  dia: "#2F80C2",
-  randomA: "#EBCB6A",
-  randomB: "#F4D98A",
+  clay: "#A9482B",
+  alpine: "#364536",
+  bark: "#6E3F2A",
+  river: "#385C7A",
+  ochre: "#D68A36",
+  stone: "#B7B0A2",
+  spy: "#385C7A",
+  dia: "#6E3F2A",
+  randomA: "#D68A36",
+  randomB: "#B7B0A2",
 };
 
 function toNumber(value) {
@@ -107,17 +110,17 @@ function lineStyle(name) {
   if (upper === "RANDOM A") return COLORS.randomA;
   if (upper === "RANDOM B") return COLORS.randomB;
   if (upper.includes("GOOGLE")) {
-    const palette = ["#6E5A33", "#826A3D", "#9A7E4A", "#B49359", "#C9A66A"];
+    const palette = ["#364536", "#4A5C42", "#657344", "#899052", "#D68A36"];
     const index = Number(upper.match(/\d+/)?.[0] || 10) / 10 - 1;
     return palette[Math.max(0, Math.min(palette.length - 1, index))];
   }
   if (upper.includes("OPENAI")) {
-    const palette = ["#993C1D", "#B94322", "#C94A24", "#D85A30", "#E06A3D"];
+    const palette = ["#385C7A", "#4E6D87", "#6E3F2A", "#A9482B", "#C26335"];
     const index = Number(upper.match(/\d+/)?.[0] || 10) / 10 - 1;
     return palette[Math.max(0, Math.min(palette.length - 1, index))];
   }
 
-  return "#9A9386";
+  return COLORS.stone;
 }
 
 function buildSummary(history) {
@@ -219,14 +222,14 @@ function mix(a, b, t) {
 }
 
 function heatColor(score) {
-  const brick = [252, 235, 235];
-  const neutral = [245, 241, 232];
-  const sage = [225, 245, 238];
-  const strongSage = [93, 202, 165];
+  const clay = [245, 226, 217];
+  const neutral = [244, 239, 227];
+  const alpine = [226, 235, 220];
+  const strongAlpine = [136, 153, 112];
   const rgb =
     score < 0.5
-      ? mix(brick, neutral, score / 0.5)
-      : mix(sage, strongSage, (score - 0.5) / 0.5);
+      ? mix(clay, neutral, score / 0.5)
+      : mix(alpine, strongAlpine, (score - 0.5) / 0.5);
 
   return `rgb(${rgb.join(", ")})`;
 }
@@ -490,30 +493,40 @@ export default function DashboardPage() {
   return (
     <main>
       <section className="hero">
-        <div className="hero-kicker">From Noise to Action</div>
-        <h1>Can AI beat the market?</h1>
-        <p>
-          Eight portfolios, two benchmarks, and one simple test: whether AI-picked baskets
-          can create real separation from SPY and DIA once the noise settles into numbers.
-        </p>
-        <div className="hero-meta">
-          <span><b>As of</b> {data.as_of_date || "-"}</span>
-          <span><b>Start</b> {data.start_date || "-"}</span>
-          <span><b>Portfolios</b> {portfolioNames.length}</span>
-          <span><b>Updated</b> {formatGeneratedAt(data.generated_at)}</span>
-          <span className={selectedDollarChange >= 0 ? "performance-pill positive" : "performance-pill negative"}>
-            <b>Selected portfolios</b> {selectedDollarChange >= 0 ? "+" : ""}
-            {money(selectedDollarChange)}
-          </span>
-          <span className={selectedReturn >= 0 ? "performance-pill positive" : "performance-pill negative"}>
-            <b>Selected return</b> {pct(selectedReturn)}
-          </span>
+        <div className="hero-content">
+          <div className="hero-kicker">Earthline field ledger</div>
+          <h1>From Noise to Action</h1>
+          <p>
+            A field-tested readout for the 2026 AI portfolio experiment: fixed baskets,
+            benchmark routes, and the signal that remains after daily market weather.
+          </p>
+          <div className="hero-meta">
+            <span><b>As of</b> {data.as_of_date || "-"}</span>
+            <span><b>Start</b> {data.start_date || "-"}</span>
+            <span><b>Portfolios</b> {portfolioNames.length}</span>
+            <span><b>Updated</b> {formatGeneratedAt(data.generated_at)}</span>
+            <span className={selectedDollarChange >= 0 ? "performance-pill positive" : "performance-pill negative"}>
+              <b>Selected portfolios</b> {selectedDollarChange >= 0 ? "+" : ""}
+              {money(selectedDollarChange)}
+            </span>
+            <span className={selectedReturn >= 0 ? "performance-pill positive" : "performance-pill negative"}>
+              <b>Selected return</b> {pct(selectedReturn)}
+            </span>
+          </div>
         </div>
       </section>
 
-      <details className="settings-panel">
+      <nav className="utility-nav" aria-label="Dashboard sections">
+        <a href="#controls">Controls</a>
+        <a href="#readout">Readout</a>
+        <a href="#ranking">Ranking</a>
+        <a href="#trend">Trend</a>
+        <a href="#holdings">Holdings</a>
+      </nav>
+
+      <details className="settings-panel" id="controls">
         <summary>
-          <span>Portfolio Settings</span>
+          <span>Signal Controls</span>
           <small>{selected.length} selected · {benchmark}</small>
         </summary>
         <section className="control-panel">
@@ -553,14 +566,14 @@ export default function DashboardPage() {
 
       <details className="settings-panel about-panel">
         <summary>
-          <span>About This Experiment</span>
-          <small>Methodology · 2026 test</small>
+          <span>Field Notes</span>
+          <small>Method · 2026 test</small>
         </summary>
         <section className="about-content">
           <p>
-            This is a simple 2026 experiment: give AI systems the same portfolio challenge,
-            compare the resulting baskets against SPY and DIA, and see what actually holds up by
-            December 31.
+            This ledger tracks a simple 2026 experiment: give AI systems the same portfolio
+            challenge, hold the baskets steady, compare them against SPY and DIA, and inspect what
+            still holds up by December 31.
           </p>
           <div className="about-grid">
             <div>
@@ -575,12 +588,12 @@ export default function DashboardPage() {
               <h3>Random controls</h3>
               <p>
                 Random A and Random B were built by a Python randomizer over an available S&P 500
-                stock list. They are here as a clean baseline: no model, no thesis, just chance.
+                stock list. They are a clean baseline: no model, no thesis, just chance.
               </p>
             </div>
           </div>
           <p className="about-note">
-            This dashboard is for tracking the experiment, not investment advice.
+            Track the route. Do not treat it as investment advice.
           </p>
         </section>
       </details>
@@ -601,7 +614,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="ai-card">
-        <div className="ai-kicker">Daily commentary</div>
+        <div className="ai-kicker">Field note</div>
         <h2>{cleanInsightHeadline(insight.headline, benchmark)}</h2>
         <p>{insight.summary || insight.insight_text}</p>
         <div className="takeaways">
@@ -611,8 +624,8 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="section-label">Performance</div>
+      <section className="section-block" id="readout">
+        <div className="section-label">Readout</div>
         <h2>Benchmark-relative readout</h2>
         <div className="metric-grid">
           <MetricCard
@@ -634,9 +647,9 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="section-label">Portfolio ranking</div>
-        <h2>Total return by portfolio</h2>
+      <section className="section-block" id="ranking">
+        <div className="section-label">Portfolio route order</div>
+        <h2>Total return by basket</h2>
         <RankingBars summary={summary} />
       </section>
 
@@ -644,14 +657,14 @@ export default function DashboardPage() {
         <div className="section-label">Signal map</div>
         <h2>Portfolio heatmap</h2>
         <p className="small-note">
-          Warmer cells indicate softer relative performance. Cooler green cells indicate stronger relative performance.
+          Clay cells indicate softer relative performance. Alpine cells indicate stronger relative performance.
           Lower volatility is rewarded.
         </p>
         <Heatmap summary={summary} />
       </section>
 
-      <section className="section-block">
-        <div className="section-label">Trend</div>
+      <section className="section-block" id="trend">
+        <div className="section-label">Route line</div>
         <h2>Cumulative return comparison</h2>
         <p className="small-note">Percent return since the start of the selected date range.</p>
         <TrendChart series={trendSeries} />
@@ -662,9 +675,9 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="section-block detail-grid">
+      <section className="section-block detail-grid" id="holdings">
         <div>
-          <div className="section-label">Drilldown</div>
+          <div className="section-label">Holdings check</div>
           <h2>Portfolio detail</h2>
           <select className="detail-select" value={chosenPortfolio} onChange={(event) => setChosenPortfolio(event.target.value)}>
             {selected.map((name) => (
@@ -702,7 +715,7 @@ export default function DashboardPage() {
 
       <footer className="site-footer">
         <div>
-          <b>Data source</b>
+          <b>Trail data</b>
           Daily close prices are pulled from Yahoo Finance through the Python export job.
         </div>
         <div>
