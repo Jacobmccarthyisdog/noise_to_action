@@ -128,14 +128,6 @@ p {
     url("/images/alpine-layered-mountains-sun-clean.png") center calc(50% + 72px) / cover no-repeat;
 }
 
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 7px;
-  background: linear-gradient(90deg, var(--pine) 0 24%, var(--sky) 24% 47%, var(--mustard) 47% 72%, var(--flame) 72% 100%);
-}
-
 .hero-content {
   position: relative;
   z-index: 1;
