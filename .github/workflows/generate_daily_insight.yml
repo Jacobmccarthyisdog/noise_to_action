@@ -43,7 +43,7 @@ jobs:
         id: market_window
         run: |
           python - <<'PY'
-          from datetime import datetime, time
+          from datetime import datetime, time, timedelta
           from zoneinfo import ZoneInfo
           import os
 
@@ -92,9 +92,9 @@ jobs:
                   day = datetime(year + 1, 1, 1).date()
               else:
                   day = datetime(year, month + 1, 1).date()
-              day = day.replace(day=day.day - 1)
+              day = day - timedelta(days=1)
               while day.weekday() != weekday:
-                  day = day.replace(day=day.day - 1)
+                  day = day - timedelta(days=1)
               return day
 
           def easter_date(year):
@@ -119,7 +119,7 @@ jobs:
               observed_new_year(year),
               nth_weekday(year, 1, 0, 3),
               nth_weekday(year, 2, 0, 3),
-              easter_date(year).replace(day=easter_date(year).day - 2),
+              easter_date(year) - timedelta(days=2),
               last_weekday(year, 5, 0),
               observed_juneteenth(year),
               observed_independence_day(year),
