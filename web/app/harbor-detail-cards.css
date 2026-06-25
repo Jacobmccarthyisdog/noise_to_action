@@ -1,8 +1,8 @@
 .detail-metrics .metric-card {
   border: 1px solid rgba(219, 228, 239, 0.95);
-  border-radius: 24px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 18px 52px rgba(25, 47, 74, 0.08);
+  box-shadow: 0 14px 38px rgba(25, 47, 74, 0.07);
   backdrop-filter: blur(16px);
 }
 
@@ -39,7 +39,7 @@
 
 .ranking-item {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .ranking-row-clickable {
@@ -59,54 +59,93 @@
 }
 
 .leaderboard-detail {
-  margin: -2px 0 18px 34px;
-  padding: clamp(18px, 2.5vw, 28px);
+  margin: -4px 0 18px 34px;
+  padding: clamp(16px, 2vw, 24px);
   border: 1px solid rgba(219, 228, 239, 0.95);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 18px 52px rgba(25, 47, 74, 0.08);
   backdrop-filter: blur(16px);
 }
 
 .compact-detail-summary {
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .compact-detail-summary h3 {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--harbor-ink);
   font-size: clamp(24px, 3vw, 34px);
   letter-spacing: -0.04em;
 }
 
 .compact-legend {
-  margin: 0;
+  margin: 6px 0 0;
   justify-content: flex-end;
 }
 
 .inline-detail-grid {
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(420px, 1.28fr);
+  grid-template-areas:
+    "metrics trend"
+    "holdings trend";
+  gap: 16px;
+  align-items: start;
+}
+
+.inline-detail-grid .detail-metrics {
+  grid-area: metrics;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.inline-detail-grid .detail-metrics .metric-card {
+  min-height: 132px;
+  padding: 20px;
+}
+
+.inline-detail-grid .detail-metrics .metric-value {
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+.inline-detail-grid .detail-trend-card {
+  grid-area: trend;
+}
+
+.inline-detail-grid .table-card {
+  grid-area: holdings;
+  max-height: 300px;
+  overflow: auto;
 }
 
 .detail-trend-card {
   border: 1px solid rgba(219, 228, 239, 0.95);
-  border-radius: 24px;
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 18px 52px rgba(25, 47, 74, 0.08);
+  box-shadow: 0 14px 38px rgba(25, 47, 74, 0.07);
   backdrop-filter: blur(16px);
   overflow: hidden;
+}
+
+.detail-trend-card .chart-scroll {
+  padding: 0 10px 10px;
 }
 
 .detail-trend-card .trend-chart {
   border: 0;
   box-shadow: none;
   background: transparent;
+  min-height: 245px;
 }
 
 .detail-card-label {
-  padding: 18px 20px 0;
+  padding: 16px 20px 0;
   color: var(--harbor-accent-ink);
   font-size: 12px;
   font-weight: 800;
@@ -118,12 +157,30 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
+@media (max-width: 1100px) {
+  .inline-detail-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "metrics"
+      "trend"
+      "holdings";
+  }
+}
+
 @media (max-width: 900px) {
   .leaderboard-detail {
     margin-left: 0;
   }
 
+  .compact-detail-summary {
+    display: grid;
+  }
+
   .compact-legend {
     justify-content: flex-start;
+  }
+
+  .inline-detail-grid .detail-metrics {
+    grid-template-columns: 1fr;
   }
 }
