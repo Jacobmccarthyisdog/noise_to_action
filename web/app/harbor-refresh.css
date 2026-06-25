@@ -244,9 +244,8 @@ input[type="date"]:hover {
 }
 
 .ticker-track {
-  animation-duration: 30s;
-  animation-delay: -3s;
-  animation-timing-function: linear;
+  animation: ticker-scroll 22s linear 0s infinite;
+  transform: translate3d(0, 0, 0);
   will-change: transform;
 }
 
