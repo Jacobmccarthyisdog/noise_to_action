@@ -6,6 +6,52 @@
   backdrop-filter: blur(16px);
 }
 
+main {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  order: 1;
+}
+
+.utility-nav {
+  display: none !important;
+}
+
+#heatmap {
+  order: 2;
+  margin-top: 18px;
+}
+
+.settings-panel {
+  order: 3;
+}
+
+.about-panel {
+  order: 4;
+}
+
+.ticker-shell {
+  order: 5;
+}
+
+.ai-card {
+  order: 6;
+}
+
+#readout {
+  order: 7;
+}
+
+#ranking {
+  order: 8;
+}
+
+.site-footer {
+  order: 9;
+}
+
 .detail-metrics .metric-card:first-child,
 .detail-metrics .metric-card:nth-child(2) {
   border-color: rgba(219, 228, 239, 0.95);
