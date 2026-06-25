@@ -84,6 +84,12 @@ def public_insight_record(record: dict[str, Any]) -> dict[str, Any]:
     return cleaned
 
 
+def latest_complete_portfolio_date(portfolio_history: pd.DataFrame) -> pd.Timestamp:
+    if portfolio_history is None or portfolio_history.empty or "Date" not in portfolio_history.columns:
+        return pd.NaT
+    return pd.to_datetime(portfolio_history["Date"]).max()
+
+
 def build_export_payload() -> dict[str, Any]:
     portfolios, prices = load_data()
 
@@ -99,7 +105,7 @@ def build_export_payload() -> dict[str, Any]:
     summary = build_summary(portfolio_history)
     investable_summary = exclude_benchmark_portfolios(summary)
     investable_holdings = exclude_benchmark_portfolios(holdings_snapshot)
-    latest_date = pd.to_datetime(prices["Date"]).max()
+    latest_date = latest_complete_portfolio_date(portfolio_history)
 
     metrics_payload = build_ytd_metrics_snapshot(
         portfolio_history=portfolio_history,
