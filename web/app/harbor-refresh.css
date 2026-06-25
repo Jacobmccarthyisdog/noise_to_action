@@ -1,5 +1,5 @@
 /* Harbor Signal visual refresh overrides.
-   Header pass only: preserve copy, data, routes, DOM, and behavior. */
+   Visual skin only: preserve copy, data, routes, DOM, and behavior. */
 
 :root {
   --harbor-bg: #f8fafc;
@@ -22,6 +22,28 @@
   --harbor-shadow-soft: 0 20px 60px rgba(25, 47, 74, 0.1);
 }
 
+html {
+  background: var(--harbor-bg);
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(142, 190, 245, 0.72) 0 12%, transparent 30%),
+    radial-gradient(circle at 82% 12%, rgba(217, 235, 255, 0.92) 0 15%, transparent 36%),
+    radial-gradient(circle at 72% 45%, rgba(77, 127, 203, 0.32) 0 17%, transparent 42%),
+    radial-gradient(circle at 16% 68%, rgba(173, 218, 255, 0.7) 0 18%, transparent 43%),
+    radial-gradient(circle at 88% 88%, rgba(142, 190, 245, 0.52) 0 15%, transparent 35%),
+    linear-gradient(135deg, #f8fafc 0%, #eef6ff 44%, #ffffff 100%);
+  background-attachment: fixed;
+  color: var(--harbor-ink);
+}
+
+main {
+  position: relative;
+}
+
 .hero {
   min-height: auto;
   margin-top: 6px;
@@ -39,8 +61,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(77, 127, 203, 0.68), rgba(142, 190, 245, 0.16) 38%, transparent 74%);
+  background: linear-gradient(90deg, rgba(77, 127, 203, 0.68), rgba(142, 190, 245, 0.16) 38%, transparent 74%);
   opacity: 0.08;
 }
 
@@ -53,7 +74,6 @@
   height: 120px;
   border-radius: 999px;
   background: radial-gradient(circle, rgba(142, 190, 245, 0.34), rgba(142, 190, 245, 0));
-  filter: blur(2px);
   pointer-events: none;
 }
 
@@ -114,6 +134,23 @@
   background: #ffffff;
   box-shadow: 0 8px 22px rgba(25, 47, 74, 0.08);
   color: var(--harbor-accent-ink);
+}
+
+.hero,
+.ai-card,
+.settings-panel,
+.metric-card,
+.table-card {
+  border-color: rgba(219, 228, 239, 0.95);
+  box-shadow: 0 18px 52px rgba(25, 47, 74, 0.08);
+}
+
+.ai-card,
+.settings-panel,
+.metric-card,
+.table-card {
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(16px);
 }
 
 @media (max-width: 700px) {
