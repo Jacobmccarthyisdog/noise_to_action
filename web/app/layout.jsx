@@ -1,6 +1,7 @@
 import Script from 'next/script';
 import './globals.css';
 import './harbor-refresh.css';
+import './harbor-detail-cards.css';
 
 export const metadata = {
   title: 'From Noise to Action | Alpine Ops Signal Ledger',
