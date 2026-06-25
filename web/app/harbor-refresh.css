@@ -243,6 +243,13 @@ input[type="date"]:hover {
   backdrop-filter: blur(14px);
 }
 
+.ticker-track {
+  animation-duration: 30s;
+  animation-delay: -3s;
+  animation-timing-function: linear;
+  will-change: transform;
+}
+
 .ticker-shell:hover .ticker-track {
   animation-play-state: running;
 }
