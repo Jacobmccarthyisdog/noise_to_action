@@ -90,23 +90,29 @@
 
 .inline-detail-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 0.72fr) minmax(420px, 1.28fr);
+  grid-template-columns: minmax(280px, 0.74fr) minmax(420px, 1.26fr);
   grid-template-areas:
     "metrics trend"
-    "holdings trend";
+    "holdings holdings";
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .inline-detail-grid .detail-metrics {
   grid-area: metrics;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  align-self: stretch;
+}
+
+.inline-detail-grid .detail-metrics .metric-card:nth-child(3) {
+  display: none;
 }
 
 .inline-detail-grid .detail-metrics .metric-card {
-  min-height: 132px;
+  min-height: 0;
+  height: 100%;
   padding: 20px;
 }
 
@@ -116,12 +122,13 @@
 
 .inline-detail-grid .detail-trend-card {
   grid-area: trend;
+  align-self: stretch;
 }
 
 .inline-detail-grid .table-card {
   grid-area: holdings;
-  max-height: 300px;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .detail-trend-card {
@@ -134,14 +141,19 @@
 }
 
 .detail-trend-card .chart-scroll {
+  width: 100%;
+  overflow: hidden;
   padding: 0 10px 10px;
 }
 
 .detail-trend-card .trend-chart {
+  width: 100%;
+  min-width: 0;
+  height: auto;
   border: 0;
   box-shadow: none;
   background: transparent;
-  min-height: 245px;
+  min-height: 0;
 }
 
 .detail-card-label {
