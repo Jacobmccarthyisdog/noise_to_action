@@ -1,0 +1,128 @@
+/* Harbor Signal visual refresh overrides.
+   Header pass only: preserve copy, data, routes, DOM, and behavior. */
+
+:root {
+  --harbor-bg: #f8fafc;
+  --harbor-surface: #ffffff;
+  --harbor-surface-soft: #f2f6fb;
+  --harbor-mist: #e7edf5;
+  --harbor-line: #dbe4ef;
+  --harbor-ink: #111827;
+  --harbor-ink-soft: #475569;
+  --harbor-ink-faint: #8090a3;
+  --harbor-glacier: #8ebef5;
+  --harbor-glacier-soft: #e8f3ff;
+  --harbor-accent: #4d7fcb;
+  --harbor-accent-ink: #244f95;
+  --harbor-success: #4fa987;
+  --harbor-warning: #d89b3d;
+  --harbor-radius-sm: 10px;
+  --harbor-radius-md: 16px;
+  --harbor-radius-lg: 28px;
+  --harbor-shadow-soft: 0 20px 60px rgba(25, 47, 74, 0.1);
+}
+
+.hero {
+  min-height: auto;
+  margin-top: 6px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(142, 190, 245, 0.26), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(242, 246, 251, 0.92) 100%);
+  border-color: rgba(219, 228, 239, 0.95);
+  border-radius: 24px;
+  box-shadow: var(--harbor-shadow-soft);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(77, 127, 203, 0.68), rgba(142, 190, 245, 0.16) 38%, transparent 74%);
+  opacity: 0.08;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(142, 190, 245, 0.34), rgba(142, 190, 245, 0));
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.hero-content {
+  width: min(980px, 100%);
+  min-height: 168px;
+  padding: clamp(24px, 4vw, 42px);
+  justify-content: center;
+}
+
+.hero h1 {
+  max-width: 820px;
+  color: var(--harbor-ink);
+  font-family: "IBM Plex Sans", Inter, system-ui, sans-serif;
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.hero p {
+  max-width: 720px;
+  margin-top: 14px;
+  color: var(--harbor-ink-soft);
+  font-size: clamp(15px, 2vw, 17px);
+  line-height: 1.58;
+}
+
+.utility-nav {
+  margin: 14px 0 16px;
+  padding: 6px;
+  border-color: rgba(219, 228, 239, 0.95);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 12px 30px rgba(25, 47, 74, 0.07);
+  backdrop-filter: blur(14px);
+}
+
+.utility-nav a {
+  min-height: 38px;
+  border-color: transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--harbor-ink-soft);
+  font-size: 13px;
+  font-weight: 650;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.utility-nav a:hover {
+  border-color: rgba(142, 190, 245, 0.44);
+  background: rgba(232, 243, 255, 0.58);
+  color: var(--harbor-accent-ink);
+}
+
+.utility-nav a.active {
+  border-color: rgba(142, 190, 245, 0.72);
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(25, 47, 74, 0.08);
+  color: var(--harbor-accent-ink);
+}
+
+@media (max-width: 700px) {
+  .hero-content {
+    min-height: 156px;
+    padding: 24px;
+  }
+
+  .hero h1 {
+    font-size: clamp(31px, 11vw, 44px);
+  }
+}
