@@ -19,29 +19,29 @@ main {
   display: none !important;
 }
 
-#heatmap {
-  order: 2;
-  margin-top: 18px;
-}
-
 .settings-panel {
-  order: 3;
+  order: 2;
 }
 
 .about-panel {
-  order: 4;
+  order: 3;
 }
 
 .ticker-shell {
-  order: 5;
+  order: 4;
 }
 
 .ai-card {
-  order: 6;
+  order: 5;
 }
 
 #readout {
+  order: 6;
+}
+
+#heatmap {
   order: 7;
+  margin-top: 18px;
 }
 
 #ranking {
