@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import './globals.css';
 import './harbor-refresh.css';
 
@@ -9,7 +10,23 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
-      <body>{children}</body>
+      <body>
+        <Script id='reset-scroll-position' strategy='beforeInteractive'>
+          {`
+            if ('scrollRestoration' in history) {
+              history.scrollRestoration = 'manual';
+            }
+            window.scrollTo(0, 0);
+            window.addEventListener('pageshow', function () {
+              window.scrollTo(0, 0);
+            });
+            window.addEventListener('beforeunload', function () {
+              window.scrollTo(0, 0);
+            });
+          `}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }
