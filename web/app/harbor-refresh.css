@@ -250,6 +250,10 @@ input[type="date"]:hover {
   backdrop-filter: blur(14px);
 }
 
+.ticker-shell:hover .ticker-track {
+  animation-play-state: running;
+}
+
 .ticker-shell::before {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
 }
