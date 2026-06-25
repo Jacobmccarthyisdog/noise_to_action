@@ -9,6 +9,11 @@ on:
     paths:
       - ".github/workflows/generate_daily_insight.yml"
       - "calculations.py"
+      - "data_loader.py"
+      - "config.py"
+      - "insights.py"
+      - "jobs/**"
+      - "requirements.txt"
 
   schedule:
     # Check hourly during the US market window on weekdays.
