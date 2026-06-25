@@ -127,19 +127,6 @@ function compareLegendNames(left, right) {
   return group(left) - group(right) || left.localeCompare(right, undefined, { numeric: true });
 }
 
-function highestModelPortfolio(rows, portfolioNames, benchmarkNames) {
-  const benchmarks = new Set(benchmarkNames.map((name) => String(name).toUpperCase()));
-  const isEligible = (name) => {
-    const upper = String(name).toUpperCase();
-    return !upper.includes("RANDOM") && !benchmarks.has(upper);
-  };
-  const leader = [...(rows || [])]
-    .filter((row) => isEligible(row.Portfolio))
-    .sort((left, right) => Number(right.Return || 0) - Number(left.Return || 0))[0];
-
-  return leader?.Portfolio || portfolioNames.find(isEligible) || portfolioNames[0];
-}
-
 function buildSummary(history) {
   const groups = groupBy(history, "Portfolio");
 
@@ -245,14 +232,16 @@ function mix(a, b, t) {
 }
 
 function heatColor(score) {
-  const flame = [252, 222, 211];
-  const neutral = [246, 241, 231];
-  const alpine = [217, 238, 231];
-  const strongAlpine = [0, 134, 110];
+  const pale = [238, 246, 255];
+  const soft = [212, 232, 255];
+  const mid = [142, 190, 245];
+  const deep = [47, 111, 176];
   const rgb =
-    score < 0.5
-      ? mix(flame, neutral, score / 0.5)
-      : mix(alpine, strongAlpine, (score - 0.5) / 0.5);
+    score < 0.35
+      ? mix(pale, soft, score / 0.35)
+      : score < 0.7
+        ? mix(soft, mid, (score - 0.35) / 0.35)
+        : mix(mid, deep, (score - 0.7) / 0.3);
 
   return `rgb(${rgb.join(", ")})`;
 }
@@ -277,9 +266,9 @@ function cleanInsightHeadline(headline, benchmark) {
   return headline.replace(/^Portfolio /, "Portfolios ");
 }
 
-function TrendChart({ series }) {
+function TrendChart({ series, compact = false }) {
   const width = 960;
-  const height = 390;
+  const height = compact ? 260 : 390;
   const padding = { top: 22, right: 24, bottom: 38, left: 58 };
   const values = series.map((point) => point.value).filter(Number.isFinite);
   const min = Math.min(...values, 0);
@@ -377,7 +366,61 @@ function Heatmap({ summary }) {
   );
 }
 
-function RankingBars({ summary }) {
+function PortfolioDetailPanel({ row, holdings, trendSeries, benchmark }) {
+  const portfolioHoldings = holdings.filter((holding) => holding.Portfolio === row.Portfolio);
+  const detailTrend = trendSeries.filter((point) => point.name === row.Portfolio || point.name === benchmark);
+
+  return (
+    <div className="leaderboard-detail">
+      <div className="detail-summary compact-detail-summary">
+        <div>
+          <div className="section-label">Selected portfolio</div>
+          <h3>{row.Portfolio}</h3>
+        </div>
+        <div className="legend compact-legend">
+          {[row.Portfolio, benchmark].filter(Boolean).map((name) => (
+            <span key={name}><i style={{ background: lineStyle(name) }} />{name}</span>
+          ))}
+        </div>
+      </div>
+      <div className="detail-grid inline-detail-grid">
+        <div className="detail-metrics">
+          <MetricCard label="Current value" value={money(row["Current Value"])} sub="Latest portfolio value" />
+          <MetricCard label="Return" value={pct(row.Return)} sub={`Dollar change ${money(row["Dollar Change"])}`} tone={row.Return >= 0 ? "positive" : "negative"} />
+          <MetricCard label="Max drawdown" value={pct(row["Max Drawdown"])} sub={`Volatility ${pct(row.Volatility)}`} tone="neutral" />
+        </div>
+        <div className="detail-trend-card">
+          <div className="detail-card-label">Trend vs {benchmark}</div>
+          <TrendChart series={detailTrend} compact />
+        </div>
+        <div className="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Initial</th>
+                <th>Current</th>
+                <th>Return</th>
+              </tr>
+            </thead>
+            <tbody>
+              {portfolioHoldings.map((holding) => (
+                <tr key={`${holding.Portfolio}-${holding.Ticker}`}>
+                  <td>{holding.Ticker}</td>
+                  <td>{money(holding["Initial Investment"])}</td>
+                  <td>{money(holding["Current Value"])}</td>
+                  <td className={holding.Return >= 0 ? "positive-text" : "negative-text"}>{pct(holding.Return)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RankingBars({ summary, holdings, trendSeries, benchmark, openPortfolio, onTogglePortfolio }) {
   const maxAbs = Math.max(...summary.map((row) => Math.abs(Number(row.Return) || 0)), 0.01);
 
   if (!summary.length) return <div className="empty-state">No ranking data available.</div>;
@@ -387,29 +430,40 @@ function RankingBars({ summary }) {
       {summary.map((row, index) => {
         const value = Number(row.Return) || 0;
         const dollarChange = Number(row["Dollar Change"]) || 0;
+        const isOpen = openPortfolio === row.Portfolio;
         return (
-          <div className="ranking-row" key={row.Portfolio}>
-            <div className="ranking-identity">
-              <span className="ranking-badge">{index + 1}</span>
-              <div>
-                <div className="ranking-name">{row.Portfolio}</div>
-                <div className={dollarChange >= 0 ? "ranking-delta positive" : "ranking-delta negative"}>
-                  {dollarChange >= 0 ? "+" : ""}
-                  {money(dollarChange)}
+          <div className="ranking-item" key={row.Portfolio}>
+            <button
+              className={isOpen ? "ranking-row ranking-row-clickable active" : "ranking-row ranking-row-clickable"}
+              onClick={() => onTogglePortfolio(row.Portfolio)}
+              type="button"
+              aria-expanded={isOpen}
+            >
+              <div className="ranking-identity">
+                <span className="ranking-badge">{index + 1}</span>
+                <div>
+                  <div className="ranking-name">{row.Portfolio}</div>
+                  <div className={dollarChange >= 0 ? "ranking-delta positive" : "ranking-delta negative"}>
+                    {dollarChange >= 0 ? "+" : ""}
+                    {money(dollarChange)}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="ranking-bar-zone">
-              <div className="ranking-track">
-                <div
-                  className={value >= 0 ? "ranking-fill positive" : "ranking-fill negative"}
-                  style={{ width: `${Math.max(5, (Math.abs(value) / maxAbs) * 100)}%` }}
-                />
+              <div className="ranking-bar-zone">
+                <div className="ranking-track">
+                  <div
+                    className={value >= 0 ? "ranking-fill positive" : "ranking-fill negative"}
+                    style={{ width: `${Math.max(5, (Math.abs(value) / maxAbs) * 100)}%` }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className={value >= 0 ? "ranking-value positive" : "ranking-value negative"}>
-              {compactPct(value)}
-            </div>
+              <div className={value >= 0 ? "ranking-value positive" : "ranking-value negative"}>
+                {compactPct(value)}
+              </div>
+            </button>
+            {isOpen ? (
+              <PortfolioDetailPanel row={row} holdings={holdings} trendSeries={trendSeries} benchmark={benchmark} />
+            ) : null}
           </div>
         );
       })}
@@ -423,7 +477,7 @@ export default function DashboardPage() {
   const [benchmark, setBenchmark] = useState("SPY");
   const [startDate, setStartDate] = useState(FALLBACK_DATA.start_date);
   const [endDate, setEndDate] = useState(FALLBACK_DATA.as_of_date);
-  const [chosenPortfolio, setChosenPortfolio] = useState(FALLBACK_DATA.portfolio_names[0]);
+  const [openPortfolio, setOpenPortfolio] = useState(null);
   const [activeSection, setActiveSection] = useState("ranking");
 
   useEffect(() => {
@@ -437,7 +491,7 @@ export default function DashboardPage() {
         setBenchmark(benchmarkNames[0] || "SPY");
         setStartDate(payload.start_date || FALLBACK_DATA.start_date);
         setEndDate(payload.as_of_date || FALLBACK_DATA.as_of_date);
-        setChosenPortfolio(highestModelPortfolio(payload.summary, names, benchmarkNames));
+        setOpenPortfolio(null);
       })
       .catch(() => setData(FALLBACK_DATA));
   }, []);
@@ -445,7 +499,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const syncActiveSection = () => {
       const section = globalThis.location.hash.slice(1);
-      if (["ranking", "trend", "holdings"].includes(section)) {
+      if (["ranking", "heatmap", "controls"].includes(section)) {
         setActiveSection(section);
       }
     };
@@ -485,8 +539,6 @@ export default function DashboardPage() {
     () => (data.holdings || []).filter((row) => selected.includes(row.Portfolio)),
     [data, selected]
   );
-  const chosenHoldings = holdings.filter((row) => row.Portfolio === chosenPortfolio);
-  const chosenSummary = summary.find((row) => row.Portfolio === chosenPortfolio);
 
   const trendSeries = useMemo(() => {
     const portfolioSeries = buildCumulativeSeries(
@@ -522,12 +574,13 @@ export default function DashboardPage() {
         takeaways: [],
       }
     : data.daily_insight || FALLBACK_DATA.daily_insight;
+
   function togglePortfolio(name) {
     setSelected((current) => {
       const next = current.includes(name)
         ? current.filter((item) => item !== name)
         : [...current, name];
-      if (!next.includes(chosenPortfolio)) setChosenPortfolio(next[0] || name);
+      if (!next.includes(openPortfolio)) setOpenPortfolio(null);
       return next;
     });
   }
@@ -546,8 +599,8 @@ export default function DashboardPage() {
 
       <nav className="utility-nav" aria-label="Dashboard sections">
         <a className={activeSection === "ranking" ? "active" : ""} href="#ranking" aria-current={activeSection === "ranking" ? "page" : undefined}>Portfolio Leaderboard</a>
-        <a className={activeSection === "trend" ? "active" : ""} href="#trend" aria-current={activeSection === "trend" ? "page" : undefined}>Trend Line</a>
-        <a className={activeSection === "holdings" ? "active" : ""} href="#holdings" aria-current={activeSection === "holdings" ? "page" : undefined}>Portfolio Composition</a>
+        <a className={activeSection === "heatmap" ? "active" : ""} href="#heatmap" aria-current={activeSection === "heatmap" ? "page" : undefined}>Portfolio Heatmap</a>
+        <a className={activeSection === "controls" ? "active" : ""} href="#controls" aria-current={activeSection === "controls" ? "page" : undefined}>Settings</a>
       </nav>
 
       <details className="settings-panel" id="controls">
@@ -658,6 +711,7 @@ export default function DashboardPage() {
             label="Best portfolio"
             value={topPortfolio?.Portfolio || "-"}
             sub={topPortfolio ? `${pct(topPortfolio.Return)} / ${money(topPortfolio["Current Value"])}` : "-"}
+            tone="positive"
           />
           <MetricCard
             label="Average alpha"
@@ -676,69 +730,25 @@ export default function DashboardPage() {
       <section className="section-block" id="ranking">
         <div className="section-label">Portfolio leaderboard</div>
         <h2>Total return by portfolio</h2>
-        <RankingBars summary={summary} />
+        <p className="small-note">Click a row to inspect its return path and portfolio composition.</p>
+        <RankingBars
+          summary={summary}
+          holdings={holdings}
+          trendSeries={trendSeries}
+          benchmark={benchmark}
+          openPortfolio={openPortfolio}
+          onTogglePortfolio={(name) => setOpenPortfolio((current) => (current === name ? null : name))}
+        />
       </section>
 
-      <section className="section-block">
+      <section className="section-block" id="heatmap">
         <div className="section-label">Signal map</div>
         <h2>Portfolio heatmap</h2>
         <p className="small-note">
-          Flame cells indicate softer relative performance. Alpine teal cells indicate stronger relative
+          Darker blue cells indicate stronger relative performance. Softer blue cells indicate weaker relative
           performance. Lower volatility is rewarded.
         </p>
         <Heatmap summary={summary} />
-      </section>
-
-      <section className="section-block" id="trend">
-        <div className="section-label">Trend line</div>
-        <h2>Cumulative return trend</h2>
-        <p className="small-note">Percent return since the start of the selected date range.</p>
-        <TrendChart series={trendSeries} />
-        <div className="legend">
-          {[...selected].sort(compareLegendNames).concat(benchmark).map((name) => (
-            <span key={name}><i style={{ background: lineStyle(name) }} />{name}</span>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-block" id="holdings">
-        <div className="detail-summary">
-          <div className="section-label">Portfolio composition</div>
-          <h2>Portfolio composition</h2>
-          <select className="detail-select" value={chosenPortfolio} onChange={(event) => setChosenPortfolio(event.target.value)}>
-            {selected.map((name) => (
-              <option value={name} key={name}>{name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="detail-grid">
-          <div className="detail-metrics">
-            <MetricCard label="Current value" value={money(chosenSummary?.["Current Value"])} sub="Latest portfolio value" />
-            <MetricCard label="Return" value={pct(chosenSummary?.Return)} sub={`Dollar change ${money(chosenSummary?.["Dollar Change"])}`} tone={chosenSummary?.Return >= 0 ? "positive" : "negative"} />
-          </div>
-          <div className="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Ticker</th>
-                  <th>Initial</th>
-                  <th>Current</th>
-                  <th>Return</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chosenHoldings.map((row) => (
-                  <tr key={`${row.Portfolio}-${row.Ticker}`}>
-                    <td>{row.Ticker}</td>
-                    <td>{money(row["Initial Investment"])}</td>
-                    <td>{money(row["Current Value"])}</td>
-                    <td className={row.Return >= 0 ? "positive-text" : "negative-text"}>{pct(row.Return)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </section>
 
       <footer className="site-footer">
