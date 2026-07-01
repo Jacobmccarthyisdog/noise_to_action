@@ -16,9 +16,8 @@ on:
       - "requirements.txt"
 
   schedule:
-    # Check hourly during the US market window on weekdays.
-    # A Python guard below skips non-trading days and keeps only every other hour.
-    # Touch this file to force a one-off refresh through the push trigger.
+    # GitHub cron runs in UTC. The Python guard below converts to America/Chicago
+    # and refreshes only at 8am, noon, and 3pm Central on trading weekdays.
     - cron: "0 13-22 * * 1-5"
 
 permissions:
@@ -43,11 +42,11 @@ jobs:
         id: market_window
         run: |
           python - <<'PY'
-          from datetime import datetime, time, timedelta
+          from datetime import datetime, timedelta
           from zoneinfo import ZoneInfo
           import os
 
-          now = datetime.now(ZoneInfo("America/New_York"))
+          now = datetime.now(ZoneInfo("America/Chicago"))
           today = now.date()
 
           def observed_new_year(year):
@@ -128,17 +127,18 @@ jobs:
               observed_christmas(year),
           }
 
+          refresh_hours_ct = {8, 12, 15}
           is_weekday = now.weekday() < 5
           is_holiday = today in holidays
-          is_market_window = time(10, 0) <= now.time() <= time(16, 0)
-          is_even_hour = now.hour % 2 == 0
-          should_run = is_weekday and not is_holiday and is_market_window and is_even_hour
+          is_refresh_hour = now.hour in refresh_hours_ct
+          should_run = is_weekday and not is_holiday and is_refresh_hour
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"should_run={'true' if should_run else 'false'}\n")
 
-          print(f"now_et={now.isoformat()}")
-          print(f"is_weekday={is_weekday} is_holiday={is_holiday} is_market_window={is_market_window} is_even_hour={is_even_hour}")
+          print(f"now_ct={now.isoformat()}")
+          print(f"is_weekday={is_weekday} is_holiday={is_holiday} is_refresh_hour={is_refresh_hour}")
+          print(f"refresh_hours_ct={sorted(refresh_hours_ct)}")
           print(f"should_run={should_run}")
           PY
 
