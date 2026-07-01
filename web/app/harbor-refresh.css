@@ -243,16 +243,6 @@ input[type="date"]:hover {
   backdrop-filter: blur(14px);
 }
 
-.ticker-track {
-  animation: ticker-scroll 22s linear 0s infinite;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-}
-
-.ticker-shell:hover .ticker-track {
-  animation-play-state: running;
-}
-
 .ticker-shell::before {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
 }
