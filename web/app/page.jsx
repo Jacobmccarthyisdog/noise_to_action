@@ -677,20 +677,30 @@ export default function DashboardPage() {
         </section>
       </details>
 
-      <section className="ticker-shell">
-        <div className="ticker-track">
-          {[...summary, ...summary].map((row, index) => (
-            <div className="ticker-card" key={`${row.Portfolio}-${index}`}>
-              <div className="ticker-name">{row.Portfolio}</div>
-              <div className="ticker-price">{money(row["Current Value"])}</div>
-              <div className="ticker-stats">
-                <span className={row.Return >= 0 ? "up" : "down"}>{compactPct(row.Return)}</span>
-                <span>{money(row["Dollar Change"])}</span>
+      {summary.length > 0 && (
+        <section className="ticker-shell" aria-label="Portfolio performance ticker">
+          <div className="ticker-track">
+            {[false, true].map((duplicate) => (
+              <div
+                className="ticker-sequence"
+                aria-hidden={duplicate ? "true" : undefined}
+                key={duplicate ? "duplicate" : "primary"}
+              >
+                {summary.map((row) => (
+                  <div className="ticker-card" key={row.Portfolio}>
+                    <div className="ticker-name">{row.Portfolio}</div>
+                    <div className="ticker-price">{money(row["Current Value"])}</div>
+                    <div className="ticker-stats">
+                      <span className={row.Return >= 0 ? "up" : "down"}>{compactPct(row.Return)}</span>
+                      <span>{money(row["Dollar Change"])}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="ai-card">
         <div className="ai-kicker">Daily dispatch</div>

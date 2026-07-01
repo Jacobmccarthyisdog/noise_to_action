@@ -400,17 +400,19 @@ input[type="date"] {
 .ticker-track {
   display: flex;
   width: max-content;
+}
+
+.ticker-sequence {
+  display: flex;
+  flex: 0 0 auto;
   gap: 10px;
   padding-right: 10px;
   animation: ticker-scroll 48s linear infinite;
-}
-
-.ticker-shell:hover .ticker-track {
-  animation-play-state: paused;
+  will-change: transform;
 }
 
 .ticker-card {
-  min-width: 220px;
+  flex: 0 0 220px;
   padding: 13px 14px;
   border: 1px solid rgba(77, 142, 181, 0.46);
   border-radius: var(--radius-md);
@@ -904,20 +906,16 @@ td {
 
 @keyframes ticker-scroll {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .ticker-track {
-    animation: none;
   }
 
   .metric-card,
@@ -1034,7 +1032,7 @@ td {
   }
 
   .ticker-card {
-    min-width: 190px;
+    flex-basis: 190px;
   }
 
   .ticker-shell::before,
