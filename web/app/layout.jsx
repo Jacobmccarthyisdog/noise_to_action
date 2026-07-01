@@ -3,6 +3,7 @@ import './globals.css';
 import './harbor-refresh.css';
 import './harbor-detail-cards.css';
 import './harbor-lava.css';
+import './ticker-carousel.css';
 
 export const metadata = {
   title: 'From Noise to Action | Alpine Ops Signal Ledger',
