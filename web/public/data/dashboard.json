@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-19T20:12:13.651626+00:00",
-  "as_of_date": "2026-08-19",
+  "generated_at": "2026-08-20T13:36:52.187147+00:00",
+  "as_of_date": "2026-08-20",
   "start_date": "2026-02-05",
   "benchmarks": {
     "SPY": "SPY",
@@ -233,90 +233,90 @@
     {
       "Portfolio": "Random A",
       "Start Value": 1000.0,
-      "Current Value": 1457.6729307942385,
-      "Dollar Change": 457.6729307942385,
-      "Return": 0.45767293079423843,
+      "Current Value": 1450.7895650988828,
+      "Dollar Change": 450.7895650988828,
+      "Return": 0.4507895650988829,
       "High Value": 1509.9360296363477,
       "Low Value": 999.9515022845969,
       "Max Drawdown": -0.06958000344643778,
-      "Volatility": 0.014028237632738647
+      "Volatility": 0.014143067557260865
     },
     {
       "Portfolio": "OpenAI 10",
       "Start Value": 1000.0,
-      "Current Value": 1262.9184698479087,
-      "Dollar Change": 262.9184698479087,
-      "Return": 0.2629184698479088,
+      "Current Value": 1264.7091678732088,
+      "Dollar Change": 264.7091678732088,
+      "Return": 0.26470916787320875,
       "High Value": 1301.039250269211,
       "Low Value": 936.877383652857,
       "Max Drawdown": -0.1457225926929342,
-      "Volatility": 0.01742018486230941
+      "Volatility": 0.01784463193399035
     },
     {
       "Portfolio": "OpenAI 100",
       "Start Value": 1000.0,
-      "Current Value": 1234.9150773202198,
-      "Dollar Change": 234.91507732021978,
-      "Return": 0.23491507732021977,
+      "Current Value": 1235.4889496487808,
+      "Dollar Change": 235.48894964878082,
+      "Return": 0.23548894964878087,
       "High Value": 1263.5958935451556,
       "Low Value": 938.3363912873281,
       "Max Drawdown": -0.1390376724351604,
-      "Volatility": 0.016623025838193556
+      "Volatility": 0.01712338271213977
     },
     {
       "Portfolio": "OpenAI 50",
       "Start Value": 1000.0,
-      "Current Value": 1234.1066741333902,
-      "Dollar Change": 234.10667413339024,
-      "Return": 0.23410667413339015,
+      "Current Value": 1234.4123505534587,
+      "Dollar Change": 234.41235055345874,
+      "Return": 0.23441235055345877,
       "High Value": 1262.7684102702883,
       "Low Value": 937.3557562596186,
       "Max Drawdown": -0.13917077589036753,
-      "Volatility": 0.01652286799408509
+      "Volatility": 0.01707018250464287
     },
     {
       "Portfolio": "Google 10",
       "Start Value": 999.9999999999999,
-      "Current Value": 1218.3150420203465,
-      "Dollar Change": 218.3150420203466,
-      "Return": 0.21831504202034657,
+      "Current Value": 1223.4839107595456,
+      "Dollar Change": 223.48391075954567,
+      "Return": 0.22348391075954566,
       "High Value": 1227.875578972666,
       "Low Value": 942.825035699097,
       "Max Drawdown": -0.14959498089303747,
-      "Volatility": 0.015461337895237083
+      "Volatility": 0.01599832354756985
     },
     {
       "Portfolio": "Google 100",
       "Start Value": 1000.0,
-      "Current Value": 1214.2827844381513,
-      "Dollar Change": 214.28278443815134,
-      "Return": 0.2142827844381514,
+      "Current Value": 1220.7517682043224,
+      "Dollar Change": 220.7517682043224,
+      "Return": 0.2207517682043223,
       "High Value": 1227.0462659894501,
       "Low Value": 946.8313230789255,
       "Max Drawdown": -0.16003490639475737,
-      "Volatility": 0.015995657975149548
+      "Volatility": 0.016572803736725903
     },
     {
       "Portfolio": "Google 50",
       "Start Value": 1000.0,
-      "Current Value": 1213.5089736056652,
-      "Dollar Change": 213.50897360566523,
-      "Return": 0.21350897360566523,
+      "Current Value": 1220.2844002307252,
+      "Dollar Change": 220.28440023072517,
+      "Return": 0.22028440023072515,
       "High Value": 1225.3735347556162,
       "Low Value": 947.5570223063401,
       "Max Drawdown": -0.16033048983610687,
-      "Volatility": 0.01598388257768379
+      "Volatility": 0.01654434282116607
     },
     {
       "Portfolio": "Random B",
       "Start Value": 1000.0,
-      "Current Value": 1112.0374531877326,
-      "Dollar Change": 112.03745318773258,
-      "Return": 0.11203745318773262,
+      "Current Value": 1100.150460897015,
+      "Dollar Change": 100.15046089701491,
+      "Return": 0.10015046089701496,
       "High Value": 1221.7211090641674,
       "Low Value": 1000.0,
       "Max Drawdown": -0.13267678787573045,
-      "Volatility": 0.020211761641274847
+      "Volatility": 0.020250142247501567
     }
   ],
   "holdings": [
@@ -325,400 +325,400 @@
       "Ticker": "NVDA",
       "Initial Investment": 369.7,
       "Shares": 2.15091918488169,
-      "Current Price": 217.55999755859375,
-      "Current Value": 467.9539726115929,
-      "Dollar Change": 98.25397261159293,
-      "Return": 0.26576676389394893
+      "Current Price": 219.4219970703125,
+      "Current Value": 471.95898308358915,
+      "Dollar Change": 102.25898308358916,
+      "Return": 0.27659990014495306
     },
     {
       "Portfolio": "Google 10",
       "Ticker": "MSFT",
       "Initial Investment": 226.67,
       "Shares": 0.5757868068902575,
-      "Current Price": 484.30999755859375,
-      "Current Value": 278.8593070392911,
-      "Dollar Change": 52.189307039291094,
-      "Return": 0.23024355688574172
+      "Current Price": 481.4800109863281,
+      "Current Value": 277.229838107304,
+      "Dollar Change": 50.55983810730399,
+      "Return": 0.22305482907885477
     },
     {
       "Portfolio": "Google 10",
       "Ticker": "AMZN",
       "Initial Investment": 142.42,
       "Shares": 0.6395437533729125,
-      "Current Price": 265.8399963378906,
-      "Current Value": 170.01630905457588,
-      "Dollar Change": 27.596309054575897,
-      "Return": 0.1937670906795106
+      "Current Price": 263.0199890136719,
+      "Current Value": 168.2127909859059,
+      "Dollar Change": 25.792790985905924,
+      "Return": 0.18110371426699845
     },
     {
       "Portfolio": "Google 10",
       "Ticker": "IBIT",
       "Initial Investment": 145.45,
       "Shares": 4.029086042878044,
-      "Current Price": 38.779998779296875,
-      "Current Value": 156.24795182449262,
-      "Dollar Change": 10.797951824492628,
-      "Return": 0.07423823873834734
+      "Current Price": 40.404998779296875,
+      "Current Value": 162.79521664416944,
+      "Dollar Change": 17.345216644169454,
+      "Return": 0.11925209105651047
     },
     {
       "Portfolio": "Google 10",
       "Ticker": "LLY",
       "Initial Investment": 115.76,
       "Shares": 0.11339680748665372,
-      "Current Price": 1280.7900390625,
-      "Current Value": 145.237501490394,
-      "Dollar Change": 29.477501490394005,
-      "Return": 0.25464324024182794
+      "Current Price": 1263.590087890625,
+      "Current Value": 143.28708193857705,
+      "Dollar Change": 27.52708193857704,
+      "Return": 0.23779441895799103
     },
     {
       "Portfolio": "Google 100",
       "Ticker": "NVDA",
       "Initial Investment": 368.47,
       "Shares": 2.1437630296276886,
-      "Current Price": 217.55999755859375,
-      "Current Value": 466.39707949200346,
-      "Dollar Change": 97.92707949200343,
-      "Return": 0.26576676389394915
+      "Current Price": 219.4219970703125,
+      "Current Value": 470.38876520641094,
+      "Dollar Change": 101.91876520641091,
+      "Return": 0.2765999001449533
     },
     {
       "Portfolio": "Google 100",
       "Ticker": "MSFT",
       "Initial Investment": 242.71,
       "Shares": 0.6165315917427733,
-      "Current Price": 484.30999755859375,
-      "Current Value": 298.59241369173844,
-      "Dollar Change": 55.882413691738435,
-      "Return": 0.23024355688574194
+      "Current Price": 481.4800109863281,
+      "Current Value": 296.84763756572886,
+      "Dollar Change": 54.13763756572885,
+      "Return": 0.22305482907885477
     },
     {
       "Portfolio": "Google 100",
       "Ticker": "IBIT",
       "Initial Investment": 164.25,
       "Shares": 4.549861688158947,
-      "Current Price": 38.779998779296875,
-      "Current Value": 176.44363071277357,
-      "Dollar Change": 12.193630712773569,
-      "Return": 0.07423823873834756
+      "Current Price": 40.404998779296875,
+      "Current Value": 183.83715595603186,
+      "Dollar Change": 19.587155956031864,
+      "Return": 0.11925209105651069
     },
     {
       "Portfolio": "Google 100",
       "Ticker": "AMZN",
       "Initial Investment": 146.29,
       "Shares": 0.656922171611595,
-      "Current Price": 265.8399963378906,
-      "Current Value": 174.63618769550558,
-      "Dollar Change": 28.34618769550559,
-      "Return": 0.1937670906795106
+      "Current Price": 263.0199890136719,
+      "Current Value": 172.7836623601192,
+      "Dollar Change": 26.493662360119203,
+      "Return": 0.18110371426699845
     },
     {
       "Portfolio": "Google 100",
       "Ticker": "LLY",
       "Initial Investment": 78.28,
       "Shares": 0.07668194618223266,
-      "Current Price": 1280.7900390625,
-      "Current Value": 98.21347284613029,
-      "Dollar Change": 19.933472846130286,
-      "Return": 0.25464324024182794
+      "Current Price": 1263.590087890625,
+      "Current Value": 96.89454711603155,
+      "Dollar Change": 18.614547116031545,
+      "Return": 0.23779441895799103
     },
     {
       "Portfolio": "Google 50",
       "Ticker": "NVDA",
       "Initial Investment": 369.62,
       "Shares": 2.15045374388956,
-      "Current Price": 217.55999755859375,
-      "Current Value": 467.85271127048145,
-      "Dollar Change": 98.23271127048145,
-      "Return": 0.26576676389394893
+      "Current Price": 219.4219970703125,
+      "Current Value": 471.8568550915776,
+      "Dollar Change": 102.23685509157758,
+      "Return": 0.27659990014495306
     },
     {
       "Portfolio": "Google 50",
       "Ticker": "MSFT",
       "Initial Investment": 234.09,
       "Shares": 0.5946350801823814,
-      "Current Price": 484.30999755859375,
-      "Current Value": 287.98771423138334,
-      "Dollar Change": 53.89771423138333,
-      "Return": 0.23024355688574194
+      "Current Price": 481.4800109863281,
+      "Current Value": 286.3049049390691,
+      "Dollar Change": 52.2149049390691,
+      "Return": 0.22305482907885477
     },
     {
       "Portfolio": "Google 50",
       "Ticker": "IBIT",
       "Initial Investment": 170.1,
       "Shares": 4.711911556504334,
-      "Current Price": 38.779998779296875,
-      "Current Value": 182.7279244093929,
-      "Dollar Change": 12.627924409392904,
-      "Return": 0.07423823873834756
+      "Current Price": 40.404998779296875,
+      "Current Value": 190.38478068871245,
+      "Dollar Change": 20.28478068871246,
+      "Return": 0.11925209105651069
     },
     {
       "Portfolio": "Google 50",
       "Ticker": "AMZN",
       "Initial Investment": 145.33,
       "Shares": 0.6526112461570382,
-      "Current Price": 265.8399963378906,
-      "Current Value": 173.4901712884533,
-      "Dollar Change": 28.160171288453284,
-      "Return": 0.1937670906795106
+      "Current Price": 263.0199890136719,
+      "Current Value": 171.64980279442292,
+      "Dollar Change": 26.319802794422912,
+      "Return": 0.18110371426699867
     },
     {
       "Portfolio": "Google 50",
       "Ticker": "LLY",
       "Initial Investment": 80.86,
       "Shares": 0.07920927654950605,
-      "Current Price": 1280.7900390625,
-      "Current Value": 101.45045240595421,
-      "Dollar Change": 20.59045240595421,
-      "Return": 0.25464324024182794
+      "Current Price": 1263.590087890625,
+      "Current Value": 100.08805671694317,
+      "Dollar Change": 19.228056716943172,
+      "Return": 0.23779441895799125
     },
     {
       "Portfolio": "OpenAI 10",
       "Ticker": "NVDA",
       "Initial Investment": 377.75,
       "Shares": 2.1977541847147917,
-      "Current Price": 217.55999755859375,
-      "Current Value": 478.14339506093927,
-      "Dollar Change": 100.39339506093927,
-      "Return": 0.26576676389394915
+      "Current Price": 219.4219970703125,
+      "Current Value": 482.2356122797561,
+      "Dollar Change": 104.48561227975608,
+      "Return": 0.2765999001449533
     },
     {
       "Portfolio": "OpenAI 10",
       "Ticker": "MSFT",
       "Initial Investment": 231.31,
       "Shares": 0.5875733281942273,
-      "Current Price": 484.30999755859375,
-      "Current Value": 284.56763714324103,
-      "Dollar Change": 53.25763714324103,
-      "Return": 0.23024355688574216
+      "Current Price": 481.4800109863281,
+      "Current Value": 282.90481251422995,
+      "Dollar Change": 51.59481251422994,
+      "Return": 0.223054829078855
     },
     {
       "Portfolio": "OpenAI 10",
       "Ticker": "QQQ",
       "Initial Investment": 222.27,
       "Shares": 0.37229283133675606,
-      "Current Price": 716.0800170898438,
-      "Current Value": 266.5914570260506,
-      "Dollar Change": 44.32145702605058,
-      "Return": 0.19940368482499027
+      "Current Price": 714.280029296875,
+      "Current Value": 265.92133447423464,
+      "Dollar Change": 43.65133447423463,
+      "Return": 0.19638878154602346
     },
     {
       "Portfolio": "OpenAI 10",
       "Ticker": "SOXX",
       "Initial Investment": 85.57,
       "Shares": 0.2586524906239366,
-      "Current Price": 519.6699829101562,
-      "Current Value": 134.41393538221047,
-      "Dollar Change": 48.843935382210475,
-      "Return": 0.570806770856731
+      "Current Price": 523.8599853515625,
+      "Current Value": 135.49768994940058,
+      "Dollar Change": 49.92768994940059,
+      "Return": 0.5834718937641765
     },
     {
       "Portfolio": "OpenAI 10",
       "Ticker": "AMZN",
       "Initial Investment": 83.1,
       "Shares": 0.373164484660083,
-      "Current Price": 265.8399963378906,
-      "Current Value": 99.20204523546731,
-      "Dollar Change": 16.102045235467315,
-      "Return": 0.19376709067951037
+      "Current Price": 263.0199890136719,
+      "Current Value": 98.14971865558756,
+      "Dollar Change": 15.049718655587569,
+      "Return": 0.18110371426699845
     },
     {
       "Portfolio": "OpenAI 100",
       "Ticker": "NVDA",
       "Initial Investment": 373.38,
       "Shares": 2.1723294705196796,
-      "Current Price": 217.55999755859375,
-      "Current Value": 472.61199430272274,
-      "Dollar Change": 99.23199430272274,
-      "Return": 0.26576676389394915
+      "Current Price": 219.4219970703125,
+      "Current Value": 476.6568707161226,
+      "Dollar Change": 103.27687071612263,
+      "Return": 0.2765999001449533
     },
     {
       "Portfolio": "OpenAI 100",
       "Ticker": "QQQ",
       "Initial Investment": 230.89,
       "Shares": 0.38673096606534213,
-      "Current Price": 716.0800170898438,
-      "Current Value": 276.930316789242,
-      "Dollar Change": 46.04031678924201,
-      "Return": 0.19940368482499027
+      "Current Price": 714.280029296875,
+      "Current Value": 276.2342057711613,
+      "Dollar Change": 45.34420577116134,
+      "Return": 0.19638878154602346
     },
     {
       "Portfolio": "OpenAI 100",
       "Ticker": "MSFT",
       "Initial Investment": 216.18,
       "Shares": 0.5491401240284814,
-      "Current Price": 484.30999755859375,
-      "Current Value": 265.9540521275597,
-      "Dollar Change": 49.774052127559685,
-      "Return": 0.23024355688574194
+      "Current Price": 481.4800109863281,
+      "Current Value": 264.39999295026684,
+      "Dollar Change": 48.21999295026683,
+      "Return": 0.22305482907885477
     },
     {
       "Portfolio": "OpenAI 100",
       "Ticker": "AMZN",
       "Initial Investment": 98.34,
       "Shares": 0.4416004262511741,
-      "Current Price": 265.8399963378906,
-      "Current Value": 117.39505569742308,
-      "Dollar Change": 19.05505569742307,
-      "Return": 0.1937670906795106
+      "Current Price": 263.0199890136719,
+      "Current Value": 116.14973926101663,
+      "Dollar Change": 17.80973926101663,
+      "Return": 0.18110371426699845
     },
     {
       "Portfolio": "OpenAI 100",
       "Ticker": "ARKK",
       "Initial Investment": 81.21,
       "Shares": 1.224332847251313,
-      "Current Price": 83.33000183105469,
-      "Current Value": 102.02365840327232,
-      "Dollar Change": 20.813658403272328,
-      "Return": 0.2562942790699707
+      "Current Price": 83.3499984741211,
+      "Current Value": 102.04814095021328,
+      "Dollar Change": 20.838140950213287,
+      "Return": 0.25659575114164856
     },
     {
       "Portfolio": "OpenAI 50",
       "Ticker": "NVDA",
       "Initial Investment": 367.41,
       "Shares": 2.137595936481963,
-      "Current Price": 217.55999755859375,
-      "Current Value": 465.05536672227583,
-      "Dollar Change": 97.64536672227581,
-      "Return": 0.26576676389394893
+      "Current Price": 219.4219970703125,
+      "Current Value": 469.0355693122572,
+      "Dollar Change": 101.6255693122572,
+      "Return": 0.27659990014495306
     },
     {
       "Portfolio": "OpenAI 50",
       "Ticker": "MSFT",
       "Initial Investment": 224.62,
       "Shares": 0.570579399848633,
-      "Current Price": 484.30999755859375,
-      "Current Value": 276.33730774767537,
-      "Dollar Change": 51.71730774767536,
-      "Return": 0.23024355688574194
+      "Current Price": 481.4800109863281,
+      "Current Value": 274.72257570769233,
+      "Dollar Change": 50.102575707692324,
+      "Return": 0.22305482907885454
     },
     {
       "Portfolio": "OpenAI 50",
       "Ticker": "QQQ",
       "Initial Investment": 227.14,
       "Shares": 0.38044987497111965,
-      "Current Price": 716.0800170898438,
-      "Current Value": 272.43255297114825,
-      "Dollar Change": 45.29255297114827,
-      "Return": 0.19940368482499027
+      "Current Price": 714.280029296875,
+      "Current Value": 271.7477478403638,
+      "Dollar Change": 44.6077478403638,
+      "Return": 0.19638878154602368
     },
     {
       "Portfolio": "OpenAI 50",
       "Ticker": "AMZN",
       "Initial Investment": 110.26,
       "Shares": 0.4951277506452558,
-      "Current Price": 265.8399963378906,
-      "Current Value": 131.62475941832284,
-      "Dollar Change": 21.364759418322834,
-      "Return": 0.1937670906795106
+      "Current Price": 263.0199890136719,
+      "Current Value": 130.22849553507925,
+      "Dollar Change": 19.968495535079242,
+      "Return": 0.18110371426699845
     },
     {
       "Portfolio": "OpenAI 50",
       "Ticker": "ARKK",
       "Initial Investment": 70.57,
       "Shares": 1.0639227808216372,
-      "Current Price": 83.33000183105469,
-      "Current Value": 88.65668727396782,
-      "Dollar Change": 18.086687273967826,
-      "Return": 0.2562942790699707
+      "Current Price": 83.3499984741211,
+      "Current Value": 88.67796215806612,
+      "Dollar Change": 18.10796215806613,
+      "Return": 0.25659575114164834
     },
     {
       "Portfolio": "Random A",
       "Ticker": "DOC",
       "Initial Investment": 492.08,
       "Shares": 29.50119850101611,
-      "Current Price": 20.7549991607666,
-      "Current Value": 612.2973501301983,
-      "Dollar Change": 120.21735013019833,
-      "Return": 0.24430448327548038
+      "Current Price": 20.7450008392334,
+      "Current Value": 612.0023876619703,
+      "Dollar Change": 119.92238766197028,
+      "Return": 0.24370506353025978
     },
     {
       "Portfolio": "Random A",
       "Ticker": "PANW",
       "Initial Investment": 206.08,
       "Shares": 1.3315241604388128,
-      "Current Price": 359.760009765625,
-      "Current Value": 479.0291449626329,
-      "Dollar Change": 272.9491449626329,
-      "Return": 1.324481487590416
+      "Current Price": 350.7699890136719,
+      "Current Value": 467.05871512856106,
+      "Dollar Change": 260.978715128561,
+      "Return": 1.266395162696822
     },
     {
       "Portfolio": "Random A",
       "Ticker": "ADM",
       "Initial Investment": 246.84,
       "Shares": 3.772581367090013,
-      "Current Price": 80.75,
-      "Current Value": 304.6359453925185,
-      "Dollar Change": 57.79594539251852,
-      "Return": 0.23414335355906069
+      "Current Price": 81.52999877929688,
+      "Current Value": 307.57855425364687,
+      "Dollar Change": 60.73855425364687,
+      "Return": 0.24606447193990788
     },
     {
       "Portfolio": "Random A",
       "Ticker": "SMCI",
       "Initial Investment": 45.01,
       "Shares": 1.4589951197224482,
-      "Current Price": 36.58000183105469,
-      "Current Value": 53.37004415094701,
-      "Dollar Change": 8.360044150947012,
-      "Return": 0.18573748391350842
+      "Current Price": 38.27000045776367,
+      "Current Value": 55.83574389965305,
+      "Dollar Change": 10.825743899653055,
+      "Return": 0.24051863807271845
     },
     {
       "Portfolio": "Random A",
       "Ticker": "NRG",
       "Initial Investment": 9.99,
       "Shares": 0.0691636654053129,
-      "Current Price": 120.58999633789062,
-      "Current Value": 8.340446157941773,
-      "Dollar Change": -1.6495538420582267,
-      "Return": -0.1651205047105332
+      "Current Price": 120.20999908447266,
+      "Current Value": 8.314164155051436,
+      "Dollar Change": -1.6758358449485637,
+      "Return": -0.16775133583068702
     },
     {
       "Portfolio": "Random B",
       "Ticker": "APH",
       "Initial Investment": 420.46,
       "Shares": 3.2943665991400772,
-      "Current Price": 155.99000549316406,
-      "Current Value": 513.8882638963569,
-      "Dollar Change": 93.4282638963569,
-      "Return": 0.22220488012262019
+      "Current Price": 153.4700927734375,
+      "Current Value": 505.58674759974144,
+      "Dollar Change": 85.12674759974146,
+      "Return": 0.20246098939195512
     },
     {
       "Portfolio": "Random B",
       "Ticker": "AKAM",
       "Initial Investment": 180.95,
       "Shares": 1.9778118288890794,
-      "Current Price": 112.83999633789062,
-      "Current Value": 223.17627952888049,
-      "Dollar Change": 42.2262795288805,
-      "Return": 0.2333588258020476
+      "Current Price": 111.00749969482422,
+      "Current Value": 219.5519459918242,
+      "Dollar Change": 38.60194599182421,
+      "Return": 0.21332935060416802
     },
     {
       "Portfolio": "Random B",
       "Ticker": "GL",
       "Initial Investment": 117.34,
       "Shares": 0.7985029087229499,
-      "Current Price": 171.5800018310547,
-      "Current Value": 137.00713054078625,
-      "Dollar Change": 19.667130540786246,
-      "Return": 0.1676080666506412
+      "Current Price": 171.60000610351562,
+      "Current Value": 137.0231040105332,
+      "Dollar Change": 19.683104010533185,
+      "Return": 0.16774419644224636
     },
     {
       "Portfolio": "Random B",
       "Ticker": "NRG",
       "Initial Investment": 146.25,
       "Shares": 1.0125311376903916,
-      "Current Price": 120.58999633789062,
-      "Current Value": 122.10112618608456,
-      "Dollar Change": -24.148873813915444,
-      "Return": -0.16512050471053297
+      "Current Price": 120.20999908447266,
+      "Current Value": 121.71636713476204,
+      "Dollar Change": -24.533632865237962,
+      "Return": -0.1677513358306869
     },
     {
       "Portfolio": "Random B",
       "Ticker": "ALB",
       "Initial Investment": 135.0,
       "Shares": 0.8627300849052951,
-      "Current Price": 134.3000030517578,
-      "Current Value": 115.86465303562441,
-      "Dollar Change": -19.135346964375586,
-      "Return": -0.14174331084722658
+      "Current Price": 134.7725067138672,
+      "Current Value": 116.2722961601541,
+      "Dollar Change": -18.7277038398459,
+      "Return": -0.13872373214700673
     }
   ],
   "portfolio_history": [
@@ -1288,16 +1288,6 @@
       "Portfolio Value": 1107.4394580973963
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Google 10",
-      "Portfolio Value": 1118.2656931544311
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Google 10",
-      "Portfolio Value": 1119.796524742815
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Google 10",
       "Portfolio Value": 1100.3102761772961
@@ -1326,11 +1316,6 @@
       "Date": "2026-07-30",
       "Portfolio": "Google 10",
       "Portfolio Value": 1108.70261766844
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Google 10",
-      "Portfolio Value": 1146.9353644654107
     },
     {
       "Date": "2026-08-03",
@@ -1395,7 +1380,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Google 10",
-      "Portfolio Value": 1218.3150420203465
+      "Portfolio Value": 1218.2640051515473
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Google 10",
+      "Portfolio Value": 1223.4839107595456
     },
     {
       "Date": "2026-02-05",
@@ -1963,16 +1953,6 @@
       "Portfolio Value": 1103.8235434936855
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Google 100",
-      "Portfolio Value": 1113.753160666414
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Google 100",
-      "Portfolio Value": 1115.1844269291073
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Google 100",
       "Portfolio Value": 1093.9717687703694
@@ -2001,11 +1981,6 @@
       "Date": "2026-07-30",
       "Portfolio": "Google 100",
       "Portfolio Value": 1106.4873756806041
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Google 100",
-      "Portfolio Value": 1145.5342570303635
     },
     {
       "Date": "2026-08-03",
@@ -2070,7 +2045,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Google 100",
-      "Portfolio Value": 1214.2827844381513
+      "Portfolio Value": 1214.2482719460158
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Google 100",
+      "Portfolio Value": 1220.7517682043224
     },
     {
       "Date": "2026-02-05",
@@ -2638,16 +2618,6 @@
       "Portfolio Value": 1104.1738105841544
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Google 50",
-      "Portfolio Value": 1114.4386394154883
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Google 50",
-      "Portfolio Value": 1115.9908980368564
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Google 50",
       "Portfolio Value": 1094.9421739706568
@@ -2676,11 +2646,6 @@
       "Date": "2026-07-30",
       "Portfolio": "Google 50",
       "Portfolio Value": 1105.7658140743893
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Google 50",
-      "Portfolio Value": 1144.2098653039743
     },
     {
       "Date": "2026-08-03",
@@ -2745,7 +2710,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Google 50",
-      "Portfolio Value": 1213.5089736056652
+      "Portfolio Value": 1213.4733236297573
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Google 50",
+      "Portfolio Value": 1220.2844002307252
     },
     {
       "Date": "2026-02-05",
@@ -3313,16 +3283,6 @@
       "Portfolio Value": 1171.1300062718985
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "OpenAI 10",
-      "Portfolio Value": 1188.5556941999873
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "OpenAI 10",
-      "Portfolio Value": 1193.0618203046374
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "OpenAI 10",
       "Portfolio Value": 1170.3943412209342
@@ -3351,11 +3311,6 @@
       "Date": "2026-07-30",
       "Portfolio": "OpenAI 10",
       "Portfolio Value": 1166.563230597878
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "OpenAI 10",
-      "Portfolio Value": 1202.3250372860768
     },
     {
       "Date": "2026-08-03",
@@ -3421,6 +3376,11 @@
       "Date": "2026-08-19",
       "Portfolio": "OpenAI 10",
       "Portfolio Value": 1262.9184698479087
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "OpenAI 10",
+      "Portfolio Value": 1264.7091678732088
     },
     {
       "Date": "2026-02-05",
@@ -3988,16 +3948,6 @@
       "Portfolio Value": 1133.8521087479562
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1147.346014432648
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1149.0081056345314
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "OpenAI 100",
       "Portfolio Value": 1124.2155908313102
@@ -4026,11 +3976,6 @@
       "Date": "2026-07-30",
       "Portfolio": "OpenAI 100",
       "Portfolio Value": 1129.0089525944436
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1164.5098811366308
     },
     {
       "Date": "2026-08-03",
@@ -4095,7 +4040,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1234.9150773202198
+      "Portfolio Value": 1234.8905854323605
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "OpenAI 100",
+      "Portfolio Value": 1235.4889496487808
     },
     {
       "Date": "2026-02-05",
@@ -4663,16 +4613,6 @@
       "Portfolio Value": 1132.4028283222838
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1145.0080966383837
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1146.4909404362145
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "OpenAI 50",
       "Portfolio Value": 1121.4632724201174
@@ -4701,11 +4641,6 @@
       "Date": "2026-07-30",
       "Portfolio": "OpenAI 50",
       "Portfolio Value": 1128.5241328687832
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1166.2883939137125
     },
     {
       "Date": "2026-08-03",
@@ -4770,7 +4705,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1234.1066741333902
+      "Portfolio Value": 1234.0853911322051
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "OpenAI 50",
+      "Portfolio Value": 1234.4123505534587
     },
     {
       "Date": "2026-02-05",
@@ -5338,16 +5278,6 @@
       "Portfolio Value": 1488.8272442093269
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Random A",
-      "Portfolio Value": 1493.810897416497
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Random A",
-      "Portfolio Value": 1484.7552528698834
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Random A",
       "Portfolio Value": 1466.143436553365
@@ -5376,11 +5306,6 @@
       "Date": "2026-07-30",
       "Portfolio": "Random A",
       "Portfolio Value": 1438.2787786409474
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Random A",
-      "Portfolio Value": 1435.6267666168762
     },
     {
       "Date": "2026-08-03",
@@ -5445,7 +5370,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Random A",
-      "Portfolio Value": 1457.6729307942385
+      "Portfolio Value": 1457.8575109134706
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Random A",
+      "Portfolio Value": 1450.7895650988828
     },
     {
       "Date": "2026-02-05",
@@ -6013,16 +5943,6 @@
       "Portfolio Value": 1120.678235947744
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Random B",
-      "Portfolio Value": 1149.7146399677704
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Random B",
-      "Portfolio Value": 1154.7239666729802
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Random B",
       "Portfolio Value": 1133.0193787753578
@@ -6051,11 +5971,6 @@
       "Date": "2026-07-30",
       "Portfolio": "Random B",
       "Portfolio Value": 1134.8357427597339
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Random B",
-      "Portfolio Value": 1140.2005909421168
     },
     {
       "Date": "2026-08-03",
@@ -6120,7 +6035,12 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Random B",
-      "Portfolio Value": 1112.0374531877326
+      "Portfolio Value": 1112.0789368160908
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Random B",
+      "Portfolio Value": 1100.150460897015
     }
   ],
   "portfolio_cumulative_returns": [
@@ -6803,18 +6723,6 @@
       "Cumulative Return": 0.1074394580973963
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Google 10",
-      "Portfolio Value": 1118.2656931544311,
-      "Cumulative Return": 0.11826569315443125
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Google 10",
-      "Portfolio Value": 1119.796524742815,
-      "Cumulative Return": 0.11979652474281521
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Google 10",
       "Portfolio Value": 1100.3102761772961,
@@ -6849,12 +6757,6 @@
       "Portfolio": "Google 10",
       "Portfolio Value": 1108.70261766844,
       "Cumulative Return": 0.10870261766844025
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Google 10",
-      "Portfolio Value": 1146.9353644654107,
-      "Cumulative Return": 0.14693536446541078
     },
     {
       "Date": "2026-08-03",
@@ -6931,8 +6833,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Google 10",
-      "Portfolio Value": 1218.3150420203465,
-      "Cumulative Return": 0.21831504202034657
+      "Portfolio Value": 1218.2640051515473,
+      "Cumulative Return": 0.21826400515154742
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Google 10",
+      "Portfolio Value": 1223.4839107595456,
+      "Cumulative Return": 0.22348391075954566
     },
     {
       "Date": "2026-02-05",
@@ -7613,18 +7521,6 @@
       "Cumulative Return": 0.10382354349368561
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Google 100",
-      "Portfolio Value": 1113.753160666414,
-      "Cumulative Return": 0.11375316066641394
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Google 100",
-      "Portfolio Value": 1115.1844269291073,
-      "Cumulative Return": 0.11518442692910735
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Google 100",
       "Portfolio Value": 1093.9717687703694,
@@ -7659,12 +7555,6 @@
       "Portfolio": "Google 100",
       "Portfolio Value": 1106.4873756806041,
       "Cumulative Return": 0.10648737568060418
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Google 100",
-      "Portfolio Value": 1145.5342570303635,
-      "Cumulative Return": 0.1455342570303635
     },
     {
       "Date": "2026-08-03",
@@ -7741,8 +7631,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Google 100",
-      "Portfolio Value": 1214.2827844381513,
-      "Cumulative Return": 0.2142827844381514
+      "Portfolio Value": 1214.2482719460158,
+      "Cumulative Return": 0.21424827194601592
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Google 100",
+      "Portfolio Value": 1220.7517682043224,
+      "Cumulative Return": 0.2207517682043223
     },
     {
       "Date": "2026-02-05",
@@ -8423,18 +8319,6 @@
       "Cumulative Return": 0.10417381058415431
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Google 50",
-      "Portfolio Value": 1114.4386394154883,
-      "Cumulative Return": 0.11443863941548837
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Google 50",
-      "Portfolio Value": 1115.9908980368564,
-      "Cumulative Return": 0.11599089803685647
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Google 50",
       "Portfolio Value": 1094.9421739706568,
@@ -8469,12 +8353,6 @@
       "Portfolio": "Google 50",
       "Portfolio Value": 1105.7658140743893,
       "Cumulative Return": 0.10576581407438934
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Google 50",
-      "Portfolio Value": 1144.2098653039743,
-      "Cumulative Return": 0.14420986530397428
     },
     {
       "Date": "2026-08-03",
@@ -8551,8 +8429,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Google 50",
-      "Portfolio Value": 1213.5089736056652,
-      "Cumulative Return": 0.21350897360566523
+      "Portfolio Value": 1213.4733236297573,
+      "Cumulative Return": 0.21347332362975724
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Google 50",
+      "Portfolio Value": 1220.2844002307252,
+      "Cumulative Return": 0.22028440023072515
     },
     {
       "Date": "2026-02-05",
@@ -9233,18 +9117,6 @@
       "Cumulative Return": 0.17113000627189856
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "OpenAI 10",
-      "Portfolio Value": 1188.5556941999873,
-      "Cumulative Return": 0.1885556941999873
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "OpenAI 10",
-      "Portfolio Value": 1193.0618203046374,
-      "Cumulative Return": 0.19306182030463748
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "OpenAI 10",
       "Portfolio Value": 1170.3943412209342,
@@ -9279,12 +9151,6 @@
       "Portfolio": "OpenAI 10",
       "Portfolio Value": 1166.563230597878,
       "Cumulative Return": 0.16656323059787792
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "OpenAI 10",
-      "Portfolio Value": 1202.3250372860768,
-      "Cumulative Return": 0.20232503728607676
     },
     {
       "Date": "2026-08-03",
@@ -9363,6 +9229,12 @@
       "Portfolio": "OpenAI 10",
       "Portfolio Value": 1262.9184698479087,
       "Cumulative Return": 0.2629184698479088
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "OpenAI 10",
+      "Portfolio Value": 1264.7091678732088,
+      "Cumulative Return": 0.26470916787320875
     },
     {
       "Date": "2026-02-05",
@@ -10043,18 +9915,6 @@
       "Cumulative Return": 0.13385210874795628
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1147.346014432648,
-      "Cumulative Return": 0.14734601443264794
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1149.0081056345314,
-      "Cumulative Return": 0.14900810563453137
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "OpenAI 100",
       "Portfolio Value": 1124.2155908313102,
@@ -10089,12 +9949,6 @@
       "Portfolio": "OpenAI 100",
       "Portfolio Value": 1129.0089525944436,
       "Cumulative Return": 0.12900895259444356
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1164.5098811366308,
-      "Cumulative Return": 0.1645098811366308
     },
     {
       "Date": "2026-08-03",
@@ -10171,8 +10025,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "OpenAI 100",
-      "Portfolio Value": 1234.9150773202198,
-      "Cumulative Return": 0.23491507732021977
+      "Portfolio Value": 1234.8905854323605,
+      "Cumulative Return": 0.2348905854323604
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "OpenAI 100",
+      "Portfolio Value": 1235.4889496487808,
+      "Cumulative Return": 0.23548894964878087
     },
     {
       "Date": "2026-02-05",
@@ -10853,18 +10713,6 @@
       "Cumulative Return": 0.13240282832228378
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1145.0080966383837,
-      "Cumulative Return": 0.14500809663838377
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1146.4909404362145,
-      "Cumulative Return": 0.14649094043621447
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "OpenAI 50",
       "Portfolio Value": 1121.4632724201174,
@@ -10899,12 +10747,6 @@
       "Portfolio": "OpenAI 50",
       "Portfolio Value": 1128.5241328687832,
       "Cumulative Return": 0.12852413286878317
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1166.2883939137125,
-      "Cumulative Return": 0.16628839391371253
     },
     {
       "Date": "2026-08-03",
@@ -10981,8 +10823,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "OpenAI 50",
-      "Portfolio Value": 1234.1066741333902,
-      "Cumulative Return": 0.23410667413339015
+      "Portfolio Value": 1234.0853911322051,
+      "Cumulative Return": 0.23408539113220517
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "OpenAI 50",
+      "Portfolio Value": 1234.4123505534587,
+      "Cumulative Return": 0.23441235055345877
     },
     {
       "Date": "2026-02-05",
@@ -11663,18 +11511,6 @@
       "Cumulative Return": 0.4888272442093269
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Random A",
-      "Portfolio Value": 1493.810897416497,
-      "Cumulative Return": 0.493810897416497
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Random A",
-      "Portfolio Value": 1484.7552528698834,
-      "Cumulative Return": 0.4847552528698833
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Random A",
       "Portfolio Value": 1466.143436553365,
@@ -11709,12 +11545,6 @@
       "Portfolio": "Random A",
       "Portfolio Value": 1438.2787786409474,
       "Cumulative Return": 0.43827877864094744
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Random A",
-      "Portfolio Value": 1435.6267666168762,
-      "Cumulative Return": 0.43562676661687627
     },
     {
       "Date": "2026-08-03",
@@ -11791,8 +11621,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Random A",
-      "Portfolio Value": 1457.6729307942385,
-      "Cumulative Return": 0.45767293079423843
+      "Portfolio Value": 1457.8575109134706,
+      "Cumulative Return": 0.4578575109134706
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Random A",
+      "Portfolio Value": 1450.7895650988828,
+      "Cumulative Return": 0.4507895650988829
     },
     {
       "Date": "2026-02-05",
@@ -12473,18 +12309,6 @@
       "Cumulative Return": 0.12067823594774407
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio": "Random B",
-      "Portfolio Value": 1149.7146399677704,
-      "Cumulative Return": 0.14971463996777046
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio": "Random B",
-      "Portfolio Value": 1154.7239666729802,
-      "Cumulative Return": 0.15472396667298027
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio": "Random B",
       "Portfolio Value": 1133.0193787753578,
@@ -12519,12 +12343,6 @@
       "Portfolio": "Random B",
       "Portfolio Value": 1134.8357427597339,
       "Cumulative Return": 0.13483574275973398
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio": "Random B",
-      "Portfolio Value": 1140.2005909421168,
-      "Cumulative Return": 0.1402005909421169
     },
     {
       "Date": "2026-08-03",
@@ -12601,8 +12419,14 @@
     {
       "Date": "2026-08-19",
       "Portfolio": "Random B",
-      "Portfolio Value": 1112.0374531877326,
-      "Cumulative Return": 0.11203745318773262
+      "Portfolio Value": 1112.0789368160908,
+      "Cumulative Return": 0.11207893681609082
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio": "Random B",
+      "Portfolio Value": 1100.150460897015,
+      "Cumulative Return": 0.10015046089701496
     }
   ],
   "benchmark_history": [
@@ -13172,16 +12996,6 @@
       "Benchmark": "SPY"
     },
     {
-      "Date": "2026-07-21",
-      "Benchmark Value": 748.280029296875,
-      "Benchmark": "SPY"
-    },
-    {
-      "Date": "2026-07-22",
-      "Benchmark Value": 747.4099731445312,
-      "Benchmark": "SPY"
-    },
-    {
       "Date": "2026-07-23",
       "Benchmark Value": 738.1799926757812,
       "Benchmark": "SPY"
@@ -13209,11 +13023,6 @@
     {
       "Date": "2026-07-30",
       "Benchmark Value": 741.6900024414062,
-      "Benchmark": "SPY"
-    },
-    {
-      "Date": "2026-07-31",
-      "Benchmark Value": 747.030029296875,
       "Benchmark": "SPY"
     },
     {
@@ -13278,7 +13087,12 @@
     },
     {
       "Date": "2026-08-19",
-      "Benchmark Value": 769.0999755859375,
+      "Benchmark Value": 769.0599975585938,
+      "Benchmark": "SPY"
+    },
+    {
+      "Date": "2026-08-20",
+      "Benchmark Value": 767.4500122070312,
       "Benchmark": "SPY"
     },
     {
@@ -13847,16 +13661,6 @@
       "Benchmark": "DIA"
     },
     {
-      "Date": "2026-07-21",
-      "Benchmark Value": 521.510009765625,
-      "Benchmark": "DIA"
-    },
-    {
-      "Date": "2026-07-22",
-      "Benchmark Value": 521.469970703125,
-      "Benchmark": "DIA"
-    },
-    {
       "Date": "2026-07-23",
       "Benchmark Value": 516.260009765625,
       "Benchmark": "DIA"
@@ -13884,11 +13688,6 @@
     {
       "Date": "2026-07-30",
       "Benchmark Value": 521.510009765625,
-      "Benchmark": "DIA"
-    },
-    {
-      "Date": "2026-07-31",
-      "Benchmark Value": 524.3200073242188,
       "Benchmark": "DIA"
     },
     {
@@ -13953,7 +13752,12 @@
     },
     {
       "Date": "2026-08-19",
-      "Benchmark Value": 534.3499755859375,
+      "Benchmark Value": 534.27001953125,
+      "Benchmark": "DIA"
+    },
+    {
+      "Date": "2026-08-20",
+      "Benchmark Value": 530.9199829101562,
       "Benchmark": "DIA"
     }
   ],
@@ -14637,18 +14441,6 @@
       "Cumulative Return": 0.059376978506988864
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio Value": 521.510009765625,
-      "Portfolio": "DIA",
-      "Cumulative Return": 0.0666789508484793
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio Value": 521.469970703125,
-      "Portfolio": "DIA",
-      "Cumulative Return": 0.06659705630306179
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio Value": 516.260009765625,
       "Portfolio": "DIA",
@@ -14683,12 +14475,6 @@
       "Portfolio Value": 521.510009765625,
       "Portfolio": "DIA",
       "Cumulative Return": 0.0666789508484793
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio Value": 524.3200073242188,
-      "Portfolio": "DIA",
-      "Cumulative Return": 0.07242642489798912
     },
     {
       "Date": "2026-08-03",
@@ -14764,9 +14550,15 @@
     },
     {
       "Date": "2026-08-19",
-      "Portfolio Value": 534.3499755859375,
+      "Portfolio Value": 534.27001953125,
       "Portfolio": "DIA",
-      "Cumulative Return": 0.09294138304282296
+      "Cumulative Return": 0.09277784363048003
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio Value": 530.9199829101562,
+      "Portfolio": "DIA",
+      "Cumulative Return": 0.08592579193180172
     },
     {
       "Date": "2026-02-05",
@@ -15447,18 +15239,6 @@
       "Cumulative Return": 0.09514186742250996
     },
     {
-      "Date": "2026-07-21",
-      "Portfolio Value": 748.280029296875,
-      "Portfolio": "SPY",
-      "Cumulative Return": 0.10427678446452515
-    },
-    {
-      "Date": "2026-07-22",
-      "Portfolio Value": 747.4099731445312,
-      "Portfolio": "SPY",
-      "Cumulative Return": 0.10299279615453827
-    },
-    {
       "Date": "2026-07-23",
       "Portfolio Value": 738.1799926757812,
       "Portfolio": "SPY",
@@ -15493,12 +15273,6 @@
       "Portfolio Value": 741.6900024414062,
       "Portfolio": "SPY",
       "Cumulative Return": 0.09455153004028238
-    },
-    {
-      "Date": "2026-07-31",
-      "Portfolio Value": 747.030029296875,
-      "Portfolio": "SPY",
-      "Cumulative Return": 0.10243209273611198
     },
     {
       "Date": "2026-08-03",
@@ -15574,61 +15348,67 @@
     },
     {
       "Date": "2026-08-19",
-      "Portfolio Value": 769.0999755859375,
+      "Portfolio Value": 769.0599975585938,
       "Portfolio": "SPY",
-      "Cumulative Return": 0.1350018906288759
+      "Cumulative Return": 0.13494289291978845
+    },
+    {
+      "Date": "2026-08-20",
+      "Portfolio Value": 767.4500122070312,
+      "Portfolio": "SPY",
+      "Cumulative Return": 0.13256695159107368
     }
   ],
   "metrics_snapshot": {
-    "as_of_date": "2026-08-19",
+    "as_of_date": "2026-08-20",
     "period": "YTD",
     "benchmark": "SPY",
-    "benchmark_return": 0.1350018906288759,
+    "benchmark_return": 0.13256695159107368,
     "portfolio_count": 8,
-    "avg_portfolio_return": 0.24346967566845662,
-    "avg_alpha": 0.10846778503958071,
+    "avg_portfolio_return": 0.24375882165824242,
+    "avg_alpha": 0.11119187006716874,
     "top_portfolio": {
       "name": "Random A",
-      "return": 0.45767293079423843,
-      "dollar_change": 457.6729307942385,
-      "current_value": 1457.6729307942385,
+      "return": 0.4507895650988829,
+      "dollar_change": 450.7895650988828,
+      "current_value": 1450.7895650988828,
       "max_drawdown": -0.06958000344643778
     },
     "bottom_portfolio": {
       "name": "Random B",
-      "return": 0.11203745318773262,
-      "dollar_change": 112.03745318773258,
-      "current_value": 1112.0374531877326,
+      "return": 0.10015046089701496,
+      "dollar_change": 100.15046089701491,
+      "current_value": 1100.150460897015,
       "max_drawdown": -0.13267678787573045
     },
     "most_volatile": {
       "name": "Random B",
-      "return": 0.11203745318773262,
-      "dollar_change": 112.03745318773258,
-      "current_value": 1112.0374531877326,
+      "return": 0.10015046089701496,
+      "dollar_change": 100.15046089701491,
+      "current_value": 1100.150460897015,
       "max_drawdown": -0.13267678787573045,
-      "volatility": 0.020211761641274847
+      "volatility": 0.020250142247501567
     },
     "top_holding": {
       "ticker": "PANW",
       "portfolio": "Random A",
-      "return": 1.324481487590416,
-      "dollar_change": 272.9491449626329,
-      "current_value": 479.0291449626329
+      "return": 1.266395162696822,
+      "dollar_change": 260.978715128561,
+      "current_value": 467.05871512856106
     },
     "bottom_holding": {
       "ticker": "NRG",
       "portfolio": "Random A",
-      "return": -0.1651205047105332,
-      "dollar_change": -1.6495538420582267,
-      "current_value": 8.340446157941773
+      "return": -0.16775133583068702,
+      "dollar_change": -1.6758358449485637,
+      "current_value": 8.314164155051436
     },
     "generated_from": "build_ytd_metrics_snapshot_v1"
   },
   "daily_insight": {
     "schema_version": 1,
-    "as_of_date": "2026-08-19",
-    "generated_at": "2026-08-19T20:12:10.770537+00:00",
+    "as_of_date": "2026-08-20",
+    "generated_at": "2026-08-20T13:36:48.892941+00:00",
     "period": "YTD",
     "benchmark": "SPY",
     "model": "gpt-4o-mini",
@@ -15636,60 +15416,60 @@
     "status": "success",
     "source": "openai",
     "payload": {
-      "as_of_date": "2026-08-19",
+      "as_of_date": "2026-08-20",
       "period": "YTD",
       "benchmark": "SPY",
-      "benchmark_return": 0.1350018906288759,
+      "benchmark_return": 0.13272926284569286,
       "portfolio_count": 8,
-      "avg_portfolio_return": 0.24346967566845662,
-      "avg_alpha": 0.10846778503958071,
+      "avg_portfolio_return": 0.24400862315005434,
+      "avg_alpha": 0.11127936030436147,
       "top_portfolio": {
         "name": "Random A",
-        "return": 0.45767293079423843,
-        "dollar_change": 457.6729307942385,
-        "current_value": 1457.6729307942385,
+        "return": 0.4525536646486763,
+        "dollar_change": 452.5536646486762,
+        "current_value": 1452.5536646486762,
         "max_drawdown": -0.06958000344643778
       },
       "bottom_portfolio": {
         "name": "Random B",
-        "return": 0.11203745318773262,
-        "dollar_change": 112.03745318773258,
-        "current_value": 1112.0374531877326,
+        "return": 0.10071956647482883,
+        "dollar_change": 100.71956647482875,
+        "current_value": 1100.7195664748288,
         "max_drawdown": -0.13267678787573045
       },
       "most_volatile": {
         "name": "Random B",
-        "return": 0.11203745318773262,
-        "dollar_change": 112.03745318773258,
-        "current_value": 1112.0374531877326,
+        "return": 0.10071956647482883,
+        "dollar_change": 100.71956647482875,
+        "current_value": 1100.7195664748288,
         "max_drawdown": -0.13267678787573045,
-        "volatility": 0.020211761641274847
+        "volatility": 0.02024794314767049
       },
       "top_holding": {
         "ticker": "PANW",
         "portfolio": "Random A",
-        "return": 1.324481487590416,
-        "dollar_change": 272.9491449626329,
-        "current_value": 479.0291449626329
+        "return": 1.2730825286820764,
+        "dollar_change": 262.35684751080237,
+        "current_value": 468.43684751080235
       },
       "bottom_holding": {
         "ticker": "NRG",
         "portfolio": "Random A",
-        "return": -0.1651205047105332,
-        "dollar_change": -1.6495538420582267,
-        "current_value": 8.340446157941773
+        "return": -0.16761284045459457,
+        "dollar_change": -1.6744522761414,
+        "current_value": 8.3155477238586
       },
       "generated_from": "build_ytd_metrics_snapshot_v1"
     },
-    "headline": "Portfolio Outperformance vs SPY",
-    "summary": "As of August 19, 2026, the portfolio is demonstrating a strong performance with an average return of 24.35%, significantly outperforming the SPY benchmark return of 13.50%. This results in an average alpha of 10.85%, indicating that the portfolio is not only gaining in value but also exceeding the benchmark's performance. The top portfolio, 'Random A', has achieved an impressive return of 45.77%, contributing positively to the overall performance. In contrast, the weakest portfolio, 'Random B', has a return of 11.20%, which still aligns with the benchmark but highlights the disparity in performance among the portfolios. This outperformance is particularly relevant during times of market stress or uncertainty, as it reflects the portfolio's resilience compared to broader market trends. Note: Updated 30 minutes before and after market close.",
-    "insight_text": "As of August 19, 2026, the portfolio is demonstrating a strong performance with an average return of 24.35%, significantly outperforming the SPY benchmark return of 13.50%. This results in an average alpha of 10.85%, indicating that the portfolio is not only gaining in value but also exceeding the benchmark's performance. The top portfolio, 'Random A', has achieved an impressive return of 45.77%, contributing positively to the overall performance. In contrast, the weakest portfolio, 'Random B', has a return of 11.20%, which still aligns with the benchmark but highlights the disparity in performance among the portfolios. This outperformance is particularly relevant during times of market stress or uncertainty, as it reflects the portfolio's resilience compared to broader market trends. Note: Updated 30 minutes before and after market close.",
+    "headline": "Portfolio Outperforms SPY YTD",
+    "summary": "As of August 20, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 24.40% compared to SPY's 13.27%. This outperformance indicates that the portfolio is not only rising in absolute terms but also generating an average alpha of 11.13%. The top portfolio, 'Random A', has delivered a notable return of 45.26%, significantly contributing to the overall performance. In contrast, the weakest portfolio, 'Random B', has returned 10.07%, reflecting a more modest performance. Such relative strength against SPY is particularly relevant during periods of market stress or macroeconomic uncertainty, highlighting the portfolio's resilience. Note: Updated 30 minutes before and after market close.",
+    "insight_text": "As of August 20, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 24.40% compared to SPY's 13.27%. This outperformance indicates that the portfolio is not only rising in absolute terms but also generating an average alpha of 11.13%. The top portfolio, 'Random A', has delivered a notable return of 45.26%, significantly contributing to the overall performance. In contrast, the weakest portfolio, 'Random B', has returned 10.07%, reflecting a more modest performance. Such relative strength against SPY is particularly relevant during periods of market stress or macroeconomic uncertainty, highlighting the portfolio's resilience. Note: Updated 30 minutes before and after market close.",
     "takeaways": [
-      "Average portfolio return is 24.35%, outperforming SPY's 13.50%.",
-      "Current average alpha stands at 10.85%, indicating strong relative performance.",
-      "Top portfolio 'Random A' shows a notable return of 45.77%.",
-      "Weakest portfolio 'Random B' still performs at 11.20%, aligning with SPY.",
-      "Outperformance signals resilience during potential market volatility."
+      "Average portfolio return is 24.40%, outperforming SPY's 13.27%.",
+      "Top portfolio 'Random A' achieved a return of 45.26%.",
+      "Average alpha of 11.13% indicates strong performance relative to SPY.",
+      "Weakest portfolio 'Random B' returned 10.07%, showing lower performance.",
+      "Outperformance against SPY signals resilience during uncertain market conditions."
     ],
     "update_note": "Updated 30 minutes before and after market close."
   }
