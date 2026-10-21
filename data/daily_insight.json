@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "as_of_date": "2026-10-21",
-  "generated_at": "2026-10-21T17:43:13.282398+00:00",
+  "generated_at": "2026-10-21T20:57:12.337716+00:00",
   "period": "YTD",
   "benchmark": "SPY",
   "model": "gpt-4o-mini",
@@ -12,57 +12,57 @@
     "as_of_date": "2026-10-21",
     "period": "YTD",
     "benchmark": "SPY",
-    "benchmark_return": 0.14238065754252838,
+    "benchmark_return": 0.14089022228715464,
     "portfolio_count": 8,
-    "avg_portfolio_return": 0.26663708885734577,
-    "avg_alpha": 0.1242564313148174,
+    "avg_portfolio_return": 0.2635503654658033,
+    "avg_alpha": 0.12266014317864865,
     "top_portfolio": {
       "name": "Random A",
-      "return": 0.37710519817033994,
-      "dollar_change": 377.1051981703399,
-      "current_value": 1377.10519817034,
+      "return": 0.3657449490832414,
+      "dollar_change": 365.7449490832414,
+      "current_value": 1365.7449490832414,
       "max_drawdown": -0.0978212996682104
     },
     "bottom_portfolio": {
       "name": "Random B",
-      "return": 0.025081323034316094,
-      "dollar_change": 25.08132303431603,
-      "current_value": 1025.081323034316,
+      "return": 0.018359498635292626,
+      "dollar_change": 18.35949863529254,
+      "current_value": 1018.3594986352925,
       "max_drawdown": -0.1674849592890023
     },
     "most_volatile": {
       "name": "Random B",
-      "return": 0.025081323034316094,
-      "dollar_change": 25.08132303431603,
-      "current_value": 1025.081323034316,
+      "return": 0.018359498635292626,
+      "dollar_change": 18.35949863529254,
+      "current_value": 1018.3594986352925,
       "max_drawdown": -0.1674849592890023,
-      "volatility": 0.01935221389745468
+      "volatility": 0.01934404139855102
     },
     "top_holding": {
       "ticker": "PANW",
       "portfolio": "Random A",
-      "return": 1.2833236731474211,
-      "dollar_change": 264.46734256222055,
-      "current_value": 470.54734256222054
+      "return": 1.2436518085810255,
+      "dollar_change": 256.2917647123777,
+      "current_value": 462.37176471237774
     },
     "bottom_holding": {
       "ticker": "ALB",
       "portfolio": "Random B",
-      "return": -0.3954498909954127,
-      "dollar_change": -53.385735284380715,
-      "current_value": 81.61426471561929
+      "return": -0.39628065056192197,
+      "dollar_change": -53.497887825859465,
+      "current_value": 81.50211217414054
     },
     "generated_from": "build_ytd_metrics_snapshot_v1"
   },
   "headline": "Portfolio Outperforms SPY YTD",
-  "summary": "As of October 21, 2026, the portfolio set has delivered an average return of 26.66%, significantly outperforming the SPY benchmark, which returned 14.24%. This outperformance translates to an average alpha of 12.43%, indicating that the portfolios are not only gaining in absolute terms but are also exceeding the benchmark's performance. The top portfolio, 'Random A', achieved a return of 37.71%, contributing positively to the overall performance. In contrast, the weakest portfolio, 'Random B', returned only 2.51%, highlighting a notable disparity within the portfolio set. This relative strength against SPY is particularly relevant during periods of market uncertainty, as it suggests resilience in the portfolio's performance. Note: Updated 30 minutes before and after market close.",
-  "insight_text": "As of October 21, 2026, the portfolio set has delivered an average return of 26.66%, significantly outperforming the SPY benchmark, which returned 14.24%. This outperformance translates to an average alpha of 12.43%, indicating that the portfolios are not only gaining in absolute terms but are also exceeding the benchmark's performance. The top portfolio, 'Random A', achieved a return of 37.71%, contributing positively to the overall performance. In contrast, the weakest portfolio, 'Random B', returned only 2.51%, highlighting a notable disparity within the portfolio set. This relative strength against SPY is particularly relevant during periods of market uncertainty, as it suggests resilience in the portfolio's performance. Note: Updated 30 minutes before and after market close.",
+  "summary": "As of October 21, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 26.36% compared to SPY's 14.09%. This outperformance translates to an average alpha of 12.27%, indicating that the portfolios are not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A,' has achieved a remarkable return of 36.57%, driven by its strongest holding, PANW, which has returned 124.37%. In contrast, the weakest portfolio, 'Random B,' has returned only 1.84%, with its bottom holding, ALB, showing a decline of 39.63%. This relative performance is particularly significant during periods of market uncertainty, as it highlights the portfolio's resilience against broader market trends. Note: Updated 30 minutes before and after market close.",
+  "insight_text": "As of October 21, 2026, the portfolio set is outperforming the SPY benchmark with an average return of 26.36% compared to SPY's 14.09%. This outperformance translates to an average alpha of 12.27%, indicating that the portfolios are not only gaining in absolute terms but also exceeding the benchmark's performance. The top portfolio, 'Random A,' has achieved a remarkable return of 36.57%, driven by its strongest holding, PANW, which has returned 124.37%. In contrast, the weakest portfolio, 'Random B,' has returned only 1.84%, with its bottom holding, ALB, showing a decline of 39.63%. This relative performance is particularly significant during periods of market uncertainty, as it highlights the portfolio's resilience against broader market trends. Note: Updated 30 minutes before and after market close.",
   "takeaways": [
-    "Average portfolio return is 26.66%, outperforming SPY's 14.24%.",
-    "Current average alpha stands at 12.43%, indicating strong relative performance.",
-    "'Random A' is the top portfolio with a return of 37.71%.",
-    "'Random B' is the weakest portfolio, returning only 2.51%.",
-    "Outperformance against SPY signals resilience during market volatility."
+    "Average portfolio return is 26.36%, significantly higher than SPY's 14.09%.",
+    "Top portfolio 'Random A' shows a return of 36.57%, led by holding PANW at 124.37%.",
+    "Weakest portfolio 'Random B' has a return of only 1.84%, with ALB down 39.63%.",
+    "Current average alpha of 12.27% indicates strong relative performance versus SPY.",
+    "Outperformance during market stress can signal effective portfolio management."
   ],
   "update_note": "Updated 30 minutes before and after market close."
 }
